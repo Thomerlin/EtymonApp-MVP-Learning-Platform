@@ -1,0 +1,63 @@
+const { validateExercise } = require('../services/exerciseService');
+// const { normalizeString } = require('../utils/helpers');
+
+const validate = async (req, res) => {
+  const { exerciseId, answer, type, articleId, level } = req.body; // Adicionado level
+
+  if (!exerciseId || !answer || !type || !articleId || !level) { // Validar level
+    return res.status(400).json({ error: "exerciseId, answer, type, articleId, and level are required" });
+  }
+
+  // Call the appropriate validation based on the type
+  switch (type) {
+    case "multiple_choice":
+      validateMultipleChoice(exerciseId, answer, articleId, level, type, res); // Passar level
+      break;
+    case "fill_in_the_blanks":
+      validateGapFill(exerciseId, answer, articleId, level, type, res); // Passar level
+      break;
+    case "true_false":
+      validateTrueFalse(exerciseId, answer, articleId, level, type, res); // Passar level
+      break;
+    case "vocabulary_matching":
+      validateVocabularyMatching(exerciseId, answer, articleId, level, type, res); // Passar level
+      break;
+    case "writing_with_audio": // Changed from exercises_writing_with_audio for consistency
+      validateWriting(exerciseId, answer, articleId, level, type, res);
+      break;
+    default:
+      res.status(400).json({ error: "Invalid exercise type" });
+  }
+};
+
+const validateMultipleChoice = (exerciseId, answer, articleId, level, type, res) => {
+  const query = `SELECT answer FROM exercises_multiple_choice WHERE id = ?`;
+  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+};
+
+const validateGapFill = (exerciseId, answer, articleId, level, type, res) => {
+  const query = `SELECT answer FROM exercises_fill_in_the_blanks WHERE id = ?`;
+  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+};
+
+const validateTrueFalse = (exerciseId, answer, articleId, level, type, res) => {
+  const query = `SELECT answer FROM exercises_true_false WHERE id = ?`;
+  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+};
+
+const validateVocabularyMatching = (exerciseId, answer, articleId, level, type, res) => {
+  const query = `SELECT definition FROM exercises_vocabulary_matching WHERE id = ?`;
+  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.definition === answer);
+};
+
+const validateWriting = (exerciseId, answer, articleId, level, type, res) => {
+  const query = `SELECT sentence FROM exercises_writing_with_audio WHERE id = ?`;
+  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => {
+    // Normalize both strings by trimming whitespace and converting to lowercase
+    const correctAnswer = row.sentence.trim().toLowerCase();
+    const userInput = answer.trim().toLowerCase();
+    return correctAnswer === userInput;
+  });
+};
+
+module.exports = { validate };

@@ -1,0 +1,29 @@
+{
+	"name": "etymon-MVP",
+	"version": "1.0.0",
+	"description": "MVP da plataforma de aprendizado de idiomas Etymon!",
+	"main": "index.js",
+	"scripts": {
+		"start": "node src/server.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Thomerlin/Etymon-MVP.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Thomerlin/Etymon-MVP/issues"
+	},
+	"homepage": "https://github.com/Thomerlin/Etymon-MVP#readme",
+	"dependencies": {
+		"bcrypt": "^5.1.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.7",
+		"express": "^4.21.2",
+		"helmet": "^8.0.0",
+		"jsonwebtoken": "^9.0.2",
+		"sqlite3": "^5.1.7"
+	}
+}
