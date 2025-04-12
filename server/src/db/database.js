@@ -1,7 +1,12 @@
-const database = require('../config/database');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-module.exports = {
-  get: database.get.bind(database),
-  all: database.all.bind(database),
-  run: database.run.bind(database)
-};
+const db = new sqlite3.Database(path.join(__dirname, '../../database.db'), (err) => {
+  if (err) {
+    console.error('Error connecting to SQLite database:', err.message);
+  } else {
+    console.log('Connected to SQLite database');
+  }
+});
+
+module.exports = db;

@@ -3,25 +3,17 @@ const fs = require('fs');
 const path = require('path');
 
 const initializeDatabase = () => {
-  // Create tables
+  // Create users table without password
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    display_name TEXT,
+    picture TEXT,
+    google_id TEXT UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {
       console.error('Error creating table users:', err.message);
-    } else {
-      const genericEmail = "testuser@example.com";
-      const genericPassword = "testpassword";
-      db.run(`INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)`,
-        [genericEmail, genericPassword], (err) => {
-          if (err) {
-            console.error('Error inserting generic user:', err.message);
-          } else {
-            console.log('Generic user created: email=testuser@example.com, password=testpassword');
-          }
-        });
     }
   });
 

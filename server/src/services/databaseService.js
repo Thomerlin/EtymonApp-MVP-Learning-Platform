@@ -1,5 +1,6 @@
 const db = require('../db/database');
 
+// Function to print database contents in JSON format
 const printDatabaseContents = () => {
   console.log("\n--- Database Contents (JSON) ---");
 
