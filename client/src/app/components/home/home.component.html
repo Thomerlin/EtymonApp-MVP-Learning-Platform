@@ -1,1 +1,40 @@
-<p>home works!</p>
+<div class="home-container">
+  <header class="app-header">
+    <h1>{{ appName }}</h1>
+  </header>
+  
+  <div class="content">
+    <div class="random-level-section" *ngIf="randomLevel">
+      <h2>Featured Level</h2>
+      <div class="level-card">
+        <h3>{{ randomLevel.title }}</h3>
+        <p>{{ randomLevel.description }}</p>
+        <div class="level-info">
+          <span>Difficulty: {{ randomLevel.difficulty }}</span>
+          <span>Category: {{ randomLevel.category }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="articles-section">
+      <h2>Available Articles</h2>
+      
+      <div *ngIf="isLoading" class="loading">Loading articles...</div>
+      
+      <div *ngIf="!isLoading && articlesSummary.length === 0" class="no-articles">
+        No articles available.
+      </div>
+      
+      <div class="articles-grid" *ngIf="!isLoading && articlesSummary.length > 0">
+        <div class="article-card" *ngFor="let article of articlesSummary">
+          <h3>{{ article.title }}</h3>
+          <p>{{ article.summary }}</p>
+          <div class="article-meta">
+            <span>Category: {{ article.category }}</span>
+            <span>Author: {{ article.author }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

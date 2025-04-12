@@ -24,8 +24,8 @@ initializeDatabase();
 const articleRoutes = require('./routes/articleRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
 const progressRoutes = require('./routes/progressRoutes');
-const indexRoutes = require('./routes/indexRoutes');
 const ttsRoutes = require('./routes/ttsRoutes');
+const indexRoutes = require('./routes/indexRoutes');
 
 app.use('/api/article', articleRoutes);
 app.use('/api/exercise', exerciseRoutes);
