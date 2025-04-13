@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/database');
-const { verifyToken } = require('../middleware/auth');
+const { authenticateJWT } = require('../middleware/auth');
 const { validate } = require('../controllers/exerciseController');
 const { checkCooldown } = require('../middleware/cooldown');
 
 // Get exercises (requires auth)
-router.get('/:level_id/:type', verifyToken, (req, res) => {
+router.get('/:level_id/:type', authenticateJWT, (req, res) => {
   const { level_id, type } = req.params;
   
   let tableName;

@@ -1,45 +1,100 @@
 const jwt = require('jsonwebtoken');
-const authConfig = require('../config/auth.config');
+const db = require('../config/database');
+const { safeDbGet } = require('../utils/databaseHelpers');
 
-// Verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'] || req.headers.authorization?.split(' ')[1];
-
+// Middleware para verificar tokens JWT com logs detalhados
+const authenticateJWT = (req, res, next) => {
+  // Verificar token em diversos locais
+  const token = extractTokenFromRequest(req);
+  
   if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
+    console.log('authenticateJWT: Nenhum token fornecido');
+    return res.status(401).json({ error: 'Acesso negado. Token não fornecido.' });
   }
 
+  // Log do token para debug (remova em produção!)
+  console.log('authenticateJWT: Token recebido para verificação');
+
   try {
-    const decoded = jwt.verify(token, authConfig.jwt.secret);
-    req.userId = decoded.id;
+    // Verificar se o SECRET existe
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET não está definido nas variáveis de ambiente');
+      return res.status(500).json({ error: 'Erro de configuração do servidor' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token verificado para usuário:', decoded.id);
+    
+    // Verificar se o token não expirou
+    if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+      console.log('Token expirado');
+      return res.status(401).json({ error: 'Token expirado' });
+    }
+    
+    req.user = decoded;
     next();
   } catch (error) {
-    console.error('Auth error:', error);
-    return res.status(401).json({ message: 'Unauthorized' });
+    console.error('Erro na verificação JWT:', error.message);
+    return res.status(401).json({ error: 'Token inválido' });
   }
 };
 
-// Optional authentication - proceeds even without auth
-const optionalAuth = (req, res, next) => {
-  const token = req.headers['x-access-token'] || req.headers.authorization?.split(' ')[1];
+// Extract token from multiple locations with detailed logging
+const extractTokenFromRequest = (req) => {
+  // Verificar headers
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    console.log('Token encontrado no header Authorization');
+    return authHeader.split(' ')[1];
+  }
+  
+  // Verificar cookies
+  if (req.cookies && req.cookies.token) {
+    console.log('Token encontrado nos cookies');
+    return req.cookies.token;
+  }
+  
+  // Verificar query parameter
+  if (req.query && req.query.token) {
+    console.log('Token encontrado na query string');
+    return req.query.token;
+  }
+  
+  console.log('Nenhum token encontrado na requisição');
+  return null;
+};
 
-  if (!token) {
-    req.isAuthenticated = false;
-    return next();
+// Verificar usuário no banco com tratamento de erros apropriado
+const checkUserExists = async (req, res, next) => {
+  if (!req.user || !req.user.id) {
+    console.log('checkUserExists: Usuário não autenticado');
+    return res.status(401).json({ error: 'Usuário não autenticado' });
   }
 
   try {
-    const decoded = jwt.verify(token, authConfig.jwt.secret);
-    req.userId = decoded.id;
-    req.isAuthenticated = true;
+    const user = await safeDbGet('SELECT id, email, display_name FROM users WHERE id = ?', [req.user.id]);
+    if (!user) {
+      console.warn('Usuário não encontrado no banco:', req.user.id);
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    console.log('Usuário encontrado no banco:', user.id);
+    // Não expõe dados sensíveis
+    req.dbUser = {
+      id: user.id,
+      email: user.email,
+      display_name: user.display_name
+    };
+    
     next();
   } catch (error) {
-    req.isAuthenticated = false;
-    next();
+    console.error('Erro de banco de dados em checkUserExists:', error.message);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
 module.exports = {
-  verifyToken,
-  optionalAuth
+  authenticateJWT,
+  checkUserExists,
+  extractTokenFromRequest
 };

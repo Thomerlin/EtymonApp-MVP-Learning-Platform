@@ -26,11 +26,13 @@ const exerciseRoutes = require('./routes/exerciseRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const ttsRoutes = require('./routes/ttsRoutes');
 const indexRoutes = require('./routes/indexRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 app.use('/api/article', articleRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/auth', authRoutes); 
 app.use('/', indexRoutes);
 
 // Print database contents after 2 seconds
