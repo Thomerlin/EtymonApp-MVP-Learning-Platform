@@ -1,0 +1,34 @@
+<header class="app-header">
+  <div class="logo-container">
+    <a (click)="goToHome()" class="logo">English Learning Platform</a>
+  </div>
+  
+  <nav class="main-nav">
+    <ul class="nav-links">
+      <li>
+        <a (click)="goToHome()" [routerLink]="['']" [routerLinkActive]="'active'" [routerLinkActiveOptions]="{exact: true}">
+          <span class="icon">🏠</span> Home
+        </a>
+      </li>
+    </ul>
+  </nav>
+  
+  <div class="header-actions">
+    <button class="toggle-dark-mode-btn" (click)="toggleDarkMode()" aria-label="Toggle dark mode">
+      <span *ngIf="!darkMode">🌙</span>
+      <span *ngIf="darkMode">☀️</span>
+    </button>
+    
+    <div *ngIf="!isAuthenticated" class="auth-buttons">
+      <button class="btn-login" (click)="login()">Login</button>
+    </div>
+    
+    <div *ngIf="isAuthenticated" class="user-menu">
+      <button class="profile-button" (click)="goToDashboard()">
+        <span class="avatar">👤</span>
+        <span class="user-name">{{ userName || 'User' }}</span>
+      </button>
+      <button class="btn-logout" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</header>

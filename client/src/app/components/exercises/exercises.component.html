@@ -1,23 +1,26 @@
-<div>
+<div class="exercises-container">
   <hr>
-  <h3>Exercises</h3>
+  <h3 style="margin-left: 10px;">Exercises</h3>
 
-  <!-- Login info for unauthenticated users -->
-  <div *ngIf="!isAuthenticated" class="login-prompt">
-    <p>Para fazer exercícios e acompanhar seu progresso, é necessário fazer login.</p>
-    <button class="btn-login-prompt" (click)="authModalRequested.emit()">Entrar com Google</button>
+  <!-- Auth Modal Overlay with blur effect -->
+  <div *ngIf="!isAuthenticated" class="auth-modal-overlay">
+    <div class="auth-modal-content">
+      <h3>Login Required</h3>
+      <p>Para fazer exercícios e acompanhar seu progresso, é necessário fazer login.</p>
+      <button class="btn-login-modal" (click)="authModalRequested.emit()">Entrar com Google</button>
+    </div>
   </div>
 
   <!-- Exercise Content Loading Placeholder -->
   <div *ngIf="isLoading" class="exercises-loading">
     <!-- Exercise title placeholder -->
     <div class="placeholder-item placeholder-exercise-title"></div>
-    
+
     <!-- Exercise content placeholder -->
     <div class="placeholder-exercise-card">
       <div class="placeholder-line placeholder-line-medium"></div>
       <div class="placeholder-line placeholder-line-full"></div>
-      
+
       <!-- Options placeholder -->
       <div class="placeholder-options">
         <div class="placeholder-option">
@@ -33,17 +36,17 @@
           <div class="placeholder-line placeholder-line-short"></div>
         </div>
       </div>
-      
+
       <!-- Button placeholder -->
       <div class="placeholder-exercise-button"></div>
     </div>
-    
+
     <!-- Progress placeholder -->
     <div class="placeholder-progress">
       <div class="placeholder-line placeholder-line-medium"></div>
       <div class="placeholder-progress-bar"></div>
     </div>
-    
+
     <!-- Vocabulary cards placeholder -->
     <div class="placeholder-flashcards">
       <div class="placeholder-flashcard"></div>
@@ -53,20 +56,21 @@
   </div>
 
   <!-- Actual exercises content shown when not loading -->
-  <div [hidden]="isLoading">
+  <div [hidden]="isLoading" class="exercises-content">
     <div *ngIf="allExercises.length > 0" class="exercise-wrapper">
       <ng-container [ngSwitch]="allExercises[currentExerciseIndex]?.type">
         <!-- Multiple Choice -->
         <div *ngSwitchCase="'multiple_choice'" class="exercise-card exercise-card-multiple_choice"
-          [class.error-animation]="showErrorAnimation" 
-          [class.success-animation]="showSuccessAnimation"
+          [class.error-animation]="showErrorAnimation" [class.success-animation]="showSuccessAnimation"
           [class.slide-out]="isSlidingOut">
-          <h3>{{ allExercises[currentExerciseIndex].question }}</h3>
-          <div class="options-container">
-            <div *ngFor="let option of allExercises[currentExerciseIndex].options.split(',')" class="option-item">
-              <input type="radio" [name]="'multiple_choice_' + allExercises[currentExerciseIndex].id"
-                [value]="option.split('.')[0].trim()" (change)="answer = option.split('.')[0].trim()">
-              <label>{{ option }}</label>
+          <div class="exercise-content">
+            <h3>{{ allExercises[currentExerciseIndex].question }}</h3>
+            <div class="options-container">
+              <div *ngFor="let option of allExercises[currentExerciseIndex].options.split(',')" class="option-item">
+                <input type="radio" [name]="'multiple_choice_' + allExercises[currentExerciseIndex].id"
+                  [value]="option.split('.')[0].trim()" (change)="answer = option.split('.')[0].trim()">
+                <label>{{ option }}</label>
+              </div>
             </div>
           </div>
           <div class="exercise-buttons">
@@ -77,16 +81,17 @@
 
         <!-- Fill in the Blanks -->
         <div *ngSwitchCase="'fill_in_the_blanks'" class="exercise-card exercise-card-fill_in_the_blanks"
-          [class.error-animation]="showErrorAnimation"
-          [class.success-animation]="showSuccessAnimation"
+          [class.error-animation]="showErrorAnimation" [class.success-animation]="showSuccessAnimation"
           [class.slide-out]="isSlidingOut">
-          <h3>
-            <span *ngFor="let part of allExercises[currentExerciseIndex].sentence.split('___'); let i = index">
-              {{ part }}
-              <input *ngIf="i < allExercises[currentExerciseIndex].sentence.split('___').length - 1" type="text"
-                [(ngModel)]="answers[allExercises[currentExerciseIndex].id]" class="blank-input" />
-            </span>
-          </h3>
+          <div class="exercise-content">
+            <h3>
+              <span *ngFor="let part of allExercises[currentExerciseIndex].sentence.split('___'); let i = index">
+                {{ part }}
+                <input *ngIf="i < allExercises[currentExerciseIndex].sentence.split('___').length - 1" type="text"
+                  [(ngModel)]="answers[allExercises[currentExerciseIndex].id]" class="blank-input" />
+              </span>
+            </h3>
+          </div>
           <div class="exercise-buttons">
             <button class="validate-btn"
               (click)="validate(allExercises[currentExerciseIndex].id, answers[allExercises[currentExerciseIndex].id], 'fill_in_the_blanks')">Validate</button>
@@ -95,34 +100,37 @@
 
         <!-- True/False -->
         <div *ngSwitchCase="'true_false'" class="exercise-card exercise-card-true-false"
-          [class.error-animation]="showErrorAnimation"
-          [class.success-animation]="showSuccessAnimation"
+          [class.error-animation]="showErrorAnimation" [class.success-animation]="showSuccessAnimation"
           [class.slide-out]="isSlidingOut">
-          <h3>{{ allExercises[currentExerciseIndex].statement }}</h3>
-          <div class="true-false-buttons">
-            <button class="tf-btn" (click)="validate(allExercises[currentExerciseIndex].id, 'T', 'true_false')">True</button>
-            <button class="tf-btn" (click)="validate(allExercises[currentExerciseIndex].id, 'F', 'true_false')">False</button>
+          <div class="exercise-content">
+            <h3>{{ allExercises[currentExerciseIndex].statement }}</h3>
+            <div class="true-false-buttons">
+              <button class="tf-btn"
+                (click)="validate(allExercises[currentExerciseIndex].id, 'T', 'true_false')">True</button>
+              <button class="tf-btn"
+                (click)="validate(allExercises[currentExerciseIndex].id, 'F', 'true_false')">False</button>
+            </div>
           </div>
         </div>
 
         <!-- Writing with Audio -->
         <div *ngSwitchCase="'writing_with_audio'" class="exercise-card exercise-card-writing_with_audio"
-          [class.error-animation]="showErrorAnimation"
-          [class.success-animation]="showSuccessAnimation"
+          [class.error-animation]="showErrorAnimation" [class.success-animation]="showSuccessAnimation"
           [class.slide-out]="isSlidingOut">
-          <h3>Listen and Write</h3>
-          <div class="writing-audio-container">
-            <div class="audio-control">
-              <button class="audio-button" 
-                      [class.active]="isExercisePlaying || isExercisePaused"
-                      (click)="playWritingAudio(allExercises[currentExerciseIndex].id)">
-                <span *ngIf="!isExercisePlaying && !isExercisePaused">▶️ Play</span>
-                <span *ngIf="isExercisePlaying">⏸️ Pause</span>
-                <span *ngIf="!isExercisePlaying && isExercisePaused">▶️ Resume</span>
-              </button>
+          <div class="exercise-content">
+            <h3>Listen and Write</h3>
+            <div class="writing-audio-container">
+              <div class="audio-control">
+                <button class="audio-button" [class.active]="isExercisePlaying || isExercisePaused"
+                  (click)="playWritingAudio(allExercises[currentExerciseIndex].id)">
+                  <span *ngIf="!isExercisePlaying && !isExercisePaused">▶️ Play</span>
+                  <span *ngIf="isExercisePlaying">⏸️ Pause</span>
+                  <span *ngIf="!isExercisePlaying && isExercisePaused">▶️ Resume</span>
+                </button>
+              </div>
+              <textarea class="writing-textarea" [(ngModel)]="answers[allExercises[currentExerciseIndex].id]"
+                placeholder="Type your answer here..."></textarea>
             </div>
-            <textarea class="writing-textarea" [(ngModel)]="answers[allExercises[currentExerciseIndex].id]"
-              placeholder="Type your answer here..."></textarea>
           </div>
           <div class="exercise-buttons">
             <button class="validate-btn"
@@ -140,8 +148,10 @@
 
     <!-- Vocabulary Matching -->
     <div class="flashcard-container">
-      <div *ngFor="let flashcard of vocabularyFlashcards" class="flashcard" [class.flipped]="flashcard.flipped"
-        (click)="flipFlashcard(flashcard)">
+      <!-- Using regular div instead of ng-container to properly maintain grid structure -->
+      <div class="flashcard" *ngFor="let flashcard of vocabularyFlashcards" 
+           [class.flipped]="flashcard.flipped" 
+           (click)="flipFlashcard(flashcard)">
         <div class="flashcard-front">
           <h3>{{ flashcard.word }}</h3>
         </div>

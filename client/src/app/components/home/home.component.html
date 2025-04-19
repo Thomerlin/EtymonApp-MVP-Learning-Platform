@@ -1,86 +1,131 @@
-<div class="header">
-  <h1>Welcome to English Learning MVP</h1>
-  <div class="auth-buttons" *ngIf="!loggedIn">
-    <button routerLink="/login">Login</button>
-    <button routerLink="/login">Sign Up</button>
-  </div>
-  <button class="toggle-dark-mode-btn" (click)="toggleDarkMode()">
-    Toggle Dark Mode
-  </button>
-</div>
+<div class="article-container">
+  <!-- Introduction Section -->
+  <!-- <div class="intro-section">
+    <p class="intro-text">Learn English with adapted Wikipedia texts and exercises tailored to your level (A1-C2).</p>
+  </div> -->
 
-<p>Learn English with adapted Wikipedia texts and simple exercises tailored to your level (A1-C1).</p>
-
-<div class="random-exercise-container" *ngIf="randomExerciseLevel">
-  <h2>{{ randomExerciseLevel.title }}</h2>
-  <p><strong>Summary:</strong> {{ randomExerciseLevel.summary }}</p>
-
-  <div class="text-container">
-    <div class="paragraph">
-      <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index" class="sentence-container"
-        [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
-        <span class="sentence-text">
-          <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-            <span class="word toggle-phonetics-btn" (click)="togglePopup(i)">{{ word.text }}</span>
-            <span class="popup" *ngIf="word.phonetic">
-              {{ replaceHyphensWithSpaces(word.phonetic) }}
-            </span>
-          </span>
-        </span>
-      </div>
-    </div>
-    <br>
-    <div class="paragraph">
-      <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index" class="sentence-container"
-        [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
-        <span class="sentence-text">
-          <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-            <span class="word toggle-phonetics-btn" (click)="togglePopup(i + sentences.length / 2)">{{ word.text
-              }}</span>
-            <span class="popup" *ngIf="word.phonetic">
-              {{ replaceHyphensWithSpaces(word.phonetic) }}
-            </span>
-          </span>
-        </span>
+  <!-- Featured Exercise Section -->
+  <div class="featured-section" *ngIf="isLoading">
+    <div class="content-placeholder">
+      <div class="placeholder-item placeholder-title"></div>
+      <div class="placeholder-line placeholder-line-medium"></div>
+      <div class="placeholder-line placeholder-line-long"></div>
+      <div class="placeholder-text">
+        <div class="placeholder-line placeholder-line-full"></div>
+        <div class="placeholder-line placeholder-line-long"></div>
+        <div class="placeholder-line placeholder-line-medium"></div>
       </div>
     </div>
   </div>
 
+  <!-- Random Exercise Container -->
+  <div class="featured-section" *ngIf="!isLoading && randomExerciseLevel">
+    <h2>Featured Content: {{ randomExerciseLevel.title }}</h2>
+    <p class="summary"><strong>Summary:</strong> {{ randomExerciseLevel.summary }}</p>
+
+    <div class="text-container">
+      <div class="paragraph">
+        <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index" class="sentence-container"
+          [class.paragraph-start]="i === 0 || sentences[i - 1]?.text?.endsWith('.')">
+          <span class="sentence-text">
+            <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+              <span class="word" (click)="togglePopup(i)">{{ word.text }}</span>
+              <span class="popup" *ngIf="word.phonetic">
+                {{ replaceHyphensWithSpaces(word.phonetic) }}
+              </span>
+            </span>
+          </span>
+        </div>
+      </div>
+      <br>
+      <div class="paragraph">
+        <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index" class="sentence-container"
+          [class.paragraph-start]="i === 0 || sentences[i - 1]?.text?.endsWith('.')">
+          <span class="sentence-text">
+            <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+              <span class="word" (click)="togglePopup(i + sentences.length / 2)">{{ word.text }}</span>
+              <span class="popup" *ngIf="word.phonetic">
+                {{ replaceHyphensWithSpaces(word.phonetic) }}
+              </span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="audio-button" (click)="playAudio(randomExerciseLevel.content)">
+        ▶️ Play Full Text
+      </button>
+      <button class="access-article-btn" [routerLink]="['/article', randomExerciseLevel.id]">
+        Continue Reading
+      </button>
+    </div>
+  </div>
+
+  <!-- Articles Section -->
+  <div class="articles-section" *ngIf="isLoading">
+    <h2>Latest Articles</h2>
+    <div class="content-placeholder">
+      <div *ngFor="let i of [1, 2, 3]" class="article-card-placeholder">
+        <div class="placeholder-item placeholder-article-title"></div>
+        <div class="placeholder-line placeholder-line-long"></div>
+        <div class="placeholder-line placeholder-line-medium"></div>
+        <div class="placeholder-item placeholder-level-buttons"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="articles-section" *ngIf="!isLoading && articles.length > 0">
+    <h2>Latest Articles</h2>
+    <p class="subtitle">Explore articles at different levels to improve your English skills.</p>
+
+    <div class="articles-grid">
+      <div *ngFor="let article of articles | slice:0:showArticlesUpTo; let i = index" class="article-card">
+        <h3 class="article-title">{{ article.title }}</h3>
+        <p class="article-summary">{{ article.summary }}</p>
+
+        <div *ngIf="article.levels?.length > 0" class="article-levels">
+          <h4>Available Levels:</h4>
+          <div class="level-buttons">
+            <button *ngFor="let level of article.levels" (click)="redirectToArticle(article.id, level.level)"
+              class="level-button">
+              {{ level.level }}
+            </button>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" [style.width.%]="article.totalPercentage"></div>
+          </div>
+        </div>
+
+        <button class="btn-read-more" [routerLink]="['/article', article.id]">Read Article</button>
+      </div>
+    </div>
+
+    <button *ngIf="showArticlesUpTo < articles.length" class="see-more-btn" (click)="seeMoreArticles()">
+      See More Articles
+    </button>
+  </div>
+
+  <!-- CTA Section for non-logged in users -->
+  <!-- <div class="cta-section" *ngIf="!loggedIn">
+    <h2>Ready to Improve Your English?</h2>
+    <p>Sign up now to track your progress, save your favorite articles, and access personalized exercises.</p>
+    <button class="btn-start" (click)="login()">Get Started</button>
+  </div> -->
+
+  <!-- Popup Overlay -->
   <div *ngIf="popupVisible" class="popup-overlay">
     <div class="popup-content">
       <button class="close-popup-btn" (click)="closePopup()">×</button>
       <p class="popup-sentence">{{ popupContent?.text }}
-        <button (click)="playAudio(popupContent?.text)">▶️ Play</button>
+        <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
+          ▶️ Play
+        </button>
       </p>
       <p class="popup-phonetic">
         {{ popupContent?.phonetic }}
       </p>
     </div>
   </div>
-</div>
-
-<div *ngIf="articles.length > 0">
-  <h2>Articles</h2>
-  <p>Explore articles at different levels to improve your English skills. Select a level to start learning!</p>
-  <div *ngFor="let article of articles | slice:0:showArticlesUpTo; let i = index" class="article-container">
-    <h3>{{ i + 1 }}. {{ article.title }}</h3>
-    <p>{{ article.summary }}</p>
-    <a [routerLink]="['/article', article.id]">Read more</a>
-    <div *ngIf="article.levels.length > 0">
-      <h4>Available Levels:</h4>
-      <div class="level-buttons">
-        <button *ngFor="let level of article.levels" [class.active]="level.level === level.level"
-          (click)="redirectToArticle(article.id, level.level)">
-          {{ level.level }}
-        </button>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-bar-fill" [style.width.%]="article.totalPercentage"></div>
-      </div>
-      <p><strong>Percentage:</strong> {{ article.totalPercentage }}%</p>
-    </div>
-  </div>
-  <button *ngIf="showArticlesUpTo < articles.length" class="see-more-btn" (click)="seeMoreArticles()">
-    See More
-  </button>
 </div>

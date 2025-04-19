@@ -1,4 +1,132 @@
 <div class="dashboard-container">
-  <h1>Bem-vindo ao Dashboard</h1>
-  <p>Aqui você pode acompanhar seu progresso e acessar funcionalidades exclusivas.</p>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando seu dashboard...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <!-- User Welcome Section -->
+    <div class="welcome-section">
+      <div class="user-info">
+        <img *ngIf="userData?.profile_picture" [src]="userData.profile_picture" alt="Profile picture"
+          class="profile-image">
+        <div class="avatar-placeholder" *ngIf="!userData?.profile_picture">
+          {{ userData?.name?.charAt(0) || 'U' }}
+        </div>
+        <div class="user-details">
+          <h1>Olá, {{ userData?.name || 'Estudante' }}!</h1>
+          <p>Bem-vindo de volta à sua jornada de aprendizado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Statistics Cards -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ userStats.completedExercises }}</h3>
+          <p>Exercícios Completados</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ userStats.completedArticles }}</h3>
+          <p>Artigos Lidos</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ formatTime(userStats.totalTimeSpent) }}</h3>
+          <p>Tempo de Estudo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Language Level Progress Section -->
+    <div class="level-progress-section">
+      <h2>Seu Progresso por Níveis</h2>
+
+      <div class="levels-grid">
+        <div class="level-card" *ngFor="let level of levelProgressData">
+          <div class="level-header">
+            <h3>{{ level.level }} - {{ level.description }}</h3>
+            <span class="level-progress">{{ level.progress }}%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="level.progress"></div>
+          </div>
+
+          <div class="level-stats">
+            <span>{{ level.completedExercises }}/{{ level.totalExercises }} exercícios completos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Courses Section -->
+    <div class="recent-courses-section">
+      <h2>Seus Cursos por Nível</h2>
+
+      <div *ngFor="let level of levelProgressData" class="level-courses">
+        <div *ngIf="hasCourses(level.level)" class="level-section">
+          <h3 class="level-title">{{ level.level }} - {{ level.description }}</h3>
+
+          <div class="courses-grid">
+            <div class="course-card" *ngFor="let course of getCoursesByLevel(level.level)">
+              <div class="course-header">
+                <h3>{{ course.title }}</h3>
+                <span class="progress-percent">{{ course.progress }}%</span>
+              </div>
+
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="course.progress"></div>
+              </div>
+
+              <div class="course-footer">
+                <span class="last-accessed">Último acesso: {{ course.lastAccessed | date:'dd/MM/yyyy' }}</span>
+                <button class="continue-btn">Continuar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-courses" *ngIf="recentCourses.length === 0">
+        <p>Você ainda não começou nenhum curso. Explore nosso catálogo para começar!</p>
+        <button class="explore-btn">Explorar Cursos</button>
+      </div>
+    </div>
+
+    <!-- Suggested Next Steps -->
+    <div class="next-steps-section">
+      <h2>Próximos Passos Sugeridos</h2>
+      <div class="suggestions">
+        <div class="suggestion-card">
+          <div class="suggestion-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="suggestion-content">
+            <h4>Complete seu perfil</h4>
+            <p>Adicione suas habilidades e interesses para recomendações personalizadas.</p>
+            <button class="action-btn">Atualizar Perfil</button>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
 </div>

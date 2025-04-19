@@ -6,179 +6,99 @@
 
 /* Container principal */
 .article-container {
-  @include container-style;
-  color: $light-text-color;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   h1 {
+    color: var(--text-color);
+    margin-bottom: 10px;
     font-size: 2.5rem;
-    color: $primary-color;
     text-align: center;
-    margin-bottom: 20px;
+  }
+
+  h2 {
+    color: var(--text-color);
+    margin-top: 30px;
+    margin-bottom: 15px;
   }
 
   p {
-    font-size: 1rem;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    color: var(--text-color);
 
     strong {
-      color: #555;
+      color: var(--text-color);
+    }
+  }
+
+  .text-container {
+    margin: 20px 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-color);
+
+    .paragraph {
+      margin-bottom: 20px;
+    }
+  }
+
+  .audio-button {
+    padding: 10px 15px;
+    background-color: var(--button-primary);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+
+    &:hover {
+      background-color: var(--button-hover);
     }
   }
 
   .level-buttons {
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
     gap: 10px;
-    margin: 20px;
+    margin: 30px 0;
+    justify-content: center;
 
     button {
-      padding: 12px 24px;
+      padding: 8px 15px;
+      background-color: var(--level-button-bg);
+      color: var(--level-button-text);
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 5px;
       cursor: pointer;
-      background-color: $primary-color;
-      color: $light-text-color;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+      transition: background-color 0.3s ease, transform 0.3s ease;
 
-      &.active,
-      &:hover {
-        background-color: $primary-hover-color;
+      &:hover:not([disabled]) {
+        background-color: var(--button-hover);
         transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
       }
 
-      &[disabled] {
-        background-color: #cccccc;
+      &.active {
+        background-color: var(--button-hover);
+      }
+
+      &:disabled {
+        opacity: 0.5;
         cursor: not-allowed;
-        opacity: 0.7;
-        transform: none;
-        box-shadow: none;
-
-        &:hover {
-          background-color: #cccccc;
-          transform: none;
-          box-shadow: none;
-        }
       }
     }
   }
 
-  h2 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 15px;
-  }
-
-  button.audio-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: $light-text-color;
-    background-color: $primary-color;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-    &:hover {
-      background-color: $primary-hover-color;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-    }
-  }
-
-  .audio-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 15px;
-    transition: background-color 0.3s;
-    
-    &:hover {
-      background-color: #45a049;
-    }
-    
-    &.active {
-      background-color: #f44336;
-      
-      &:hover {
-        background-color: #d32f2f;
-      }
-    }
-    
-    &[disabled] {
-      background-color: #cccccc;
-      cursor: not-allowed;
-      opacity: 0.7;
-      
-      &:hover {
-        background-color: #cccccc;
-      }
-    }
-  }
-
-  .audio-control-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 5px 10px;
-    margin-left: 10px;
-    transition: background-color 0.3s;
-    
-    &:hover {
-      background-color: #45a049;
-    }
-  }
-
-  .writing-audio-container {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    
-    .audio-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    
-    .writing-textarea {
-      width: 100%;
-      min-height: 100px;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      resize: vertical;
-    }
-  }
-
-  /* Popup */
-  .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+  /* Word and sentence styling */
+  .sentence-container {
+    display: inline;
   }
 
   .word-container {
@@ -188,718 +108,289 @@
 
     .word {
       cursor: pointer;
-      position: relative;
-      transition: color 0.3s;
+      padding: 0 2px;
+      transition: color 0.3s ease, background-color 0.3s ease;
 
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -2px;
-        height: 2px;
-        background-color: $primary-color;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s ease-in-out;
-      }
-
-      .toggle-phonetics-btn {
-        background-color: transparent;
-        border: none;
-        font-size: 16px;
-        cursor: pointer;
-        margin-left: 5px;
-        padding: 0;
-        line-height: 1;
-        transition: color 0.3s;
-      }
-
-
-      &:hover::after {
-        transform: scaleX(1);
+      &:hover {
+        color: var(--link-color);
+        background-color: rgba(128, 128, 128, 0.1);
       }
     }
 
     .popup {
-      visibility: hidden;
-      background-color: #1c51e0;
-      color: #fff;
-      text-align: center;
-      border-radius: 5px;
-      padding: 5px;
+      display: none;
       position: absolute;
-      z-index: 1;
-      bottom: 125%;
+      top: 100%;
       left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      opacity: 0;
-      transition: opacity 0.3s, transform 0.3s;
+      transform: translateX(-50%);
+      padding: 5px 10px;
+      background-color: var(--popup-background);
+      border-radius: 3px;
+      font-size: 0.8rem;
+      z-index: 10;
       white-space: nowrap;
+      color: var(--popup-text);
+      box-shadow: var(--popup-shadow);
+      transition: background-color 0.3s ease, color 0.3s ease;
 
-      &::after {
-        content: '';
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border-width: 5px;
-        border-style: solid;
-        border-color: #1c51e0 transparent transparent transparent;
+      .toggle-phonetics-btn:hover+& {
+        display: block;
       }
     }
-
-    &:hover .popup {
-      visibility: visible;
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
   }
 
-  .sentence-container {
-    display: inline;
-    align-items: center;
-    margin-right: 10px;
-  }
-
-  .sentence-text {
-    display: inline;
-    align-items: center;
-    cursor: pointer;
-    transition: color 0.3s, background-color 0.3s;
-
-    &:hover {
-      color: #0056b3;
-      background-color: #f0f8ff;
-    }
-  }
-
-  .sentence-end {
-    margin-right: 5px;
-  }
-
-  .phonetic-text {
-    color: #555;
-    font-style: italic;
-    margin-top: 5px;
-    text-decoration: underline;
-  }
-
-
+  /* Popup overlay */
   .popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: var(--modal-overlay-bg);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 99999;
-    animation: fadeIn 0.3s;
-
-    &.closing {
-      animation: fadeOut 0.3s;
-    }
+    z-index: 1000;
   }
 
   .popup-content {
-    @include popup-style;
-
-    &.closing {
-      animation: zoomOut 0.3s;
-    }
+    position: relative;
+    width: 80%;
+    max-width: 500px;
+    max-height: 80%;
+    overflow-y: auto;
+    background-color: var(--popup-background);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--popup-shadow);
+    color: var(--popup-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
 
     .close-popup-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: transparent;
+      background: none;
       border: none;
-      font-size: 20px;
-      font-weight: bold;
+      font-size: 24px;
       cursor: pointer;
-      color: #000;
+      color: var(--popup-text);
+      transition: color 0.3s ease;
 
       &:hover {
-        color: #ff0000;
+        color: var(--error-color);
       }
     }
 
     .popup-sentence {
-      font-size: 20px;
-      font-weight: bold !important;
-      color: #000 !important;
+      font-size: 1.2rem;
       margin-bottom: 10px;
+      color: var(--popup-text);
     }
 
     .popup-phonetic {
-      font-size: 16px;
+      font-size: 1rem;
       font-style: italic;
-      color: #555;
+      color: var(--popup-text);
     }
-  }
 
-  .inline-input {
-    display: inline-block;
-    width: 100px;
-    padding: 5px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin: 0 5px;
-    text-align: center;
-  }
-
-  .inline-input:focus {
-    outline: none;
-    border-color: $primary-color;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  }
-
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    background-color: $primary-color;
-    color: $light-text-color;
-    cursor: pointer;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: $primary-hover-color;
-    }
-  }
-
-  .flashcard-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin: 20px 0;
-
-    .flashcard {
-      width: 200px;
-      height: 150px;
-      perspective: 1000px;
+    .audio-control-btn {
+      background: none;
+      border: none;
+      color: var(--popup-text);
       cursor: pointer;
-      position: relative;
-      margin: 5px;
+      padding: 5px;
+      border-radius: 3px;
+      margin-left: 10px;
+      transition: background-color 0.3s ease;
 
-      &.flipped .flashcard-front {
-        transform: rotateY(180deg);
-      }
-
-      &.flipped .flashcard-back {
-        transform: rotateY(0);
-      }
-
-      .flashcard-front,
-      .flashcard-back {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        backface-visibility: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 10px;
-        text-align: center;
-        transition: transform 0.6s;
-      }
-
-      .flashcard-front {
-        background-color: $primary-color;
-        color: $light-text-color;
-        transform: rotateY(0);
-
-        h3 {
-          margin-bottom: 10px;
-        }
-      }
-
-      .flashcard-back {
-        background-color: #fff;
-        color: #333;
-        transform: rotateY(180deg);
-
-        p {
-          font-size: 0.9rem;
-        }
+      &:hover {
+        background-color: rgba(128, 128, 128, 0.1);
       }
     }
   }
 
-  .exercise-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-
-    .exercise-card {
-      width: 100%;
-      max-width: 600px;
-      background-color: #f9f9f9;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      position: relative;
-      text-align: left;
-      animation: slideInLeft 0.5s ease-in-out;
-
-      &.slide-out {
-        animation: slideOutRight 0.5s ease-in-out;
-      }
-
-      h3 {
-        font-size: 1.2rem;
-        color: $primary-color;
-        margin-bottom: 15px;
-      }
-
-      .exercise-buttons {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-
-        button {
-          padding: 10px 20px;
-          font-size: 1rem;
-          border: none;
-          border-radius: 5px;
-          background-color: $primary-color;
-          color: $light-text-color;
-          cursor: pointer;
-          transition: background-color 0.3s;
-
-          &:hover {
-            background-color: $primary-hover-color;
-          }
-
-          &:not(:last-child) {
-            margin-right: 10px;
-          }
-        }
-      }
-    }
-  }
-
-  .exercise-card-true-false,
-  .exercise-card-writing_with_audio,
-  .exercise-card-fill_in_the_blanks,
-  .exercise-card-multiple_choice {
-    background-color: #f9f9f9;
-    border: 2px solid #ddd;
-    border-radius: 10px;
+  /* Loading placeholders */
+  .content-placeholder {
     padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    animation: slideInLeft 0.5s ease-in-out;
+    width: 100%;
 
-    &.slide-out {
-      animation: slideOutRight 0.5s ease-in-out;
+    .placeholder-item {
+      background-color: var(--placeholder-background);
+      height: 20px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      animation: pulse 1.5s infinite;
+      transition: background-color 0.3s ease;
     }
 
-    h3 {
-      color: $primary-color;
+    .placeholder-title {
+      height: 30px;
+      width: 60%;
     }
 
-    .exercise-buttons {
+    .placeholder-heading {
+      height: 24px;
+      width: 40%;
+      margin-top: 20px;
+    }
+
+    .placeholder-button {
+      height: 40px;
+      width: 150px;
+      margin: 20px 0;
+    }
+
+    .placeholder-line {
+      height: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      animation: pulse 1.5s infinite;
+      background-color: var(--placeholder-background);
+      transition: background-color 0.3s ease;
+    }
+
+    .placeholder-line-long {
+      width: 85%;
+    }
+
+    .placeholder-line-medium {
+      width: 65%;
+    }
+
+    .placeholder-line-short {
+      width: 45%;
+    }
+
+    .placeholder-line-full {
+      width: 100%;
+    }
+
+    .placeholder-text {
+      margin: 25px 0;
+    }
+
+    .placeholder-level-buttons {
       display: flex;
-      justify-content: center;
-      gap: 10px;
+      gap: 5px;
+      margin-top: 15px;
+      height: 25px;
+      width: 200px;
+    }
+  }
 
-      button {
-        background-color: $primary-color;
-        color: $light-text-color;
-        transition: background-color 0.3s;
+  /* Exercise placeholders */
+  .exercises-loading {
+    margin-top: 40px;
 
-        &:hover {
-          background-color: $primary-hover-color;
+    .placeholder-exercise-title {
+      height: 25px;
+      width: 30%;
+      margin-bottom: 20px;
+      background-color: var(--placeholder-background);
+      border-radius: 4px;
+      animation: pulse 1.5s infinite;
+      transition: background-color 0.3s ease;
+    }
+
+    .placeholder-exercise-card {
+      background-color: var(--card-background);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 20px;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+
+      .placeholder-line {
+        height: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        animation: pulse 1.5s infinite;
+        background-color: var(--placeholder-background);
+        transition: background-color 0.3s ease;
+      }
+
+      .placeholder-options {
+        margin: 20px 0;
+
+        .placeholder-option {
+          display: flex;
+          align-items: center;
+          margin-bottom: 10px;
+
+          .placeholder-radio {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--placeholder-background);
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+            transition: background-color 0.3s ease;
+          }
         }
+      }
+
+      .placeholder-exercise-button {
+        height: 35px;
+        width: 120px;
+        margin-top: 15px;
+        background-color: var(--placeholder-background);
+        border-radius: 5px;
+        animation: pulse 1.5s infinite;
+        transition: background-color 0.3s ease;
+      }
+    }
+
+    .placeholder-progress {
+      margin: 30px 0;
+
+      .placeholder-line {
+        height: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        animation: pulse 1.5s infinite;
+        background-color: var(--placeholder-background);
+        transition: background-color 0.3s ease;
+      }
+
+      .placeholder-progress-bar {
+        height: 8px;
+        width: 100%;
+        background-color: var(--placeholder-background);
+        border-radius: 4px;
+        margin-top: 10px;
+        animation: pulse 1.5s infinite;
+        transition: background-color 0.3s ease;
+      }
+    }
+
+    .placeholder-flashcards {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+
+      .placeholder-flashcard {
+        flex: 0 0 200px;
+        height: 120px;
+        background-color: var(--placeholder-background);
+        border-radius: 8px;
+        animation: pulse 1.5s infinite;
+        transition: background-color 0.3s ease;
       }
     }
   }
 
-  .error-animation {
-    animation: shake 0.5s ease-in-out;
-    border: 2px solid red;
-    /* Highlight the exercise with a red border */
-  }
-
-  @keyframes shake {
+  @keyframes pulse {
 
     0%,
     100% {
-      transform: translateX(0);
-    }
-
-    25% {
-      transform: translateX(-5px);
+      opacity: 0.6;
     }
 
     50% {
-      transform: translateX(5px);
+      opacity: 0.3;
     }
-
-    75% {
-      transform: translateX(-5px);
-    }
-  }
-
-  .incorrect-summary {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid red;
-    border-radius: 5px;
-    background-color: #ffe6e6;
-    color: #cc0000;
-
-    h2 {
-      color: #cc0000;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
-
-      li {
-        margin-bottom: 10px;
-      }
-    }
-  }
-
-  /* Content Loading Placeholder Styles */
-  .content-placeholder {
-    padding: 15px;
-    width: 100%;
-    
-    .placeholder-item {
-      background-color: #e0e0e0;
-      border-radius: 4px;
-      animation: placeholder-shimmer 1.5s infinite linear;
-      background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0,
-        rgba(255, 255, 255, 0.2) 20%,
-        rgba(255, 255, 255, 0.5) 60%,
-        rgba(255, 255, 255, 0)
-      );
-      background-size: 200% 100%;
-    }
-    
-    .placeholder-title {
-      height: 50px;
-      width: 70%;
-      margin: 0 auto 30px auto;
-    }
-    
-    .placeholder-heading {
-      height: 30px;
-      width: 40%;
-      margin: 30px 0 20px 0;
-    }
-    
-    .placeholder-button {
-      width: 150px;
-      height: 45px;
-      margin-bottom: 30px;
-    }
-    
-    .placeholder-level-buttons {
-      height: 45px;
-      width: 80%;
-      max-width: 500px;
-      margin: 30px auto;
-    }
-    
-    .placeholder-exercise {
-      height: 120px;
-      width: 100%;
-      margin: 30px 0 15px 0;
-    }
-    
-    .placeholder-text {
-      margin-bottom: 30px;
-      
-      .placeholder-line {
-        height: 15px;
-        margin-bottom: 12px;
-        border-radius: 4px;
-        background-color: #e0e0e0;
-        animation: placeholder-shimmer 1.5s infinite linear;
-        background-image: linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0) 0,
-          rgba(255, 255, 255, 0.2) 20%,
-          rgba(255, 255, 255, 0.5) 60%,
-          rgba(255, 255, 255, 0)
-        );
-        background-size: 200% 100%;
-        
-        &.placeholder-line-full {
-          width: 100%;
-        }
-        
-        &.placeholder-line-long {
-          width: 85%;
-        }
-        
-        &.placeholder-line-medium {
-          width: 65%;
-        }
-        
-        &.placeholder-line-short {
-          width: 40%;
-        }
-      }
-    }
-  }
-
-  @keyframes placeholder-shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
-  }
-
-  @keyframes slideInLeft {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideOutRight {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    to {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-  }
-}
-
-.login-prompt {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px 0;
-  text-align: center;
-  border: 1px solid #dee2e6;
-}
-
-.btn-login-prompt {
-  background-color: #4285F4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  
-  &:hover {
-    background-color: #357ae8;
-  }
-}
-
-// Exercise loading placeholder styles
-.exercises-loading {
-  padding: 15px 0;
-  
-  .placeholder-item,
-  .placeholder-line {
-    background-color: #e0e0e0;
-    border-radius: 4px;
-    animation: placeholder-shimmer 1.5s infinite linear;
-    background-image: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0,
-      rgba(255, 255, 255, 0.2) 20%,
-      rgba(255, 255, 255, 0.5) 60%,
-      rgba(255, 255, 255, 0)
-    );
-    background-size: 200% 100%;
-  }
-  
-  .placeholder-exercise-title {
-    height: 30px;
-    width: 150px;
-    margin-bottom: 20px;
-  }
-  
-  .placeholder-exercise-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    width: 100%;
-    max-width: 600px;
-    
-    .placeholder-line {
-      height: 16px;
-      margin-bottom: 15px;
-      
-      &.placeholder-line-full {
-        width: 100%;
-      }
-      
-      &.placeholder-line-medium {
-        width: 65%;
-      }
-      
-      &.placeholder-line-short {
-        width: 40%;
-      }
-    }
-    
-    .placeholder-options {
-      margin: 25px 0;
-      
-      .placeholder-option {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-        
-        .placeholder-radio {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          margin-right: 10px;
-          background-color: #e0e0e0;
-          animation: placeholder-shimmer 1.5s infinite linear;
-          background-image: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0) 0,
-            rgba(255, 255, 255, 0.2) 20%,
-            rgba(255, 255, 255, 0.5) 60%,
-            rgba(255, 255, 255, 0)
-          );
-          background-size: 200% 100%;
-        }
-        
-        .placeholder-line {
-          flex-grow: 1;
-        }
-      }
-    }
-    
-    .placeholder-exercise-button {
-      height: 40px;
-      width: 120px;
-      border-radius: 4px;
-      margin-left: auto;
-      background-color: #e0e0e0;
-      animation: placeholder-shimmer 1.5s infinite linear;
-      background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0,
-        rgba(255, 255, 255, 0.2) 20%,
-        rgba(255, 255, 255, 0.5) 60%,
-        rgba(255, 255, 255, 0)
-      );
-      background-size: 200% 100%;
-    }
-  }
-  
-  .placeholder-progress {
-    margin: 30px 0;
-    
-    .placeholder-line {
-      height: 20px;
-      width: 200px;
-      margin-bottom: 10px;
-    }
-    
-    .placeholder-progress-bar {
-      height: 20px;
-      width: 100%;
-      border-radius: 10px;
-      background-color: #e0e0e0;
-      animation: placeholder-shimmer 1.5s infinite linear;
-      background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0,
-        rgba(255, 255, 255, 0.2) 20%,
-        rgba(255, 255, 255, 0.5) 60%,
-        rgba(255, 255, 255, 0)
-      );
-      background-size: 200% 100%;
-    }
-  }
-  
-  .placeholder-flashcards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    justify-content: center;
-    margin-top: 30px;
-    
-    .placeholder-flashcard {
-      width: 220px;
-      height: 150px;
-      border-radius: 8px;
-      background-color: #e0e0e0;
-      animation: placeholder-shimmer 1.5s infinite linear;
-      background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0,
-        rgba(255, 255, 255, 0.2) 20%,
-        rgba(255, 255, 255, 0.5) 60%,
-        rgba(255, 255, 255, 0)
-      );
-      background-size: 200% 100%;
-    }
-  }
-}
-
-@keyframes placeholder-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
   }
 }

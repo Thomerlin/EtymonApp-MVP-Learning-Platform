@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ArticleService } from '../../services/article.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +18,7 @@ export class HomeComponent implements OnInit {
   loggedIn: boolean = false;
   showArticlesUpTo: number = 5;
 
-  // Add missing properties
+  // Properties
   randomExerciseLevel: any = null;
   sentences: any[] = [];
   popupVisible: boolean = false;
@@ -27,7 +28,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private articleService: ArticleService,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService
   ) { }
 
   ngOnInit(): void {
@@ -43,6 +45,11 @@ export class HomeComponent implements OnInit {
 
     // Load a random exercise level for the demo
     this.loadRandomExercise();
+    
+    // Subscribe to theme changes
+    this.themeService.darkMode$.subscribe(isDark => {
+      this.darkMode = isDark;
+    });
   }
 
   loadArticles(): void {
@@ -102,10 +109,8 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  // Add missing methods
   toggleDarkMode(): void {
-    this.darkMode = !this.darkMode;
-    document.body.classList.toggle('dark-mode', this.darkMode);
+    this.themeService.toggleDarkMode();
   }
 
   togglePopup(sentenceIndex: number): void {

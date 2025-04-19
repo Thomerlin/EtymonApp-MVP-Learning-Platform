@@ -15,3 +15,127 @@
     color: #666;
   }
 }
+
+/* Language Level Progress Section */
+.level-progress-section {
+  margin-bottom: 3rem;
+  
+  h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    text-align: left;
+  }
+  
+  .levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    
+    .level-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      
+      .level-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        
+        h3 {
+          font-size: 1.2rem;
+          margin: 0;
+          color: #2c3e50;
+          font-weight: 600;
+        }
+        
+        .level-progress {
+          font-weight: bold;
+          color: #3498db;
+        }
+      }
+      
+      .progress-bar {
+        height: 8px;
+        background-color: #ecf0f1;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        
+        .progress-fill {
+          height: 100%;
+          background-color: #3498db;
+          border-radius: 4px;
+        }
+      }
+      
+      .level-stats {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+/* Level Courses Section */
+.level-courses {
+  margin-bottom: 2rem;
+  
+  .level-section {
+    margin-bottom: 1.5rem;
+    
+    .level-title {
+      font-size: 1.4rem;
+      color: #2c3e50;
+      margin: 1rem 0;
+      text-align: left;
+      border-bottom: 1px solid #ecf0f1;
+      padding-bottom: 0.5rem;
+    }
+  }
+}
+
+/* Color coding for different levels */
+.level-card, .level-title {
+  &:has(h3:contains("A1")) {
+    border-left: 4px solid #27ae60;
+  }
+  
+  &:has(h3:contains("A2")) {
+    border-left: 4px solid #2ecc71;
+  }
+  
+  &:has(h3:contains("B1")) {
+    border-left: 4px solid #f39c12;
+  }
+  
+  &:has(h3:contains("B2")) {
+    border-left: 4px solid #e67e22;
+  }
+  
+  &:has(h3:contains("C1")) {
+    border-left: 4px solid #e74c3c;
+  }
+  
+  &:has(h3:contains("C2")) {
+    border-left: 4px solid #c0392b;
+  }
+}
+
+/* Since :has() might not be supported in all browsers, let's add specific classes */
+.level-a1 { border-left: 4px solid #27ae60; }
+.level-a2 { border-left: 4px solid #2ecc71; }
+.level-b1 { border-left: 4px solid #f39c12; }
+.level-b2 { border-left: 4px solid #e67e22; }
+.level-c1 { border-left: 4px solid #e74c3c; }
+.level-c2 { border-left: 4px solid #c0392b; }
+
+/* Recent courses section modifications */
+.recent-courses-section {
+  h2 {
+    text-align: left;
+  }
+}

@@ -1,0 +1,98 @@
+/* Global CSS Variables */
+
+* {
+	font-family: 'Roboto', sans-serif;
+}
+
+:root {
+	/* Light Mode (Default) */
+	--background-color: #f8f9fa;
+	--text-color: #333333;
+	--card-background: #ffffff;
+	--card-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	--border-color: #dee2e6;
+	--button-primary: #007bff;
+	--button-hover: #0069d9;
+	--button-text: #ffffff;
+	--input-background: #ffffff;
+	--placeholder-background: #e9ecef;
+	--header-background: #ffffff;
+	--header-text: #333333;
+	--link-color: #007bff;
+	--success-color: #28a745;
+	--error-color: #dc3545;
+	--warning-color: #ffc107;
+	--popup-background: rgba(255, 255, 255, 0.95);
+	--popup-text: #333333;
+	--popup-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+	--flashcard-front-bg: #4285f4;
+	--flashcard-front-text: #ffffff;
+	--flashcard-back-bg: #ffffff;
+	--flashcard-back-text: #333333;
+	--exercise-card-bg: #f9f9f9;
+	--exercise-border: #dddddd;
+	--level-button-bg: #007bff;
+	--level-button-text: #ffffff;
+	--modal-overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Dark Mode */
+body.dark-mode {
+	--background-color: #121212;
+	--text-color: #e0e0e0;
+	--card-background: #1e1e1e;
+	--card-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+	--border-color: #333333;
+	--button-primary: #0d6efd;
+	--button-hover: #0b5ed7;
+	--button-text: #ffffff;
+	--input-background: #2d2d2d;
+	--placeholder-background: #3d3d3d;
+	--header-background: #1a1a1a;
+	--header-text: #e0e0e0;
+	--link-color: #6ea8fe;
+	--success-color: #41b958;
+	--error-color: #e35d6a;
+	--warning-color: #ffda6a;
+	--popup-background: rgba(30, 30, 30, 0.95);
+	--popup-text: #e0e0e0;
+	--popup-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+	--flashcard-front-bg: #0d6efd;
+	--flashcard-front-text: #ffffff;
+	--flashcard-back-bg: #1e1e1e;
+	--flashcard-back-text: #e0e0e0;
+	--exercise-card-bg: #2a2a2a;
+	--exercise-border: #444444;
+	--level-button-bg: #0d6efd;
+	--level-button-text: #ffffff;
+	--modal-overlay-bg: rgba(0, 0, 0, 0.7);
+}
+
+/* Basic element styling */
+body {
+	background-color: var(--background-color);
+	color: var(--text-color);
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+	color: var(--link-color);
+	transition: color 0.3s ease;
+}
+
+input,
+textarea,
+select {
+	background-color: var(--input-background);
+	color: var(--text-color);
+	border-color: var(--border-color);
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+button {
+	background-color: var(--button-primary);
+	color: var(--button-text);
+	transition: background-color 0.3s ease;
+}
+
+/* Add other global styles here */

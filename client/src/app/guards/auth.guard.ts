@@ -3,8 +3,7 @@ import {
   CanActivate, 
   ActivatedRouteSnapshot, 
   RouterStateSnapshot, 
-  Router,
-  UrlTree 
+  Router 
 } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
@@ -18,18 +17,15 @@ export class AuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  ): Observable<boolean> | Promise<boolean> | boolean {
     
     // Check if the user is authenticated
     if (this.authService.isAuthenticated()) {
       return true;
     }
 
-    // // If not authenticated, redirect to the login page with the return url
-    // this.router.navigate(['/login'], { 
-    //   queryParams: { returnUrl: state.url }
-    // });
-    
+    // Redirect to home page instead of login page
+    this.router.navigate(['']);
     return false;
   }
 }

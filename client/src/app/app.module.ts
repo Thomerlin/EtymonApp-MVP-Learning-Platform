@@ -18,7 +18,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { ProgressExercisesComponent } from './components/progress-exercises/progress-exercises.component';
 import { ExercisesComponent } from './components/exercises/exercises.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
+// Import the header component
+import { HeaderComponent } from './components/header/header.component';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     AuthModalComponent,
     ProgressExercisesComponent,
     ExercisesComponent,
+    HeaderComponent,
   ],
   imports: [
     BrowserModule,
