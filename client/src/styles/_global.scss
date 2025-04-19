@@ -1,0 +1,25 @@
+@import './_variables.scss';
+
+body {
+  font-family: $font-family;
+  margin: 0;
+  height: 100%;
+}
+
+body.dark-mode {
+  background-color: $dark-bg-color;
+  color: $dark-text-color;
+
+  a {
+    color: lighten($primary-color, 20%);
+  }
+
+  button {
+    background-color: $dark-bg-color;
+    color: $dark-text-color;
+  }
+
+  .header {
+    background-color: darken($primary-color, 20%);
+  }
+}

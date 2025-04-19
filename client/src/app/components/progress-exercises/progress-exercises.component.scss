@@ -1,0 +1,97 @@
+.progress-container {
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-progress-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  justify-content: center;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.highlight {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.progress-summary {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.exercise-progress {
+  flex: 0 0 auto;
+  width: 150px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.3s ease;
+}
+
+.loading-container {
+  text-align: center;
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+.total-progress-container {
+  position: relative;
+}
+
+.total-progress-bar {
+  position: relative;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.total-progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.3s ease;
+}
+
+.total-progress-bar-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #fff;
+  line-height: 20px;
+}
+
+.total-completed-text {
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #6c757d;
+}

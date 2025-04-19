@@ -1,0 +1,47 @@
+@mixin button-style($bg-color, $hover-color) {
+  background-color: $bg-color;
+  color: $light-text-color;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: $hover-color;
+    transform: scale(1.05);
+  }
+}
+
+@mixin container-style {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: $font-family;
+  line-height: 1.5;
+}
+
+@mixin popup-style {
+  background-color: $light-bg-color;
+  color: $light-text-color;
+  padding: 30px;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 90%;
+  position: relative;
+  animation: zoomIn 0.3s; // Adiciona animação de zoom ao abrir
+  font-size: 1.2rem; // Ajusta o tamanho da fonte do conteúdo do popup
+  transform: scale(1.5); // Define o zoom padrão de 150%
+}
+
+@mixin responsive($breakpoint) {
+  @if $breakpoint == 'desktop' {
+    @media (max-width: 1920px) { @content; }
+  } @else if $breakpoint == 'tablet' {
+    @media (max-width: 1280px) { @content; }
+  } @else if $breakpoint == 'mobile' {
+    @media (max-width: 768px) { @content; }
+  } @else if $breakpoint == 'small-mobile' {
+    @media (max-width: 480px) { @content; }
+  }
+}

@@ -1,0 +1,36 @@
+// Cores
+$primary-color: #007bff;
+$primary-hover-color: #0056b3;
+$secondary-color: #28a745;
+$secondary-hover-color: #218838;
+$dark-bg-color: #121212;
+$dark-text-color: #ffffff;
+$light-bg-color: #ffffff;
+$light-text-color: #333;
+$light-background-color: #f9f9f9; // Light background color for tabs or other elements
+
+// Fontes
+$font-family: 'Roboto', Arial, sans-serif;
+
+// Mixins
+@mixin button-style($bg-color, $hover-color) {
+  background-color: $bg-color;
+  color: $light-text-color;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: $hover-color;
+    transform: scale(1.05);
+  }
+}
+
+@mixin container-style {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: $font-family;
+  line-height: 1.6;
+}

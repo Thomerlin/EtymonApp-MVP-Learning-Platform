@@ -1,0 +1,15 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+.button-primary {
+  @include button-style($primary-color, $primary-hover-color);
+}
+
+.button-secondary {
+  @include button-style($secondary-color, $secondary-hover-color);
+}
+
+.button-dark-mode {
+  @include button-style($primary-color, $primary-hover-color);
+  margin-top: 10px;
+}

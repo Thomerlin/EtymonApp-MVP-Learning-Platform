@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const { initializeDatabase } = require('./db/init');
 const corsMiddleware = require('./middleware/cors');
 const { printDatabaseContents } = require('./services/databaseService');
+const passport = require('passport');
+const session = require('express-session');
 
 dotenv.config();
 
@@ -19,6 +21,17 @@ app.use('/audio', express.static(path.join(__dirname, '../public/audio')));
 
 // Initialize database
 initializeDatabase();
+
+// Configure session and passport
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'defaultsecret',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+require('./config/passport');
 
 // Routes
 const articleRoutes = require('./routes/articleRoutes');

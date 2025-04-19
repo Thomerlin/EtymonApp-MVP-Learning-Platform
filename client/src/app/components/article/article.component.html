@@ -1,1 +1,84 @@
-<p>article works!</p>
+<div class="article-container">
+  <h1>{{ title }}</h1>
+  <p><strong>Created Date:</strong> {{ createdDate }}</p>
+  <p><strong>Summary:</strong> {{ summary }}</p>
+
+  <button class="audio-button" (click)="playArticleAudio()">
+    <span *ngIf="!isArticlePlaying && !isArticlePaused">▶️ Play Full Article</span>
+    <span *ngIf="isArticlePlaying">⏸️ Pause</span>
+    <span *ngIf="!isArticlePlaying && isArticlePaused">▶️ Resume</span>
+  </button>
+
+  <div class="level-buttons">
+    <button *ngFor="let levelOption of ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']" (click)="selectLevel(levelOption)"
+      [class.active]="level === levelOption">
+      {{ levelOption }}
+    </button>
+  </div>
+
+  <div *ngIf="article">
+    <div *ngFor="let level of article.levels" [hidden]="level.level !== currentLevel">
+      <h2>Content for Level {{ level.level }}</h2>
+      <div class="text-container">
+        <!-- Primeiro parágrafo -->
+        <div class="paragraph">
+          <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index"
+            class="sentence-container" [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+            <span class="sentence-text">
+              <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+                <span class="word toggle-phonetics-btn" (click)="togglePopup(i)">{{ word.text }}</span>
+                <span class="popup" *ngIf="word.phonetic">
+                  {{ replaceHyphensWithSpaces(word.phonetic) }}
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <br>
+
+        <!-- Segundo parágrafo -->
+        <div class="paragraph">
+          <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index" class="sentence-container"
+            [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+            <span class="sentence-text">
+              <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+                <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5)">{{
+                  word.text }}</span>
+                <span class="popup" *ngIf="word.phonetic">
+                  {{ replaceHyphensWithSpaces(word.phonetic) }}
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="popupVisible" class="popup-overlay">
+        <div class="popup-content">
+          <button class="close-popup-btn" (click)="closePopup()">×</button>
+          <p class="popup-sentence">{{ popupContent?.text }}
+            <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
+              <span *ngIf="!isPopupPlaying && !isPopupPaused || currentPopupText !== popupContent?.text">▶️ Play</span>
+              <span *ngIf="isPopupPlaying && currentPopupText === popupContent?.text">⏸️ Pause</span>
+              <span *ngIf="!isPopupPlaying && isPopupPaused && currentPopupText === popupContent?.text">▶️ Resume</span>
+            </button>
+          </p>
+          <p class="popup-phonetic">
+            {{ popupContent?.phonetic }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Include the Exercises Component -->
+      <app-exercises 
+        [articleId]="article.id" 
+        [currentLevel]="currentLevel"
+        [isAuthenticated]="isAuthenticated"
+        (authModalRequested)="openAuthModal()">
+      </app-exercises>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<app-auth-modal [isOpen]="showAuthModal" (closeModal)="closeAuthModal()"></app-auth-modal>

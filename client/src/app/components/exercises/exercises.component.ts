@@ -1,12 +1,323 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ViewChild, Output, EventEmitter } from '@angular/core';
+import { TtsService } from '../../services/tts.service';
+import { AuthService } from '../../services/auth.service';
+import { ProgressExercisesComponent } from '../progress-exercises/progress-exercises.component';
+import { ArticleService } from '../../services/article.service';
+import { ExerciseService } from '../../services/exercise.service';
+
+interface MultipleChoiceExercise {
+  id: number;
+  question: string;
+  options: string;
+}
+
+interface FillInTheBlanksExercise {
+  id: number;
+  sentence: string;
+  hint: string;
+}
+
+interface TrueFalseExercise {
+  id: number;
+  statement: string;
+}
+
+interface VocabularyMatchingExercise {
+  id: number;
+  word: string;
+  definition: string;
+  example: string;
+  flipped?: boolean;
+}
+
+interface WritingWithAudioExercise {
+  id: number;
+  sentence: string;
+}
+
+interface Exercises {
+  multiple_choice: MultipleChoiceExercise[];
+  fill_in_the_blanks: FillInTheBlanksExercise[];
+  true_false: TrueFalseExercise[];
+  vocabulary_matching: VocabularyMatchingExercise[];
+  writing_with_audio: WritingWithAudioExercise[];
+}
+
+interface Level {
+  id: number;
+  level: string;
+  content: string;
+  phonetics: string;
+  exercises: Exercises;
+}
+
+// Define additional types for exercises with extra properties
+interface VocabularyMatchingExerciseWithFlipped extends VocabularyMatchingExercise {
+  flipped: boolean;
+}
+
+interface MultipleChoiceExerciseWithType extends MultipleChoiceExercise {
+  type: 'multiple_choice';
+  answeredCorrectly?: boolean;
+}
+interface FillInTheBlanksExerciseWithType extends FillInTheBlanksExercise {
+  type: 'fill_in_the_blanks';
+  answeredCorrectly?: boolean;
+}
+interface TrueFalseExerciseWithType extends TrueFalseExercise {
+  type: 'true_false';
+  answeredCorrectly?: boolean;
+}
+interface WritingWithAudioExerciseWithType extends WritingWithAudioExercise {
+  type: 'writing_with_audio';
+  answeredCorrectly?: boolean;
+}
+interface WritingWithAudioExerciseWithType extends WritingWithAudioExercise {
+  type: 'writing_with_audio';
+}
+
+type ExerciseWithType =
+  | MultipleChoiceExerciseWithType
+  | FillInTheBlanksExerciseWithType
+  | TrueFalseExerciseWithType
+  | WritingWithAudioExerciseWithType;
 
 @Component({
   selector: 'app-exercises',
-  standalone: true,
-  imports: [],
   templateUrl: './exercises.component.html',
-  styleUrl: './exercises.component.scss'
+  styleUrls: ['./exercises.component.scss']
 })
-export class ExercisesComponent {
+export class ExercisesComponent implements OnInit, OnChanges {
+  @Input() articleId!: number;
+  @Input() currentLevel!: string;
+  @Input() isAuthenticated = false;
+  @Output() authModalRequested = new EventEmitter<void>();
 
+  @ViewChild(ProgressExercisesComponent) progressComponent!: ProgressExercisesComponent;
+
+  exerciseId: number | null = null;
+  answer: string = "";
+  answers: { [key: number]: string } = {};
+  allExercises: any[] = [];
+  incorrectExercises: any[] = [];
+  currentExerciseIndex: number = 0;
+  showErrorAnimation: boolean = false;
+  correctExercises: Set<number> = new Set();
+  completedExercises: Set<number> = new Set();
+  isSlidingOut: boolean = false;
+  vocabularyFlashcards: VocabularyMatchingExercise[] = [];
+  isExercisePlaying: boolean = false;
+  isExercisePaused: boolean = false;
+  currentExerciseText: string = '';
+  lastAttemptedExerciseData: { exerciseId: number, answer: string, type: string } | null = null;
+
+  constructor(
+    private articleService: ArticleService,
+    private exerciseService: ExerciseService,
+    private ttsService: TtsService,
+    private authService: AuthService
+  ) { }
+
+  ngOnInit() {
+    // Subscribe to TTS service's playing/paused status for exercises
+    this.ttsService.isExercisePlaying$.subscribe(isPlaying => {
+      this.isExercisePlaying = isPlaying;
+    });
+
+    this.ttsService.isExercisePaused$.subscribe(isPaused => {
+      this.isExercisePaused = isPaused;
+    });
+
+    this.ttsService.exerciseText$.subscribe(text => {
+      this.currentExerciseText = text;
+    });
+
+    // Check authentication status
+    this.authService.currentUser$.subscribe(user => {
+      this.isAuthenticated = !!user;
+
+      // If user just logged in and there was a pending exercise validation
+      if (this.isAuthenticated && this.lastAttemptedExerciseData) {
+        const { exerciseId, answer, type } = this.lastAttemptedExerciseData;
+        this.validate(exerciseId, answer, type);
+        this.lastAttemptedExerciseData = null;
+      }
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['articleId'] && !changes['articleId'].firstChange) ||
+      (changes['currentLevel'] && !changes['currentLevel'].firstChange)) {
+      this.loadExercises();
+    } else if (changes['articleId']?.firstChange || changes['currentLevel']?.firstChange) {
+      this.loadExercises();
+    }
+  }
+
+  loadExercises() {
+    if (this.articleId) {
+      this.articleService.getArticle(this.articleId).subscribe(
+        article => {
+          const level = article.levels.find((l: Level) => l.level === this.currentLevel);
+          if (level) {
+            // Process vocabulary matching exercises
+            this.vocabularyFlashcards = level.exercises?.vocabulary_matching.map((exercise: VocabularyMatchingExercise): VocabularyMatchingExerciseWithFlipped => ({
+              ...exercise,
+              flipped: false
+            })) || [];
+
+            this.exerciseId = level.exercises?.multiple_choice?.[0]?.id || null;
+
+            // Format multiple choice options
+            level.exercises?.multiple_choice?.forEach((exercicio: MultipleChoiceExercise) => {
+              exercicio.options = exercicio.options.replace(/["[\]]/g, '');
+            });
+
+            // Combine and shuffle all exercises
+            this.allExercises = this.shuffleArray([
+              ...level.exercises.multiple_choice.map((ex: MultipleChoiceExercise) => ({ ...ex, type: 'multiple_choice' } as MultipleChoiceExerciseWithType)),
+              ...level.exercises.fill_in_the_blanks.map((ex: FillInTheBlanksExercise) => ({ ...ex, type: 'fill_in_the_blanks' } as FillInTheBlanksExerciseWithType)),
+              ...level.exercises.true_false.map((ex: TrueFalseExercise) => ({ ...ex, type: 'true_false' } as TrueFalseExerciseWithType)),
+              ...level.exercises.writing_with_audio.map((ex: WritingWithAudioExercise) => ({ ...ex, type: 'writing_with_audio' } as WritingWithAudioExerciseWithType))
+            ]).filter((ex: ExerciseWithType) => !ex.answeredCorrectly);
+
+            this.currentExerciseIndex = 0;
+          }
+        },
+        err => console.error('Error loading exercises:', err)
+      );
+    }
+  }
+
+  shuffleArray(array: any[]): any[] {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  validate(exerciseId: number, answer: string, type: string) {
+    // Check if authenticated before proceeding
+    if (!this.isAuthenticated) {
+      // Save the exercise data for later validation after login
+      this.lastAttemptedExerciseData = { exerciseId, answer, type };
+
+      // Request auth modal to be shown
+      this.authModalRequested.emit();
+      return;
+    }
+
+    if (this.articleId) {
+      const level = this.currentLevel;
+
+      this.exerciseService.validateExercise(exerciseId, answer, type, this.articleId, level).subscribe(
+        res => {
+          console.log(res.message);
+          if (res.message === "Correct answer! Progress saved.") {
+            this.answers[exerciseId] = answer; // Save the correct answer
+            if (this.progressComponent) {
+              this.progressComponent.getData(this.articleId.toString(), level); // Update progress dynamically
+            }
+            this.moveToNextExercise(); // Move to the next exercise
+            this.refreshExercises(); // Refresh exercises without reloading the article
+          } else {
+            this.handleIncorrectAnswer(exerciseId); // Handle incorrect answer
+          }
+        },
+        err => {
+          console.log(err.error || "Error validating answer");
+          this.handleIncorrectAnswer(exerciseId); // Ensure it moves to the next exercise even on API error
+        }
+      );
+    } else {
+      console.error("Article ID not provided. Cannot validate exercise.");
+    }
+  }
+
+  refreshExercises() {
+    this.loadExercises();
+  }
+
+  handleIncorrectAnswer(exerciseId: number) {
+    this.showErrorAnimation = true; // Trigger error animation
+    setTimeout(() => {
+      this.showErrorAnimation = false; // Reset animation after 500ms
+      const incorrectExercise = this.allExercises[this.currentExerciseIndex];
+      this.incorrectExercises.push(incorrectExercise); // Add the current exercise to the incorrectExercises array
+
+      // Add the incorrect exercise back to the allExercises list
+      this.allExercises.push(incorrectExercise);
+
+      this.moveToNextExercise(); // Move to the next exercise
+    }, 500);
+  }
+
+  moveToNextExercise() {
+    if (this.currentExerciseIndex < this.allExercises.length - 1) {
+      this.nextExercise();
+    } else if (this.incorrectExercises.length > 0) {
+      // Reintroduce incorrect exercises if all exercises are completed
+      this.allExercises = this.shuffleArray([...this.incorrectExercises]);
+      this.incorrectExercises = [];
+      this.currentExerciseIndex = 0;
+    } else {
+      console.log("All exercises completed!");
+    }
+  }
+
+  nextExercise() {
+    this.isSlidingOut = true;
+    setTimeout(() => {
+      this.currentExerciseIndex = (this.currentExerciseIndex + 1) % this.allExercises.length;
+      this.isSlidingOut = false;
+    }, 500); // Match the animation duration
+  }
+
+  previousExercise() {
+    this.isSlidingOut = true;
+    setTimeout(() => {
+      this.currentExerciseIndex =
+        (this.currentExerciseIndex - 1 + this.allExercises.length) % this.allExercises.length;
+      this.isSlidingOut = false;
+    }, 500); // Match the animation duration
+  }
+
+  playWritingAudio(exerciseId: number) {
+    if (this.articleId) {
+      // Find the exercise by ID
+      const exercise = this.allExercises.find(ex =>
+        ex.type === 'writing_with_audio' && ex.id === exerciseId);
+
+      if (exercise) {
+        const text = exercise.sentence;
+
+        if (this.currentExerciseText === text) {
+          this.ttsService.toggleAudio(text, 'exercise');
+        } else {
+          this.ttsService.speak(text, 'exercise');
+        }
+      }
+    }
+  }
+
+  pauseExerciseAudio() {
+    this.ttsService.pauseAudio('exercise');
+  }
+
+  resumeExerciseAudio() {
+    this.ttsService.resumeAudio('exercise');
+  }
+
+  stopExerciseAudio() {
+    this.ttsService.stopAudio('exercise');
+  }
+
+  flipFlashcard(flashcard: VocabularyMatchingExercise): void {
+    flashcard.flipped = !flashcard.flipped;
+  }
+
+  areAllExercisesCorrect(): boolean {
+    return this.allExercises.every(ex => ex.answeredCorrectly);
+  }
+
+  hasPendingExercises(): boolean {
+    return this.allExercises.some(ex => !ex.answeredCorrectly);
+  }
 }

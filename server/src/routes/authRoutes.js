@@ -5,15 +5,15 @@ const { googleCallback, getCurrentUser, logout } = require('../controllers/authC
 const { authenticateJWT, checkUserExists } = require('../middleware/auth');
 
 // Google Auth Routes
-router.get('/google', passport.authenticate('google', { 
-  scope: ['profile', 'email'] 
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
 }));
 
-router.get('/google/callback', 
-  passport.authenticate('google', { 
+router.get('/google/callback',
+  passport.authenticate('google', {
     failureRedirect: '/login?error=google_auth_failed',
     session: false
-  }), 
+  }),
   googleCallback
 );
 
@@ -28,7 +28,7 @@ router.get('/status', (req, res) => {
   const authConfig = {
     googleOAuth: {
       clientConfigured: !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
-      callbackUrl: `${process.env.SERVER_URL || 'http://localhost:3000'}/api/auth/google/callback`
+      callbackURL: `${process.env.SERVER_URL || 'http://localhost:3000'}/api/auth/google/callback`
     },
     jwt: {
       secretConfigured: !!process.env.JWT_SECRET,
@@ -47,7 +47,7 @@ router.get('/status', (req, res) => {
       } : null
     }
   };
-  
+
   res.json({
     status: 'Auth system diagnostic',
     config: authConfig,

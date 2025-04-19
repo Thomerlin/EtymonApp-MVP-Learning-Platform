@@ -5,17 +5,17 @@ const path = require('path');
 const initializeDatabase = () => {
   // Create users table without password
   db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
-    display_name TEXT,
-    picture TEXT,
     google_id TEXT UNIQUE,
+    display_name TEXT,
+    profile_picture TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {
       console.error('Error creating table users:', err.message);
     }
-  });
+  });;
 
   db.run(`CREATE TABLE IF NOT EXISTS progress (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,43 +114,43 @@ const initializeNestedTables = () => {
   const articles = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/articles.json'), 'utf8'));
   articles.forEach(article => {
     db.run(`INSERT INTO articles (title, article_link, summary, created_date) VALUES (?, ?, ?, ?)`,
-      [article.title, article.article_link, article.summary, article.created_date], function(err) {
+      [article.title, article.article_link, article.summary, article.created_date], function (err) {
         if (err) {
           console.error('Error inserting article:', err.message);
           return;
         }
         const articleId = this.lastID;
-        
+
         Object.keys(article.levels).forEach(levelKey => {
           const level = article.levels[levelKey];
           db.run(`INSERT INTO levels (article_id, level, content, phonetics) VALUES (?, ?, ?, ?)`,
-            [articleId, levelKey, level.text.content, level.text.phonetics], function(err) {
+            [articleId, levelKey, level.text.content, level.text.phonetics], function (err) {
               if (err) {
                 console.error('Error inserting level:', err.message);
                 return;
               }
               const levelId = this.lastID;
-              
+
               level.exercises.multiple_choice.forEach(exercise => {
                 db.run(`INSERT INTO exercises_multiple_choice (level_id, question, options, answer) VALUES (?, ?, ?, ?)`,
                   [levelId, exercise.question, JSON.stringify(exercise.options), exercise.answer]);
               });
-              
+
               level.exercises.fill_in_the_blanks.forEach(exercise => {
                 db.run(`INSERT INTO exercises_fill_in_the_blanks (level_id, sentence, answer, hint) VALUES (?, ?, ?, ?)`,
                   [levelId, exercise.sentence, exercise.answer, exercise.hint]);
               });
-              
+
               level.exercises.true_false.forEach(exercise => {
                 db.run(`INSERT INTO exercises_true_false (level_id, statement, answer) VALUES (?, ?, ?)`,
                   [levelId, exercise.statement, exercise.answer]);
               });
-              
+
               level.exercises.vocabulary_matching.forEach(exercise => {
                 db.run(`INSERT INTO exercises_vocabulary_matching (level_id, word, definition, example) VALUES (?, ?, ?, ?)`,
                   [levelId, exercise.word, exercise.definition, exercise.example]);
               });
-              
+
               if (level.exercises.writing_with_audio) {
                 level.exercises.writing_with_audio.forEach(exercise => {
                   db.run(`INSERT INTO exercises_writing_with_audio (level_id, sentence) VALUES (?, ?)`,

@@ -1,0 +1,27 @@
+<div *ngIf="progressData" class="progress-container">
+  <h2><span class="highlight">{{ progressData.level }}</span></h2>
+
+  <div class="progress-summary">
+    <div class="total-progress-container">
+      <span class="total-completed-text">{{ progressData.totalCompleted }} / {{ progressData.totalExercises }}</span>
+      <div class="total-progress-bar">
+        <div class="total-progress-bar-fill" [style.width.%]="progressData.totalPercentage"></div>
+        <span class="total-progress-bar-text">{{ progressData.totalPercentage }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise-progress-container">
+    <div class="exercise-progress" *ngFor="let exercise of progressData.exercises">
+      <h5>{{ exercise.type }}</h5>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" [style.width.%]="exercise.percentage"></div>
+      </div>
+      <p>{{ exercise.completed }} / {{ exercise.total }} ({{ exercise.percentage }}%)</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!progressData" class="loading-container">
+  <p>Loading...</p>
+</div>

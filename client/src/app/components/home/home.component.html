@@ -1,40 +1,86 @@
-<div class="home-container">
-  <header class="app-header">
-    <h1>{{ appName }}</h1>
-  </header>
-  
-  <div class="content">
-    <div class="random-level-section" *ngIf="randomLevel">
-      <h2>Featured Level</h2>
-      <div class="level-card">
-        <h3>{{ randomLevel.title }}</h3>
-        <p>{{ randomLevel.description }}</p>
-        <div class="level-info">
-          <span>Difficulty: {{ randomLevel.difficulty }}</span>
-          <span>Category: {{ randomLevel.category }}</span>
-        </div>
+<div class="header">
+  <h1>Welcome to English Learning MVP</h1>
+  <div class="auth-buttons" *ngIf="!loggedIn">
+    <button routerLink="/login">Login</button>
+    <button routerLink="/login">Sign Up</button>
+  </div>
+  <button class="toggle-dark-mode-btn" (click)="toggleDarkMode()">
+    Toggle Dark Mode
+  </button>
+</div>
+
+<p>Learn English with adapted Wikipedia texts and simple exercises tailored to your level (A1-C1).</p>
+
+<div class="random-exercise-container" *ngIf="randomExerciseLevel">
+  <h2>{{ randomExerciseLevel.title }}</h2>
+  <p><strong>Summary:</strong> {{ randomExerciseLevel.summary }}</p>
+
+  <div class="text-container">
+    <div class="paragraph">
+      <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index" class="sentence-container"
+        [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+        <span class="sentence-text">
+          <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+            <span class="word toggle-phonetics-btn" (click)="togglePopup(i)">{{ word.text }}</span>
+            <span class="popup" *ngIf="word.phonetic">
+              {{ replaceHyphensWithSpaces(word.phonetic) }}
+            </span>
+          </span>
+        </span>
       </div>
     </div>
-    
-    <div class="articles-section">
-      <h2>Available Articles</h2>
-      
-      <div *ngIf="isLoading" class="loading">Loading articles...</div>
-      
-      <div *ngIf="!isLoading && articlesSummary.length === 0" class="no-articles">
-        No articles available.
-      </div>
-      
-      <div class="articles-grid" *ngIf="!isLoading && articlesSummary.length > 0">
-        <div class="article-card" *ngFor="let article of articlesSummary">
-          <h3>{{ article.title }}</h3>
-          <p>{{ article.summary }}</p>
-          <div class="article-meta">
-            <span>Category: {{ article.category }}</span>
-            <span>Author: {{ article.author }}</span>
-          </div>
-        </div>
+    <br>
+    <div class="paragraph">
+      <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index" class="sentence-container"
+        [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+        <span class="sentence-text">
+          <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+            <span class="word toggle-phonetics-btn" (click)="togglePopup(i + sentences.length / 2)">{{ word.text
+              }}</span>
+            <span class="popup" *ngIf="word.phonetic">
+              {{ replaceHyphensWithSpaces(word.phonetic) }}
+            </span>
+          </span>
+        </span>
       </div>
     </div>
   </div>
+
+  <div *ngIf="popupVisible" class="popup-overlay">
+    <div class="popup-content">
+      <button class="close-popup-btn" (click)="closePopup()">×</button>
+      <p class="popup-sentence">{{ popupContent?.text }}
+        <button (click)="playAudio(popupContent?.text)">▶️ Play</button>
+      </p>
+      <p class="popup-phonetic">
+        {{ popupContent?.phonetic }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="articles.length > 0">
+  <h2>Articles</h2>
+  <p>Explore articles at different levels to improve your English skills. Select a level to start learning!</p>
+  <div *ngFor="let article of articles | slice:0:showArticlesUpTo; let i = index" class="article-container">
+    <h3>{{ i + 1 }}. {{ article.title }}</h3>
+    <p>{{ article.summary }}</p>
+    <a [routerLink]="['/article', article.id]">Read more</a>
+    <div *ngIf="article.levels.length > 0">
+      <h4>Available Levels:</h4>
+      <div class="level-buttons">
+        <button *ngFor="let level of article.levels" [class.active]="level.level === level.level"
+          (click)="redirectToArticle(article.id, level.level)">
+          {{ level.level }}
+        </button>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" [style.width.%]="article.totalPercentage"></div>
+      </div>
+      <p><strong>Percentage:</strong> {{ article.totalPercentage }}%</p>
+    </div>
+  </div>
+  <button *ngIf="showArticlesUpTo < articles.length" class="see-more-btn" (click)="seeMoreArticles()">
+    See More
+  </button>
 </div>

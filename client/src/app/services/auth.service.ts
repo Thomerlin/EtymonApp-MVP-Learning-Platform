@@ -1,25 +1,127 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+
+interface User {
+  id: number;
+  email: string;
+  name?: string;
+  profile_picture?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/api/auth`;
+  private apiUrl = 'http://localhost:3000/api';
+  private currentUserSubject: BehaviorSubject<User | null>;
+  public currentUser$: Observable<User | null>;
+  private tokenExpirationTimer: any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) {
+    this.currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromLocalStorage());
+    this.currentUser$ = this.currentUserSubject.asObservable();
 
-  googleLogin(): void {
-    window.location.href = `${this.apiUrl}/google`;
+    // Auto login if token exists
+    if (this.getToken()) {
+      this.validateToken().subscribe();
+    }
   }
 
-  getProfile(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/profile`);
+  autoLogin(): void {
+    const userData = this.getUserFromLocalStorage();
+    if (!userData) {
+      return;
+    }
+
+    this.currentUserSubject.next(userData);
   }
 
-  checkAuthStatus(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/status`);
+  logout(): void {
+    this.http.get(`${this.apiUrl}/auth/logout`).subscribe();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tokenExpiration');
+    this.currentUserSubject.next(null);
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+    }
+    this.tokenExpirationTimer = null;
+    this.router.navigate(['/login']);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  handleGoogleCallback(token: string): void {
+    localStorage.setItem('token', token);
+    this.validateToken().subscribe(user => {
+      if (user) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  validateToken(): Observable<User | null> {
+    return this.http.get<User>(`${this.apiUrl}/auth/me`, {
+      headers: { Authorization: `Bearer ${this.getToken()}` }
+    }).pipe(
+      tap(user => {
+        const userData = {
+          id: user.id,
+          email: user.email,
+          name: user.name || user.email.split('@')[0],
+          profile_picture: user.profile_picture
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        this.currentUserSubject.next(userData);
+      }),
+      catchError(error => {
+        console.error('Token validation error', error);
+        this.logout();
+        return of(null);
+      })
+    );
+  }
+
+  initiateGoogleLogin(): void {
+    window.location.href = `${this.apiUrl}/auth/google`;
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.currentUserSubject.value; // Returns true if a user is logged in
+  }
+
+  private setAutoLogout(expirationDuration: number): void {
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
+  }
+
+  private getUserFromLocalStorage(): User | null {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(userJson);
+    } catch (e) {
+      localStorage.removeItem('user');
+      return null;
+    }
   }
 }
