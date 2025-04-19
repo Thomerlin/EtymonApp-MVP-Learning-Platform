@@ -2,29 +2,95 @@
 .exercise-wrapper {
   margin: 20px 0;
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
-.exercise-card-multiple_choice,
-.exercise-card-fill_in_the_blanks,
-.exercise-card-true-false,
-.exercise-card-writing_with_audio {
+.exercise-card {
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
   transition: transform 0.5s ease, opacity 0.5s ease;
+  position: relative;
+  width: fit-content;
+  min-width: 500px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
 }
 
 // Exercise animation
 .error-animation {
   animation: shake 0.5s;
+  border: 2px solid #dc3545 !important;
+  position: relative;
+}
+
+.error-animation::before {
+  content: '✕';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #dc3545;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-10px); }
-  40%, 80% { transform: translateX(10px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+    background-color: #f8f9fa;
+  }
+
+  20%,
+  60% {
+    transform: translateX(-10px);
+    background-color: rgba(255, 76, 76, 0.15);
+  }
+
+  40%,
+  80% {
+    transform: translateX(10px);
+    background-color: rgba(255, 76, 76, 0.15);
+  }
+}
+
+// Success animation
+.success-animation {
+  animation: success-pulse 0.8s;
+  border: 2px solid #28a745 !important;
+  position: relative;
+}
+
+.success-animation::before {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #28a745;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+@keyframes success-pulse {
+  0% {
+    transform: scale(1);
+    background-color: #f8f9fa;
+  }
+
+  50% {
+    transform: scale(1.02);
+    background-color: rgba(40, 167, 69, 0.15);
+  }
+
+  100% {
+    transform: scale(1);
+    background-color: #f8f9fa;
+  }
 }
 
 .slide-out {
@@ -35,54 +101,165 @@
 // Exercise buttons
 .exercise-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
-.exercise-buttons button {
+.validate-btn {
   padding: 8px 16px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #0069d9;
+  }
+}
+
+// Multiple choice options
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  align-self: flex-start;
+  width: 100%;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  input[type="radio"] {
+    margin: 0;
+  }
+
+  label {
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+// Fill in the blanks
+.blank-input {
+  border: none;
+  border-bottom: 2px solid #007bff;
+  background-color: transparent;
+  padding: 3px 5px;
+  margin: 0 5px;
+  min-width: 100px;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-bottom: 2px solid #0056b3;
+  }
+}
+
+// True/False
+.true-false-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.tf-btn {
+  padding: 10px 30px;
+  font-size: 16px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
 }
 
 // Writing with audio
 .writing-audio-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+  margin: 15px 0;
+  width: 100%;
+  position: relative;
+}
+
+.audio-control {
+  display: flex;
+  justify-content: baseline;
+  margin-bottom: 5px;
 }
 
 .writing-textarea {
   width: 100%;
-  min-height: 100px;
-  border-radius: 4px;
-  padding: 10px;
+  min-height: 120px;
+  max-height: 250px;
+  border-radius: 10px;
+  padding: 15px;
   border: 1px solid #ced4da;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: #fff;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(0, 123, 255, 0.15);
+  }
+
+  &::placeholder {
+    color: #adb5bd;
+    opacity: 0.8;
+  }
+
+  &:hover {
+    border-color: #6c757d;
+  }
 }
 
-.audio-buttons {
-  display: flex;
-  gap: 10px;
+.exercise-card-writing_with_audio .exercise-buttons {
+  padding-top: 10px;
 }
 
 .audio-button {
-  padding: 8px 16px;
+  padding: 10px 20px;
   background-color: #6c757d;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+  font-size: 16px;
+  min-width: 120px;
+
   &.active {
     background-color: #28a745;
   }
-  
+
   &:disabled {
     background-color: #adb5bd;
     cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
   }
 }
 
@@ -108,8 +285,8 @@
 .flashcard-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 25px;
+  justify-content: center;
 }
 
 .flashcard {
@@ -117,6 +294,8 @@
   height: 150px;
   perspective: 1000px;
   cursor: pointer;
+  position: relative;
+  margin: 10px;
 }
 
 .flashcard-front,
@@ -152,4 +331,164 @@
 
 .flashcard.flipped .flashcard-back {
   transform: rotateY(0);
+}
+
+// Exercise loading placeholder styles
+.exercises-loading {
+  padding: 15px 0;
+  
+  .placeholder-item,
+  .placeholder-line {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    animation: placeholder-shimmer 1.5s infinite linear;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.5) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    background-size: 200% 100%;
+  }
+  
+  .placeholder-exercise-title {
+    height: 30px;
+    width: 150px;
+    margin-bottom: 20px;
+  }
+  
+  .placeholder-exercise-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
+    
+    .placeholder-line {
+      height: 16px;
+      margin-bottom: 15px;
+      
+      &.placeholder-line-full {
+        width: 100%;
+      }
+      
+      &.placeholder-line-medium {
+        width: 65%;
+      }
+      
+      &.placeholder-line-short {
+        width: 40%;
+      }
+    }
+    
+    .placeholder-options {
+      margin: 25px 0;
+      
+      .placeholder-option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        
+        .placeholder-radio {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          margin-right: 10px;
+          background-color: #e0e0e0;
+          animation: placeholder-shimmer 1.5s infinite linear;
+          background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.2) 20%,
+            rgba(255, 255, 255, 0.5) 60%,
+            rgba(255, 255, 255, 0)
+          );
+          background-size: 200% 100%;
+        }
+        
+        .placeholder-line {
+          flex-grow: 1;
+        }
+      }
+    }
+    
+    .placeholder-exercise-button {
+      height: 40px;
+      width: 120px;
+      border-radius: 4px;
+      margin-left: auto;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+  
+  .placeholder-progress {
+    margin: 30px 0;
+    
+    .placeholder-line {
+      height: 20px;
+      width: 200px;
+      margin-bottom: 10px;
+    }
+    
+    .placeholder-progress-bar {
+      height: 20px;
+      width: 100%;
+      border-radius: 10px;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+  
+  .placeholder-flashcards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    margin-top: 30px;
+    
+    .placeholder-flashcard {
+      width: 220px;
+      height: 150px;
+      border-radius: 8px;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+}
+
+@keyframes placeholder-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }

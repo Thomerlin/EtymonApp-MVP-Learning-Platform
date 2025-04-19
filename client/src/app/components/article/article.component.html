@@ -1,81 +1,163 @@
 <div class="article-container">
-  <h1>{{ title }}</h1>
-  <p><strong>Created Date:</strong> {{ createdDate }}</p>
-  <p><strong>Summary:</strong> {{ summary }}</p>
+  <!-- Show content placeholders when loading -->
+  <div *ngIf="isLoading" class="content-placeholder">
+    <!-- Title placeholder -->
+    <div class="placeholder-item placeholder-title"></div>
 
-  <button class="audio-button" (click)="playArticleAudio()">
-    <span *ngIf="!isArticlePlaying && !isArticlePaused">▶️ Play Full Article</span>
-    <span *ngIf="isArticlePlaying">⏸️ Pause</span>
-    <span *ngIf="!isArticlePlaying && isArticlePaused">▶️ Resume</span>
-  </button>
+    <!-- Date and summary placeholders -->
+    <div class="placeholder-line placeholder-line-medium"></div>
+    <div class="placeholder-line placeholder-line-long"></div>
 
-  <div class="level-buttons">
-    <button *ngFor="let levelOption of ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']" (click)="selectLevel(levelOption)"
-      [class.active]="level === levelOption">
-      {{ levelOption }}
-    </button>
+    <!-- Level heading placeholder -->
+    <div class="placeholder-item placeholder-heading"></div>
+
+    <!-- Audio button placeholder -->
+    <div class="placeholder-item placeholder-button"></div>
+
+    <!-- Text content placeholders -->
+    <div class="placeholder-text">
+      <div class="placeholder-line placeholder-line-full"></div>
+      <div class="placeholder-line placeholder-line-long"></div>
+      <div class="placeholder-line placeholder-line-medium"></div>
+      <div class="placeholder-line placeholder-line-full"></div>
+      <div class="placeholder-line placeholder-line-short"></div>
+    </div>
+
+    <div class="placeholder-text">
+      <div class="placeholder-line placeholder-line-full"></div>
+      <div class="placeholder-line placeholder-line-medium"></div>
+      <div class="placeholder-line placeholder-line-long"></div>
+      <div class="placeholder-line placeholder-line-full"></div>
+      <div class="placeholder-line placeholder-line-medium"></div>
+    </div>
+
+    <!-- Level buttons placeholder -->
+    <div class="placeholder-item placeholder-level-buttons"></div>
+
+    <!-- Exercises placeholder -->
+    <div *ngIf="isLoading" class="exercises-loading">
+      <!-- Exercise title placeholder -->
+      <div class="placeholder-item placeholder-exercise-title"></div>
+
+      <!-- Exercise content placeholder -->
+      <div class="placeholder-exercise-card">
+        <div class="placeholder-line placeholder-line-medium"></div>
+        <div class="placeholder-line placeholder-line-full"></div>
+
+        <!-- Options placeholder -->
+        <div class="placeholder-options">
+          <div class="placeholder-option">
+            <div class="placeholder-radio"></div>
+            <div class="placeholder-line placeholder-line-short"></div>
+          </div>
+          <div class="placeholder-option">
+            <div class="placeholder-radio"></div>
+            <div class="placeholder-line placeholder-line-short"></div>
+          </div>
+          <div class="placeholder-option">
+            <div class="placeholder-radio"></div>
+            <div class="placeholder-line placeholder-line-short"></div>
+          </div>
+        </div>
+
+        <!-- Button placeholder -->
+        <div class="placeholder-exercise-button"></div>
+      </div>
+
+      <!-- Progress placeholder -->
+      <div class="placeholder-progress">
+        <div class="placeholder-line placeholder-line-medium"></div>
+        <div class="placeholder-progress-bar"></div>
+      </div>
+
+      <!-- Vocabulary cards placeholder -->
+      <div class="placeholder-flashcards">
+        <div class="placeholder-flashcard"></div>
+        <div class="placeholder-flashcard"></div>
+        <div class="placeholder-flashcard"></div>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="article">
-    <div *ngFor="let level of article.levels" [hidden]="level.level !== currentLevel">
-      <h2>Content for Level {{ level.level }}</h2>
-      <div class="text-container">
-        <!-- Primeiro parágrafo -->
-        <div class="paragraph">
-          <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index"
-            class="sentence-container" [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
-            <span class="sentence-text">
-              <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-                <span class="word toggle-phonetics-btn" (click)="togglePopup(i)">{{ word.text }}</span>
-                <span class="popup" *ngIf="word.phonetic">
-                  {{ replaceHyphensWithSpaces(word.phonetic) }}
+  <!-- Actual content shown when not loading -->
+  <div [hidden]="isLoading">
+    <h1>{{ title }}</h1>
+    <p><strong>Created Date:</strong> {{ createdDate }}</p>
+    <p><strong>Summary:</strong> {{ summary }}</p>
+
+    <div *ngIf="article">
+      <div *ngFor="let level of article.levels" [hidden]="level.level !== currentLevel">
+        <h2>Content for Level {{ level.level }}</h2>
+
+        <button class="audio-button" (click)="playArticleAudio()">
+          <span *ngIf="!isArticlePlaying && !isArticlePaused">▶️ Play Full Article</span>
+          <span *ngIf="isArticlePlaying">⏸️ Pause</span>
+          <span *ngIf="!isArticlePlaying && isArticlePaused">▶️ Resume</span>
+        </button>
+        <div class="text-container">
+          <!-- Primeiro parágrafo -->
+          <div class="paragraph">
+            <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index"
+              class="sentence-container" [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+              <span class="sentence-text">
+                <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+                  <span class="word toggle-phonetics-btn" (click)="togglePopup(i)">{{ word.text }}</span>
+                  <span class="popup" *ngIf="word.phonetic">
+                    {{ replaceHyphensWithSpaces(word.phonetic) }}
+                  </span>
                 </span>
               </span>
-            </span>
+            </div>
           </div>
-        </div>
-        <br>
+          <br>
 
-        <!-- Segundo parágrafo -->
-        <div class="paragraph">
-          <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index" class="sentence-container"
-            [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
-            <span class="sentence-text">
-              <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-                <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5)">{{
-                  word.text }}</span>
-                <span class="popup" *ngIf="word.phonetic">
-                  {{ replaceHyphensWithSpaces(word.phonetic) }}
+          <!-- Segundo parágrafo -->
+          <div class="paragraph">
+            <div *ngFor="let sentence of sentences.slice(sentences.length / 2); let i = index"
+              class="sentence-container" [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
+              <span class="sentence-text">
+                <span *ngFor="let word of sentence.words; let j = index" class="word-container">
+                  <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5)">{{
+                    word.text }}</span>
+                  <span class="popup" *ngIf="word.phonetic">
+                    {{ replaceHyphensWithSpaces(word.phonetic) }}
+                  </span>
                 </span>
               </span>
-            </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div *ngIf="popupVisible" class="popup-overlay">
-        <div class="popup-content">
-          <button class="close-popup-btn" (click)="closePopup()">×</button>
-          <p class="popup-sentence">{{ popupContent?.text }}
-            <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
-              <span *ngIf="!isPopupPlaying && !isPopupPaused || currentPopupText !== popupContent?.text">▶️ Play</span>
-              <span *ngIf="isPopupPlaying && currentPopupText === popupContent?.text">⏸️ Pause</span>
-              <span *ngIf="!isPopupPlaying && isPopupPaused && currentPopupText === popupContent?.text">▶️ Resume</span>
-            </button>
-          </p>
-          <p class="popup-phonetic">
-            {{ popupContent?.phonetic }}
-          </p>
+        <!-- Moved level buttons to appear after the article content -->
+        <div class="level-buttons">
+          <button *ngFor="let levelOption of ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']" (click)="selectLevel(levelOption)"
+            [class.active]="currentLevel === levelOption" [disabled]="isLoading">
+            {{ levelOption }}
+          </button>
         </div>
-      </div>
 
-      <!-- Include the Exercises Component -->
-      <app-exercises 
-        [articleId]="article.id" 
-        [currentLevel]="currentLevel"
-        [isAuthenticated]="isAuthenticated"
-        (authModalRequested)="openAuthModal()">
-      </app-exercises>
+        <!-- Include the Exercises Component -->
+        <app-exercises [articleId]="article.id" [currentLevel]="currentLevel" [isAuthenticated]="isAuthenticated"
+          (authModalRequested)="openAuthModal()">
+        </app-exercises>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup overlay (outside of the loading condition so it can be shown at any time) -->
+  <div *ngIf="popupVisible" class="popup-overlay">
+    <div class="popup-content">
+      <button class="close-popup-btn" (click)="closePopup()">×</button>
+      <p class="popup-sentence">{{ popupContent?.text }}
+        <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
+          <span *ngIf="!isPopupPlaying && !isPopupPaused || currentPopupText !== popupContent?.text">▶️ Play</span>
+          <span *ngIf="isPopupPlaying && currentPopupText === popupContent?.text">⏸️ Pause</span>
+          <span *ngIf="!isPopupPlaying && isPopupPaused && currentPopupText === popupContent?.text">▶️ Resume</span>
+        </button>
+      </p>
+      <p class="popup-phonetic">
+        {{ popupContent?.phonetic }}
+      </p>
     </div>
   </div>
 </div>

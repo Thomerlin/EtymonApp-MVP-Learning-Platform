@@ -53,6 +53,7 @@ export class ArticleComponent implements OnInit {
   isPopupPlaying: boolean = false;
   isPopupPaused: boolean = false;
   currentPopupText: string = '';
+  isLoading: boolean = false; // Add this loading state property
   
   // Authentication properties
   isAuthenticated = false;
@@ -74,6 +75,7 @@ export class ArticleComponent implements OnInit {
 
     this.route.params.subscribe(params => {
       const id = +params['id'];
+      this.isLoading = true; // Set loading state when initially loading the article
       this.route.queryParams.subscribe(queryParams => {
         this.level = queryParams['level'] || this.level;
         this.currentLevel = this.level;
@@ -116,20 +118,22 @@ export class ArticleComponent implements OnInit {
   getArticleById(id: number) {
     this.articleService.getArticle(id).subscribe(
       (res: Article) => {
-      console.log(res);
-      this.article = res;
-      this.title = res.title;
-      this.createdDate = res.createdDate;
-      this.summary = res.summary;
-      this.loadLevel();
+        console.log(res);
+        this.article = res;
+        this.title = res.title;
+        this.createdDate = res.createdDate;
+        this.summary = res.summary;
+        this.loadLevel();
+        this.isLoading = false; // Set loading state to false after content is loaded
       },
       (err: { status: number; message?: string }) => {
-      if (err.status === 404) {
-        console.log(`Article with ID ${id} not found.`);
-        alert('The requested article was not found.');
-      } else {
-        console.log('Error loading article:', err);
-      }
+        if (err.status === 404) {
+          console.log(`Article with ID ${id} not found.`);
+          alert('The requested article was not found.');
+        } else {
+          console.log('Error loading article:', err);
+        }
+        this.isLoading = false; // Set loading state to false on error
       }
     );
   }
@@ -186,10 +190,18 @@ export class ArticleComponent implements OnInit {
   }
 
   selectLevel(level: string) {
+    if (this.currentLevel === level) return; // Don't reload if it's the same level
+    
+    this.isLoading = true; // Set loading state to true
     this.level = level;
     this.currentLevel = level;
-    this.loadLevel();
-    this.updateUrl();
+    
+    // Add a delay to ensure the loading animation is visible
+    setTimeout(() => {
+      this.loadLevel();
+      this.updateUrl();
+      this.isLoading = false; // Set loading state to false after content is loaded
+    }, 800); // Keep the same delay for consistent experience
   }
 
   updateUrl() {

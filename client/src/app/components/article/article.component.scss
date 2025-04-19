@@ -29,7 +29,7 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 20px;
 
     button {
       padding: 12px 24px;
@@ -47,6 +47,20 @@
         background-color: $primary-hover-color;
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      &[disabled] {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        opacity: 0.7;
+        transform: none;
+        box-shadow: none;
+
+        &:hover {
+          background-color: #cccccc;
+          transform: none;
+          box-shadow: none;
+        }
       }
     }
   }
@@ -565,6 +579,102 @@
     }
   }
 
+  /* Content Loading Placeholder Styles */
+  .content-placeholder {
+    padding: 15px;
+    width: 100%;
+    
+    .placeholder-item {
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+    
+    .placeholder-title {
+      height: 50px;
+      width: 70%;
+      margin: 0 auto 30px auto;
+    }
+    
+    .placeholder-heading {
+      height: 30px;
+      width: 40%;
+      margin: 30px 0 20px 0;
+    }
+    
+    .placeholder-button {
+      width: 150px;
+      height: 45px;
+      margin-bottom: 30px;
+    }
+    
+    .placeholder-level-buttons {
+      height: 45px;
+      width: 80%;
+      max-width: 500px;
+      margin: 30px auto;
+    }
+    
+    .placeholder-exercise {
+      height: 120px;
+      width: 100%;
+      margin: 30px 0 15px 0;
+    }
+    
+    .placeholder-text {
+      margin-bottom: 30px;
+      
+      .placeholder-line {
+        height: 15px;
+        margin-bottom: 12px;
+        border-radius: 4px;
+        background-color: #e0e0e0;
+        animation: placeholder-shimmer 1.5s infinite linear;
+        background-image: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0,
+          rgba(255, 255, 255, 0.2) 20%,
+          rgba(255, 255, 255, 0.5) 60%,
+          rgba(255, 255, 255, 0)
+        );
+        background-size: 200% 100%;
+        
+        &.placeholder-line-full {
+          width: 100%;
+        }
+        
+        &.placeholder-line-long {
+          width: 85%;
+        }
+        
+        &.placeholder-line-medium {
+          width: 65%;
+        }
+        
+        &.placeholder-line-short {
+          width: 40%;
+        }
+      }
+    }
+  }
+
+  @keyframes placeholder-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -631,5 +741,165 @@
   
   &:hover {
     background-color: #357ae8;
+  }
+}
+
+// Exercise loading placeholder styles
+.exercises-loading {
+  padding: 15px 0;
+  
+  .placeholder-item,
+  .placeholder-line {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    animation: placeholder-shimmer 1.5s infinite linear;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.5) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    background-size: 200% 100%;
+  }
+  
+  .placeholder-exercise-title {
+    height: 30px;
+    width: 150px;
+    margin-bottom: 20px;
+  }
+  
+  .placeholder-exercise-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
+    
+    .placeholder-line {
+      height: 16px;
+      margin-bottom: 15px;
+      
+      &.placeholder-line-full {
+        width: 100%;
+      }
+      
+      &.placeholder-line-medium {
+        width: 65%;
+      }
+      
+      &.placeholder-line-short {
+        width: 40%;
+      }
+    }
+    
+    .placeholder-options {
+      margin: 25px 0;
+      
+      .placeholder-option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        
+        .placeholder-radio {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          margin-right: 10px;
+          background-color: #e0e0e0;
+          animation: placeholder-shimmer 1.5s infinite linear;
+          background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.2) 20%,
+            rgba(255, 255, 255, 0.5) 60%,
+            rgba(255, 255, 255, 0)
+          );
+          background-size: 200% 100%;
+        }
+        
+        .placeholder-line {
+          flex-grow: 1;
+        }
+      }
+    }
+    
+    .placeholder-exercise-button {
+      height: 40px;
+      width: 120px;
+      border-radius: 4px;
+      margin-left: auto;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+  
+  .placeholder-progress {
+    margin: 30px 0;
+    
+    .placeholder-line {
+      height: 20px;
+      width: 200px;
+      margin-bottom: 10px;
+    }
+    
+    .placeholder-progress-bar {
+      height: 20px;
+      width: 100%;
+      border-radius: 10px;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+  
+  .placeholder-flashcards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    margin-top: 30px;
+    
+    .placeholder-flashcard {
+      width: 220px;
+      height: 150px;
+      border-radius: 8px;
+      background-color: #e0e0e0;
+      animation: placeholder-shimmer 1.5s infinite linear;
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      background-size: 200% 100%;
+    }
+  }
+}
+
+@keyframes placeholder-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }

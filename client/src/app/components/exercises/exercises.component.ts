@@ -102,6 +102,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
   incorrectExercises: any[] = [];
   currentExerciseIndex: number = 0;
   showErrorAnimation: boolean = false;
+  showSuccessAnimation: boolean = false;
   correctExercises: Set<number> = new Set();
   completedExercises: Set<number> = new Set();
   isSlidingOut: boolean = false;
@@ -110,6 +111,9 @@ export class ExercisesComponent implements OnInit, OnChanges {
   isExercisePaused: boolean = false;
   currentExerciseText: string = '';
   lastAttemptedExerciseData: { exerciseId: number, answer: string, type: string } | null = null;
+
+  // Add loading state
+  isLoading: boolean = false;
 
   constructor(
     private articleService: ArticleService,
@@ -148,8 +152,10 @@ export class ExercisesComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if ((changes['articleId'] && !changes['articleId'].firstChange) ||
       (changes['currentLevel'] && !changes['currentLevel'].firstChange)) {
+      this.isLoading = true; // Set loading state to true when level changes
       this.loadExercises();
     } else if (changes['articleId']?.firstChange || changes['currentLevel']?.firstChange) {
+      this.isLoading = true; // Set loading state to true on first load
       this.loadExercises();
     }
   }
@@ -182,10 +188,20 @@ export class ExercisesComponent implements OnInit, OnChanges {
             ]).filter((ex: ExerciseWithType) => !ex.answeredCorrectly);
 
             this.currentExerciseIndex = 0;
+
+            // Add a delay for the placeholder to be visible
+            setTimeout(() => {
+              this.isLoading = false; // Set loading to false after data is processed
+            }, 800); // Match the delay in the article component
           }
         },
-        err => console.error('Error loading exercises:', err)
+        err => {
+          console.error('Error loading exercises:', err);
+          this.isLoading = false; // Set loading to false on error
+        }
       );
+    } else {
+      this.isLoading = false; // Set loading to false if no article ID
     }
   }
 
@@ -212,22 +228,66 @@ export class ExercisesComponent implements OnInit, OnChanges {
           console.log(res.message);
           if (res.message === "Correct answer! Progress saved.") {
             this.answers[exerciseId] = answer; // Save the correct answer
+            
+            // Show success animation
+            this.showSuccessAnimation = true;
+            
             if (this.progressComponent) {
               this.progressComponent.getData(this.articleId.toString(), level); // Update progress dynamically
             }
-            this.moveToNextExercise(); // Move to the next exercise
-            this.refreshExercises(); // Refresh exercises without reloading the article
+            
+            // Allow time for success animation to play
+            setTimeout(() => {
+              this.showSuccessAnimation = false;
+              this.clearInputForExerciseType(type, exerciseId); // Clear input after success
+              this.moveToNextExercise(); 
+              this.refreshExercises();
+            }, 1000);
           } else {
+            this.clearInputForExerciseType(type, exerciseId); // Clear input after failure
             this.handleIncorrectAnswer(exerciseId); // Handle incorrect answer
           }
         },
         err => {
           console.log(err.error || "Error validating answer");
+          this.clearInputForExerciseType(type, exerciseId); // Clear input on error
           this.handleIncorrectAnswer(exerciseId); // Ensure it moves to the next exercise even on API error
         }
       );
     } else {
       console.error("Article ID not provided. Cannot validate exercise.");
+    }
+  }
+
+  // New method to clear input fields based on exercise type
+  clearInputForExerciseType(type: string, exerciseId: number): void {
+    switch(type) {
+      case 'multiple_choice':
+        // Reset the selected radio button
+        this.answer = "";
+        // Clear any radio buttons that might be checked
+        const radioButtons = document.querySelectorAll(`input[name="multiple_choice_${exerciseId}"]`) as NodeListOf<HTMLInputElement>;
+        radioButtons.forEach(radio => radio.checked = false);
+        break;
+      
+      case 'fill_in_the_blanks':
+        // Clear the input field for this exercise
+        this.answers[exerciseId] = "";
+        break;
+      
+      case 'writing_with_audio':
+        // Clear the textarea for this exercise
+        this.answers[exerciseId] = "";
+        break;
+      
+      case 'true_false':
+        // No specific input to clear for true/false as it's immediate validation
+        break;
+      
+      default:
+        // Fallback to clear answer and answers for the current exerciseId
+        this.answer = "";
+        this.answers[exerciseId] = "";
     }
   }
 
