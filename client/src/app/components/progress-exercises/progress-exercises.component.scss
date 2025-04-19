@@ -1,8 +1,9 @@
 .progress-container {
   padding: 1.5rem 1rem;
-  background-color: white;
+  background-color: var(--card-background, white);
   border-radius: 0;
   margin: 0.5rem 0;
+  transition: background-color 0.3s ease;
 }
 
 .exercise-progress-container {
@@ -15,12 +16,14 @@ h2 {
   font-size: 1.2rem;
   font-weight: 500;
   margin: 0;
-  color: #333;
+  color: var(--text-color, #333);
+  transition: color 0.3s ease;
 }
 
 .highlight {
-  color: #007bff;
+  color: var(--button-primary, #007bff);
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .progress-summary {
@@ -36,44 +39,50 @@ h2 {
 
 .exercise-header {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-secondary, #555);
+  transition: color 0.3s ease;
 }
 
 .progress-bar {
   height: 3px;
-  background-color: #f0f0f0;
+  background-color: var(--progress-bg, #f0f0f0);
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background-color: #333;
-  transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  background-color: var(--progress-fill, hsl(211, 35%, 44%));
+  transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), background-color 0.3s ease;
 }
 
 .exercise-stats {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--text-muted, #888);
   text-align: right;
+  transition: color 0.3s ease;
 }
 
 .loading-container {
   text-align: center;
   padding: 1rem;
   font-size: 0.9rem;
-  color: #999;
+  color: var(--text-muted, #999);
+  transition: color 0.3s ease;
 }
 
 .no-progress-container {
   text-align: center;
-  background-color: white;
+  background-color: var(--card-background, white);
   margin: 2rem 0;
+  transition: background-color 0.3s ease;
 }
 
 .no-progress-message {
   font-size: 1rem;
-  color: #777;
+  color: var(--text-muted, #777);
   font-style: italic;
+  transition: color 0.3s ease;
 }
 
 .total-progress-container {
@@ -82,20 +91,20 @@ h2 {
 
 .total-progress-bar {
   height: 12px;
-  background-color: #e5e5e5;
+  background-color: var(--progress-bg, #e5e5e5);
   border-radius: 6px;
   overflow: hidden;
   margin-bottom: 0.75rem;
   position: relative;
+  transition: background-color 0.3s ease;
 }
 
 .total-progress-bar-fill {
   height: 100%;
-  background-color: #58cc02;
-  /* Duolingo green */
+  background-color: var(--success-color, #58cc02);
   border-radius: 6px;
   /* Enhanced animation for progress bar */
-  transition: width 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: width 1s cubic-bezier(0.22, 0.61, 0.36, 1), background-color 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -163,21 +172,25 @@ h2 {
 
   span {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary, #8d8d8d);
     font-weight: normal;
+    transition: color 0.3s ease;
+    margin: 2px;
   }
 }
 
 .accordion {
   margin-bottom: 1rem;
   padding: 0.75rem 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid var(--border-color, #eee);
+  border-bottom: 1px solid var(--border-color, #eee);
   cursor: pointer;
+  transition: border-color 0.3s ease;
 }
 
 .accordion-item {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  transition: border-color 0.3s ease;
 
   &:last-child {
     border-bottom: none;
@@ -189,10 +202,11 @@ h2 {
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-secondary, #555);
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #000;
+    color: var(--text-color, #000);
   }
 }
 
@@ -204,7 +218,7 @@ h2 {
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
+  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
   opacity: 0;
   visibility: hidden;
 

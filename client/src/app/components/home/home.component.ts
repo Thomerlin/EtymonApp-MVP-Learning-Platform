@@ -45,7 +45,7 @@ export class HomeComponent implements OnInit {
 
     // Load a random exercise level for the demo
     this.loadRandomExercise();
-    
+
     // Subscribe to theme changes
     this.themeService.darkMode$.subscribe(isDark => {
       this.darkMode = isDark;
@@ -81,19 +81,27 @@ export class HomeComponent implements OnInit {
         paragraphs.forEach((paragraph: string, paragraphIndex: number) => {
           const phoneticParagraph = phoneticParagraphs[paragraphIndex] || '';
 
+          // Divida o parágrafo em sentenças, preservando os pontos finais
           const paragraphSentences = paragraph.match(/[^.?!]+[.?!]/g) || [];
           const phoneticSentences = phoneticParagraph.match(/[^.?!]+[.?!]/g) || [];
 
+          // Processe cada sentença do parágrafo
           paragraphSentences.forEach((sentenceText: string, sentenceIndex: number) => {
             const phoneticText = phoneticSentences[sentenceIndex] || '';
+
+            // Divida a sentença em palavras, preservando os pontos finais
             const words = sentenceText.match(/\S+|\./g) || [];
             const phoneticWords = phoneticText.match(/\S+|\./g) || [];
 
-            const wordPairs = words.map((word: string, wordIndex: number) => ({
-              text: word,
-              phonetic: phoneticWords[wordIndex] || ''
-            }));
+            // Crie os pares de palavra/fonética
+            const wordPairs = words.map((word: string, wordIndex: number) => {
+              return {
+                text: word,
+                phonetic: phoneticWords[wordIndex] || ''
+              };
+            });
 
+            // Adicione a sentença processada ao array
             this.sentences.push({
               text: sentenceText,
               phonetic: phoneticText,
@@ -113,15 +121,14 @@ export class HomeComponent implements OnInit {
     this.themeService.toggleDarkMode();
   }
 
-  togglePopup(sentenceIndex: number): void {
-    const sentence = this.sentences[sentenceIndex];
-    if (sentence) {
-      this.popupContent = {
-        text: sentence.text,
-        phonetic: sentence.words.map((w: any) => w.phonetic).join(' '),
-      };
-      this.popupVisible = true;
+  togglePopup(index: number): void {
+    if (index < 0 || index >= this.sentences.length) {
+      console.error(`Invalid index: ${index}`);
+      return;
     }
+
+    this.popupContent = this.sentences[index];
+    this.popupVisible = true;
   }
 
   closePopup(): void {

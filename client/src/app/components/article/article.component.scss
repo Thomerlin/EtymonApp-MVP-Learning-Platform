@@ -108,34 +108,49 @@
 
     .word {
       cursor: pointer;
-      padding: 0 2px;
+      padding: 2px 0;
       transition: color 0.3s ease, background-color 0.3s ease;
 
       &:hover {
         color: var(--link-color);
         background-color: rgba(128, 128, 128, 0.1);
+        border-radius: 2px;
       }
     }
 
     .popup {
-      display: none;
+      visibility: hidden;
       position: absolute;
-      top: 100%;
+      bottom: 100%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(10px);
+      background-color: blue;
+      color: white;
+      text-align: center;
+      border-radius: 4px;
       padding: 5px 10px;
-      background-color: var(--popup-background);
-      border-radius: 3px;
-      font-size: 0.8rem;
-      z-index: 10;
+      z-index: 100;
       white-space: nowrap;
-      color: var(--popup-text);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
       box-shadow: var(--popup-shadow);
-      transition: background-color 0.3s ease, color 0.3s ease;
 
-      .toggle-phonetics-btn:hover+& {
-        display: block;
+      &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: var(--popup-background) transparent transparent transparent;
       }
+    }
+
+    &:hover .popup {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
   }
 
@@ -150,29 +165,28 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
+    animation: fadeIn 0.3s;
   }
 
   .popup-content {
-    position: relative;
-    width: 80%;
-    max-width: 500px;
-    max-height: 80%;
-    overflow-y: auto;
     background-color: var(--popup-background);
-    padding: 20px;
-    border-radius: 10px;
+    border-radius: 8px;
+    padding: 25px;
+    max-width: 80%;
+    text-align: center;
+    position: relative;
     box-shadow: var(--popup-shadow);
-    color: var(--popup-text);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease;
 
     .close-popup-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: none;
+      background: transparent;
       border: none;
-      font-size: 24px;
+      font-size: 1.5rem;
+      font-weight: bold;
       cursor: pointer;
       color: var(--popup-text);
       transition: color 0.3s ease;
@@ -183,30 +197,29 @@
     }
 
     .popup-sentence {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      color: var(--popup-text);
-    }
-
-    .popup-phonetic {
-      font-size: 1rem;
-      font-style: italic;
+      font-size: 1.4rem;
+      margin-bottom: 15px;
       color: var(--popup-text);
     }
 
     .audio-control-btn {
-      background: none;
+      background-color: var(--button-primary);
+      color: var(--button-text);
       border: none;
-      color: var(--popup-text);
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 3px;
+      border-radius: 4px;
+      padding: 5px 10px;
       margin-left: 10px;
-      transition: background-color 0.3s ease;
+      cursor: pointer;
+      transition: background-color 0.3s;
 
       &:hover {
-        background-color: rgba(128, 128, 128, 0.1);
+        background-color: var(--button-hover);
       }
+    }
+
+    .popup-phonetic {
+      font-style: italic;
+      color: var(--popup-text);
     }
   }
 
