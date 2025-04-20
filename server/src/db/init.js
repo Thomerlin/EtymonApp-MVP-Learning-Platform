@@ -3,13 +3,14 @@ const fs = require('fs');
 const path = require('path');
 
 const initializeDatabase = () => {
-  // Create users table without password
+  // Create users table with is_admin field
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     google_id TEXT UNIQUE,
     display_name TEXT,
     profile_picture TEXT,
+    is_admin BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {

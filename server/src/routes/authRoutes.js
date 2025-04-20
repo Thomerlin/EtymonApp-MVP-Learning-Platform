@@ -2,7 +2,8 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const { googleCallback, getCurrentUser, logout } = require('../controllers/authController');
-const { authenticateJWT, checkUserExists } = require('../middleware/auth');
+const { authenticateJWT, checkUserExists, requireAdmin } = require('../middleware/auth');
+const db = require('../config/database');
 
 // Google Auth Routes
 router.get('/google', passport.authenticate('google', {
@@ -52,6 +53,14 @@ router.get('/status', (req, res) => {
     status: 'Auth system diagnostic',
     config: authConfig,
     timestamp: new Date().toISOString()
+  });
+});
+
+// Admin-only route to verify admin access - simplified response
+router.get('/admin-check', authenticateJWT, requireAdmin, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Você possui acesso de administrador'
   });
 });
 

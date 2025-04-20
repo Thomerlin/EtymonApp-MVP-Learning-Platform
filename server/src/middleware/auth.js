@@ -93,8 +93,33 @@ const checkUserExists = async (req, res, next) => {
   }
 };
 
+// Middleware to require admin privileges - always check database
+const requireAdmin = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      console.log('requireAdmin: Usuário não autenticado');
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    // Always check the database for admin status, regardless of token content
+    const user = await safeDbGet('SELECT is_admin FROM users WHERE id = ? AND is_admin = 1', [req.user.id]);
+    
+    if (!user) {
+      console.warn('requireAdmin: Acesso de admin negado para usuário:', req.user.id);
+      return res.status(403).json({ error: 'Permissão de administrador negada' });
+    }
+    
+    console.log('requireAdmin: Acesso de admin permitido para usuário:', req.user.id);
+    next();
+  } catch (error) {
+    console.error('Erro em requireAdmin:', error.message);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
+
 module.exports = {
   authenticateJWT,
   checkUserExists,
-  extractTokenFromRequest
+  extractTokenFromRequest,
+  requireAdmin
 };

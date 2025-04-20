@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../db/database'); // Usar db diretamente para diagnosticar
 const { v4: uuidv4 } = require('uuid');
 
-// Generate JWT token with improved security
+// Generate JWT token with improved security - admin status removed from token
 const generateToken = (user) => {
   // Verificar se existe JWT_SECRET
   if (!process.env.JWT_SECRET) {
@@ -16,6 +16,10 @@ const generateToken = (user) => {
     name: user.display_name || user.email.split('@')[0]
   });
 
+  // Admin tokens still expire in 15 minutes, regular user tokens in 24 hours
+  // We check for admin status here but don't include it in the token
+  const expiresIn = user.is_admin ? '15m' : '24h';
+
   return jwt.sign(
     {
       id: user.id,
@@ -25,14 +29,14 @@ const generateToken = (user) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: '24h', // Aumentado para facilitar testes
+      expiresIn: expiresIn,
       audience: process.env.JWT_AUDIENCE || 'etymon-app',
       issuer: process.env.JWT_ISSUER || 'etymon-auth-service'
     }
   );
 };
 
-// Google callback handler com mais logs para diagnóstico
+// Google callback handler with admin handling
 const googleCallback = (req, res) => {
   try {
     console.log('Google callback: req.user presente?', !!req.user);
@@ -43,14 +47,17 @@ const googleCallback = (req, res) => {
     }
 
     const token = generateToken(req.user);
-    console.log('Token JWT gerado com sucesso');
+    console.log('Token JWT gerado com sucesso', req.user.is_admin ? '(Admin)' : '');
+
+    // Set cookie expiration based on admin status
+    const maxAge = req.user.is_admin ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
 
     // Enviar token em cookies HTTPOnly
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Alterado para lax para funcionar com redirecionamentos
-      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+      sameSite: 'lax', 
+      maxAge: maxAge // 15 min for admin, 24h for regular users
     });
 
     // Também envie no redirecionamento para compatibilidade
@@ -63,7 +70,7 @@ const googleCallback = (req, res) => {
   }
 };
 
-// Get current user info with improved security
+// Get current user info - without exposing admin status
 const getCurrentUser = (req, res) => {
   try {
     // Verificar cabeçalho de autorização
@@ -91,7 +98,7 @@ const getCurrentUser = (req, res) => {
 
     console.log('Token verificado para o usuário ID:', decoded.id);
 
-    db.get('SELECT id, email, display_name, profile_picture FROM users WHERE id = ?', [decoded.id], (err, user) => {
+    db.get('SELECT id, email, display_name, profile_picture, is_admin FROM users WHERE id = ?', [decoded.id], (err, user) => {
       if (err) {
         console.error('Erro ao buscar usuário do banco:', err);
         return res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
@@ -102,8 +109,10 @@ const getCurrentUser = (req, res) => {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
-      console.log('Usuário encontrado e retornando dados');
-      // Não enviar dados sensíveis
+      // Log admin status for server logs but don't send it to client
+      console.log('Usuário encontrado e retornando dados', user.is_admin ? '(Admin)' : '');
+      
+      // Remove is_admin from response 
       res.json({
         id: user.id,
         email: user.email,

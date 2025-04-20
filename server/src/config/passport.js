@@ -49,23 +49,29 @@ passport.use(new GoogleStrategy({
 				return done(err);
 			}
 
+			const email = profile.emails?.[0]?.value;
+			// Check if user is admin based on EMAIL_ADM environment variable
+			const isAdmin = email === process.env.EMAIL_ADM;
+			
 			if (user) {
 				console.log('Usuário existente encontrado:', user.id);
-				// Update existing user
+				// Update existing user and set admin status
 				db.run(
-					'UPDATE users SET display_name = ?, profile_picture = ? WHERE id = ?',
-					[profile.displayName, profile.photos?.[0]?.value, user.id],
+					'UPDATE users SET display_name = ?, profile_picture = ?, is_admin = ? WHERE id = ?',
+					[profile.displayName, profile.photos?.[0]?.value, isAdmin ? 1 : 0, user.id],
 					(err) => {
 						if (err) {
 							console.error('Erro ao atualizar usuário:', err);
 							return done(err);
 						}
+						
+						// Update user object with admin status
+						user.is_admin = isAdmin;
 						return done(null, user);
 					}
 				);
 			} else {
 				// Check if we have a user with the same email
-				const email = profile.emails?.[0]?.value;
 				if (!email) {
 					console.error('Email não fornecido pelo Google');
 					return done(new Error('Email not provided by Google'));
@@ -79,28 +85,30 @@ passport.use(new GoogleStrategy({
 
 					if (existingUser) {
 						console.log('Usuário com mesmo email encontrado:', existingUser.id);
-						// Link Google to existing account
+						// Link Google to existing account and update admin status
 						db.run(
-							'UPDATE users SET google_id = ?, display_name = ?, profile_picture = ? WHERE id = ?',
-							[profile.id, profile.displayName, profile.photos?.[0]?.value, existingUser.id],
+							'UPDATE users SET google_id = ?, display_name = ?, profile_picture = ?, is_admin = ? WHERE id = ?',
+							[profile.id, profile.displayName, profile.photos?.[0]?.value, isAdmin ? 1 : 0, existingUser.id],
 							(err) => {
 								if (err) {
 									console.error('Erro ao vincular conta Google:', err);
 									return done(err);
 								}
+								
+								existingUser.is_admin = isAdmin;
 								return done(null, existingUser);
 							}
 						);
 					} else {
 						console.log('Criando novo usuário para:', email);
-						// Create new user with secure random ID
+						// Create new user with secure random ID and admin status
 						const userId = generateSecureId();
 						const displayName = profile.displayName || email.split('@')[0];
 						const profilePicture = profile.photos?.[0]?.value || '';
 
 						db.run(
-							'INSERT INTO users (id, email, google_id, display_name, profile_picture) VALUES (?, ?, ?, ?, ?)',
-							[userId, email, profile.id, displayName, profilePicture],
+							'INSERT INTO users (id, email, google_id, display_name, profile_picture, is_admin) VALUES (?, ?, ?, ?, ?, ?)',
+							[userId, email, profile.id, displayName, profilePicture, isAdmin ? 1 : 0],
 							function (err) {
 								if (err) {
 									console.error('Erro ao criar usuário:', err);
@@ -112,10 +120,11 @@ passport.use(new GoogleStrategy({
 									email,
 									google_id: profile.id,
 									display_name: displayName,
-									profile_picture: profilePicture
+									profile_picture: profilePicture,
+									is_admin: isAdmin
 								};
 
-								console.log('Novo usuário criado:', userId);
+								console.log('Novo usuário criado:', userId, isAdmin ? '(Admin)' : '');
 								return done(null, newUser);
 							}
 						);
