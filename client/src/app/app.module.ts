@@ -31,6 +31,7 @@ import { HeaderComponent } from './components/header/header.component';
     ProgressExercisesComponent,
     ExercisesComponent,
     HeaderComponent,
+    
   ],
   imports: [
     BrowserModule,

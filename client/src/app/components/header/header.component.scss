@@ -8,29 +8,28 @@
   justify-content: space-between;
   background-color: var(--header-background);
   color: var(--header-text);
-  padding: 0 20px;
-  height: 60px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0 24px;
+  height: 56px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 1000;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   
   .logo-container {
     display: flex;
     align-items: center;
     
     .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
+      font-size: 1.2rem;
+      font-weight: 500;
       color: var(--header-text);
       text-decoration: none;
       cursor: pointer;
-      white-space: nowrap;
-      transition: color 0.3s ease;
+      letter-spacing: 0.5px;
       
       &:hover {
-        opacity: 0.9;
+        opacity: 0.8;
       }
     }
   }
@@ -70,36 +69,43 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     
     .toggle-dark-mode-btn {
       background-color: transparent;
-      border: 1px solid var(--border-color);
+      border: none;
       color: var(--header-text);
-      padding: 8px 12px;
-      border-radius: 4px;
+      padding: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .icon {
+        width: 16px;
+        height: 16px;
+      }
       
       &:hover {
-        background-color: rgba(128, 128, 128, 0.1);
+        opacity: 1;
       }
     }
     
     .auth-buttons {
       .btn-login {
         background-color: transparent;
-        border: 2px solid var(--header-text);
+        border: 1px solid var(--border-color);
         color: var(--header-text);
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 3px;
+        font-size: 0.9rem;
+        font-weight: 400;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         
         &:hover {
-          background-color: var(--header-text);
-          color: var(--header-background);
+          background-color: rgba(128, 128, 128, 0.05);
         }
       }
     }
@@ -107,22 +113,27 @@
     .user-menu {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       
       .profile-button {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         background-color: transparent;
         border: none;
         color: var(--header-text);
         cursor: pointer;
-        padding: 6px 10px;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
+        padding: 6px 8px;
+        font-size: 0.9rem;
+        opacity: 0.8;
         
         .avatar {
           font-size: 1.2rem;
+        }
+        
+        .user-icon {
+          width: 16px;
+          height: 16px;
         }
         
         .user-name {
@@ -133,21 +144,30 @@
         }
         
         &:hover {
-          background-color: rgba(128, 128, 128, 0.1);
+          opacity: 1;
         }
       }
       
       .btn-logout {
-        background-color: rgba(128, 128, 128, 0.15);
-        border: none;
+        background-color: transparent;
+        border: 1px solid var(--border-color);
         color: var(--header-text);
-        padding: 6px 12px;
-        border-radius: 4px;
+        padding: 6px 8px;
+        border-radius: 3px;
+        font-size: 0.9rem;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        .logout-icon {
+          width: 16px;
+          height: 16px;
+        }
         
         &:hover {
-          background-color: rgba(128, 128, 128, 0.3);
+          background-color: rgba(128, 128, 128, 0.05);
         }
       }
     }
@@ -157,7 +177,7 @@
 /* Responsive styles */
 @media (max-width: 768px) {
   .app-header {
-    padding: 0 10px;
+    padding: 0 12px;
     
     .logo-container .logo {
       font-size: 1.2rem;
@@ -175,7 +195,7 @@
 
 @media (max-width: 576px) {
   .app-header {
-    height: auto;
+    height: 50px;
     padding: 10px;
     flex-wrap: wrap;
     
@@ -200,6 +220,22 @@
       order: 2;
       width: 100%;
       justify-content: center;
+      gap: 8px;
+      
+      .btn-login, .btn-logout {
+        padding: 4px 10px;
+      }
+      
+      .user-menu .profile-button .user-name {
+        max-width: 80px;
+      }
     }
   }
+}
+
+// Add general icon styling
+.icon {
+  stroke-width: 1.5px;
+  vertical-align: middle;
+  transition: all 0.2s ease;
 }

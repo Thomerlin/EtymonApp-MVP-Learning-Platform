@@ -228,19 +228,19 @@ export class ExercisesComponent implements OnInit, OnChanges {
           console.log(res.message);
           if (res.message === "Correct answer! Progress saved.") {
             this.answers[exerciseId] = answer; // Save the correct answer
-            
+
             // Show success animation
             this.showSuccessAnimation = true;
-            
+
             if (this.progressComponent) {
               this.progressComponent.getData(this.articleId.toString(), level); // Update progress dynamically
             }
-            
+
             // Allow time for success animation to play
             setTimeout(() => {
               this.showSuccessAnimation = false;
               this.clearInputForExerciseType(type, exerciseId); // Clear input after success
-              this.moveToNextExercise(); 
+              this.moveToNextExercise();
               this.refreshExercises();
             }, 1000);
           } else {
@@ -261,7 +261,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
   // New method to clear input fields based on exercise type
   clearInputForExerciseType(type: string, exerciseId: number): void {
-    switch(type) {
+    switch (type) {
       case 'multiple_choice':
         // Reset the selected radio button
         this.answer = "";
@@ -269,21 +269,22 @@ export class ExercisesComponent implements OnInit, OnChanges {
         const radioButtons = document.querySelectorAll(`input[name="multiple_choice_${exerciseId}"]`) as NodeListOf<HTMLInputElement>;
         radioButtons.forEach(radio => radio.checked = false);
         break;
-      
+
       case 'fill_in_the_blanks':
         // Clear the input field for this exercise
         this.answers[exerciseId] = "";
         break;
-      
+
       case 'writing_with_audio':
         // Clear the textarea for this exercise
         this.answers[exerciseId] = "";
         break;
-      
+
       case 'true_false':
         // No specific input to clear for true/false as it's immediate validation
+        this.answers[exerciseId] = "";
         break;
-      
+
       default:
         // Fallback to clear answer and answers for the current exerciseId
         this.answer = "";
