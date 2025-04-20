@@ -20,6 +20,9 @@ import { ExercisesComponent } from './components/exercises/exercises.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 // Import the header component
 import { HeaderComponent } from './components/header/header.component';
+import { FooterComponent } from './components/footer/footer.component';
+// Import the footer component
+
 
 
 @NgModule({
@@ -31,7 +34,7 @@ import { HeaderComponent } from './components/header/header.component';
     ProgressExercisesComponent,
     ExercisesComponent,
     HeaderComponent,
-    
+    FooterComponent,
   ],
   imports: [
     BrowserModule,
