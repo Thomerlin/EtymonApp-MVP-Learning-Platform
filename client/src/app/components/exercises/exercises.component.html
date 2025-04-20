@@ -84,17 +84,20 @@
           [class.error-animation]="showErrorAnimation" [class.success-animation]="showSuccessAnimation"
           [class.slide-out]="isSlidingOut">
           <div class="exercise-content">
-            <h3>
-              <span *ngFor="let part of allExercises[currentExerciseIndex].sentence.split('___'); let i = index">
-                {{ part }}
-                <input *ngIf="i < allExercises[currentExerciseIndex].sentence.split('___').length - 1" type="text"
-                  [(ngModel)]="answers[allExercises[currentExerciseIndex].id]" class="blank-input" />
-              </span>
-            </h3>
-          </div>
-          <div class="exercise-buttons">
-            <button class="validate-btn"
-              (click)="validate(allExercises[currentExerciseIndex].id, answers[allExercises[currentExerciseIndex].id], 'fill_in_the_blanks')">Validate</button>
+            <!-- <h3>{{ allExercises[currentExerciseIndex].question }}</h3> -->
+            <div class="fill-blanks-container">
+              <div class="sentence-container">
+                <span *ngFor="let part of allExercises[currentExerciseIndex].sentence.split('___'); let i = index">
+                  {{ part }}
+                  <input *ngIf="i < allExercises[currentExerciseIndex].sentence.split('___').length - 1" type="text"
+                    [(ngModel)]="answers[allExercises[currentExerciseIndex].id]" class="blank-input" />
+                </span>
+              </div>
+              <div class="exercise-buttons">
+                <button class="validate-btn"
+                  (click)="validate(allExercises[currentExerciseIndex].id, answers[allExercises[currentExerciseIndex].id], 'fill_in_the_blanks')">Validate</button>
+              </div>
+            </div>
           </div>
         </div>
 

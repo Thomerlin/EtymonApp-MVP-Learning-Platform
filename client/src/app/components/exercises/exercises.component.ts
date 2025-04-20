@@ -264,7 +264,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
     switch (type) {
       case 'multiple_choice':
         // Reset the selected radio button
-        this.answer = "";
+        this.answers[exerciseId] = "";
         // Clear any radio buttons that might be checked
         const radioButtons = document.querySelectorAll(`input[name="multiple_choice_${exerciseId}"]`) as NodeListOf<HTMLInputElement>;
         radioButtons.forEach(radio => radio.checked = false);

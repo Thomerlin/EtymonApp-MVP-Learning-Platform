@@ -4,6 +4,8 @@
   position: relative;
   display: flex;
   justify-content: center;
+  overflow: visible; /* Changed from hidden to allow animation to expand beyond boundaries */
+  padding: 5px; /* Add some padding to prevent clipping */
 }
 
 .exercise-card {
@@ -78,6 +80,8 @@
   animation: pulseSuccess 0.6s;
   border: 2px solid var(--success-color) !important;
   position: relative;
+  z-index: 10;
+  transform-origin: center; /* Ensure scaling from center */
 }
 
 .success-animation::before {
@@ -88,19 +92,23 @@
   color: var(--success-color);
   font-size: 24px;
   font-weight: bold;
+  z-index: 11;
 }
 
 @keyframes pulseSuccess {
   0% {
     transform: scale(1);
+    z-index: 10;
   }
 
   50% {
     transform: scale(1.05);
+    z-index: 10;
   }
 
   100% {
     transform: scale(1);
+    z-index: 10;
   }
 }
 
@@ -196,6 +204,27 @@
     outline: none;
     border-bottom: 2px solid var(--button-hover);
     background-color: rgba(var(--button-primary-rgb), 0.05);
+  }
+}
+
+// Fill in the blanks horizontal layout
+.fill-blanks-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 20px 0;
+
+  .sentence-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .exercise-buttons {
+    margin-top: 0;
+    flex-shrink: 0;
   }
 }
 
@@ -312,7 +341,7 @@
     padding-top: 0;
     margin-top: 10px;
   }
-  
+
   .writing-audio-container {
     margin-bottom: 0;
   }
@@ -331,6 +360,7 @@
   border-radius: 8px;
   box-shadow: var(--card-shadow);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden; /* Contain internal elements */
 
   h3 {
     color: var(--text-color);
@@ -391,7 +421,7 @@
   .exercise-wrapper {
     position: relative;
     width: 100%;
-    overflow: hidden;
+    overflow: visible; /* Updated to allow animations to expand */
   }
 
   .flashcard-container {
@@ -402,15 +432,15 @@
     margin: 0 auto;
     max-width: 700px;
     justify-content: center;
-    
+
     @media (min-width: 768px) {
       grid-template-columns: repeat(3, 1fr);
     }
-    
+
     @media (max-width: 767px) {
       grid-template-columns: repeat(2, 1fr);
     }
-    
+
     @media (max-width: 480px) {
       grid-template-columns: 1fr;
     }
@@ -424,7 +454,7 @@
     cursor: pointer;
     transition: transform 0.6s, box-shadow 0.3s;
     transform-style: preserve-3d;
-    
+
     &:hover {
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
       transform: translateY(-3px);
@@ -432,7 +462,7 @@
 
     &.flipped {
       transform: rotateY(180deg);
-      
+
       &:hover {
         transform: rotateY(180deg) translateY(-3px);
       }
