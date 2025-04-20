@@ -1,4 +1,4 @@
-const { validateExercise } = require('../services/exerciseService');
+const { validateExercise, updateReadingTime } = require('../services/exerciseService');
 // const { normalizeString } = require('../utils/helpers');
 
 const validate = async (req, res) => {
@@ -60,4 +60,20 @@ const validateWriting = (exerciseId, answer, articleId, level, type, res) => {
   });
 };
 
-module.exports = { validate };
+const updateReadingTimeHandler = async (req, res) => {
+  const { userId, articleId, level, seconds } = req.body;
+  
+  if (!userId || !articleId || !level || seconds === undefined) {
+    return res.status(400).json({ error: "Missing required parameters" });
+  }
+  
+  try {
+    await updateReadingTime(userId, articleId, level, seconds);
+    res.json({ success: true, message: "Reading time updated" });
+  } catch (err) {
+    console.error("Error updating reading time:", err);
+    res.status(500).json({ error: "Failed to update reading time" });
+  }
+};
+
+module.exports = { validate, updateReadingTimeHandler };

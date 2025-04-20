@@ -3,18 +3,41 @@ const db = require('../db/database');
 const getAnsweredCorrectlyFlag = (userId, articleId, levels, exercises, type) => {
 	return new Promise((resolve, reject) => {
 		const exerciseIds = exercises.map(ex => ex.id);
+		if (exerciseIds.length === 0) {
+			// If there are no exercises, resolve immediately
+			resolve();
+			return;
+		}
+		
+		const placeholders = exerciseIds.map(() => '?').join(',');
 		const query = `
       SELECT exercise_number, level FROM progress
       WHERE user_id = ? AND article_id = ? AND exercise_type = ? AND score = 1
-      AND exercise_number IN (${exerciseIds.join(',')})
+      AND exercise_number IN (${placeholders})
     `;
-		db.all(query, [userId, articleId, type], (err, rows) => {
-			if (err) reject(err);
+		
+		// Add exercise IDs to the parameters array
+		const params = [userId, articleId, type, ...exerciseIds];
+		
+		db.all(query, params, (err, rows) => {
+			if (err) {
+				console.error('Error in getAnsweredCorrectlyFlag:', err);
+				return reject(err);
+			}
+			
 			const answeredCorrectlyMap = new Map();
-			rows.forEach(row => answeredCorrectlyMap.set(`${row.exercise_number}-${row.level}`, true));
-			exercises.forEach(ex => {
-				ex.answeredCorrectly = answeredCorrectlyMap.has(`${ex.id}-${levels.find(l => l.id === ex.level_id)?.level}`);
+			
+			// Create mapping of answered exercises
+			rows.forEach(row => {
+				answeredCorrectlyMap.set(`${row.exercise_number}-${row.level}`, true);
 			});
+			
+			// Update each exercise with answeredCorrectly flag
+			exercises.forEach(ex => {
+				const levelValue = levels.find(l => l.id === ex.level_id)?.level;
+				ex.answeredCorrectly = answeredCorrectlyMap.has(`${ex.id}-${levelValue}`);
+			});
+			
 			resolve();
 		});
 	});

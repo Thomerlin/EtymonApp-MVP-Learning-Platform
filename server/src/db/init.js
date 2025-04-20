@@ -25,6 +25,7 @@ const initializeDatabase = () => {
     exercise_type TEXT NOT NULL,
     exercise_number INTEGER NOT NULL,
     score INTEGER NOT NULL,
+    reading_time INTEGER DEFAULT 0,
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(article_id) REFERENCES articles(id)
   )`, (err) => {

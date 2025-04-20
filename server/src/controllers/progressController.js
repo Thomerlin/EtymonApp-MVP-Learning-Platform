@@ -1,14 +1,14 @@
-const { getArticleLevelProgress } = require("../services/progressService");
-const { getProgress } = require("../services/progressService");
+const { getArticleLevelProgress, getProgress } = require("../services/progressService");
 
 const getUserProgress = async (req, res) => {
+  const userId = req.query.userId || 1; // Default to 1 for now, should get from auth
+  
   try {
-    const rows = await getProgress(1); // Hardcoded userId
-    const correctAnswers = rows.filter(row => row.score).length;
-    const total = rows.length;
-    res.json({ correctAnswers, total });
+    const progressData = await getProgress(userId);
+    res.json(progressData);
   } catch (err) {
-    res.status(500).json({ error: "Error fetching progress" });
+    console.error("Error fetching user progress:", err);
+    res.status(500).json({ error: "Error fetching progress data" });
   }
 };
 

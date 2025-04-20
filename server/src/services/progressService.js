@@ -2,13 +2,105 @@ const db = require('../db/database');
 
 const getProgress = (userId) => {
 	return new Promise((resolve, reject) => {
-		const query = `SELECT exercise_number, score FROM progress WHERE user_id = ?`;
-		db.all(query, [userId], (err, rows) => {
-			if (err) reject(err);
-			resolve(rows);
-		});
+		// Query to get total exercises solved
+		const exercisesQuery = `
+			SELECT COUNT(*) as totalExercises, 
+				   SUM(CASE WHEN score > 0 THEN 1 ELSE 0 END) as solvedExercises 
+			FROM progress 
+			WHERE user_id = ?
+		`;
+		
+		// Query to get exercises solved by level
+		const exercisesByLevelQuery = `
+			SELECT level, COUNT(*) as totalExercises, 
+				   SUM(CASE WHEN score > 0 THEN 1 ELSE 0 END) as solvedExercises 
+			FROM progress 
+			WHERE user_id = ? 
+			GROUP BY level
+		`;
+		
+		// Query to get read articles
+		const articlesQuery = `
+			SELECT DISTINCT article_id 
+			FROM progress 
+			WHERE user_id = ?
+		`;
+		
+		// Query to get article titles and reading time
+		const articleDetailsQuery = `
+			SELECT a.id, a.title, SUM(p.reading_time) as totalReadingTime
+			FROM articles a
+			INNER JOIN (
+				SELECT DISTINCT article_id, reading_time 
+				FROM progress 
+				WHERE user_id = ? AND reading_time > 0
+			) p ON a.id = p.article_id
+			GROUP BY a.id, a.title
+		`;
+		
+		Promise.all([
+			new Promise((resolve, reject) => {
+				db.get(exercisesQuery, [userId], (err, row) => {
+					if (err) reject(err);
+					else resolve(row);
+				});
+			}),
+			new Promise((resolve, reject) => {
+				db.all(exercisesByLevelQuery, [userId], (err, rows) => {
+					if (err) reject(err);
+					else resolve(rows);
+				});
+			}),
+			new Promise((resolve, reject) => {
+				db.all(articlesQuery, [userId], (err, rows) => {
+					if (err) reject(err);
+					else resolve(rows.length);
+				});
+			}),
+			new Promise((resolve, reject) => {
+				db.all(articleDetailsQuery, [userId], (err, rows) => {
+					if (err) reject(err);
+					else resolve(rows);
+				});
+			})
+		])
+		.then(([exercisesData, exercisesByLevel, readArticlesCount, articlesDetails]) => {
+			const totalReadingTime = articlesDetails.reduce((sum, article) => sum + article.totalReadingTime, 0);
+			
+			resolve({
+				totalExercises: exercisesData.totalExercises || 0,
+				solvedExercises: exercisesData.solvedExercises || 0,
+				exercisesByLevel: exercisesByLevel,
+				readArticles: {
+					count: readArticlesCount || 0,
+					details: articlesDetails
+				},
+				totalReadingTime: totalReadingTime || 0, // in seconds
+				readingTimeFormatted: formatReadingTime(totalReadingTime)
+			});
+		})
+		.catch(err => reject(err));
 	});
 };
+
+// Helper function to format reading time
+function formatReadingTime(seconds) {
+	if (!seconds) return '0 minutes';
+	
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	
+	let result = '';
+	if (hours > 0) {
+		result += `${hours} hour${hours > 1 ? 's' : ''}`;
+	}
+	if (minutes > 0) {
+		if (result) result += ' ';
+		result += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+	}
+	
+	return result || '0 minutes';
+}
 
 const getArticleLevelProgress = (userId, articleId, level) => {
 	const totalExercisesPerType = 5;
