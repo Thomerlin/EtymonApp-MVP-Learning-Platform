@@ -16,7 +16,7 @@ export class ProgressService {
   constructor(private http: HttpClient) { }
 
   getUserProgress(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/article`);
+    return this.http.get(`${this.apiUrl}/article`, { headers: this.getHeaders() });
   }
 
   getArticleLevelProgress(userId: number, articleId: string, level: string): Observable<any> {

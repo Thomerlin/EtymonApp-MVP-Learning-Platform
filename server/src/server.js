@@ -6,6 +6,7 @@ const corsMiddleware = require('./middleware/cors');
 const { printDatabaseContents } = require('./services/databaseService');
 const passport = require('passport');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -13,7 +14,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(corsMiddleware);
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increased limit for larger content uploads
+app.use(cookieParser()); // Add cookie parser for handling tokens in cookies
 app.use(express.static(path.join(__dirname, "client/dist/client")));
 
 // Create public directory for audio files
@@ -40,12 +42,14 @@ const progressRoutes = require('./routes/progressRoutes');
 const ttsRoutes = require('./routes/ttsRoutes');
 const indexRoutes = require('./routes/indexRoutes');
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // Add admin routes
 
 app.use('/api/article', articleRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/tts', ttsRoutes);
 app.use('/api/auth', authRoutes); 
+app.use('/api/admin', adminRoutes); // Mount admin routes
 app.use('/', indexRoutes);
 
 // Print database contents after 2 seconds

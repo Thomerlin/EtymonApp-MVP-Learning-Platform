@@ -21,6 +21,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // Import the header component
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { ContentInputComponent } from './components/content-input/content-input.component';
 // Import the footer component
 
 
@@ -35,6 +36,7 @@ import { FooterComponent } from './components/footer/footer.component';
     ExercisesComponent,
     HeaderComponent,
     FooterComponent,
+    ContentInputComponent
   ],
   imports: [
     BrowserModule,

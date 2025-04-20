@@ -1,0 +1,51 @@
+<div class="content-input-container">
+  <h2>Adicionar Novo Conteúdo</h2>
+  
+  <!-- Admin check loading indicator -->
+  <div *ngIf="checkingAdmin" class="text-center my-4">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Verificando permissões...</span>
+    </div>
+    <p class="mt-2">Verificando permissões de administrador...</p>
+  </div>
+  
+  <!-- Error messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <!-- Success messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  
+  <!-- Only show content to admins -->
+  <div *ngIf="isAdmin && !checkingAdmin">
+    <div class="form-group">
+      <label for="jsonInput">JSON do Artigo:</label>
+      <div class="template-actions">
+        <button class="btn btn-sm btn-outline-secondary" (click)="loadSampleTemplate()">
+          Carregar Modelo
+        </button>
+      </div>
+      <textarea 
+        id="jsonInput" 
+        class="form-control json-textarea" 
+        [(ngModel)]="jsonContent" 
+        placeholder="Insira o JSON do artigo aqui..."></textarea>
+      <small class="form-text text-muted">
+        Insira o conteúdo do artigo em formato JSON válido.
+      </small>
+    </div>
+    
+    <div class="button-container">
+      <button 
+        class="btn btn-primary" 
+        [disabled]="isLoading" 
+        (click)="onSubmit()">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+        Enviar Conteúdo
+      </button>
+    </div>
+  </div>
+</div>
