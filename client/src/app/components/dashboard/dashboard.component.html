@@ -1,5 +1,4 @@
 <div class="dashboard-container">
-
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
     <p>Carregando seu dashboard...</p>
@@ -9,14 +8,17 @@
     <!-- User Welcome Section -->
     <div class="welcome-section">
       <div class="user-info">
-        <img *ngIf="userData?.profile_picture" [src]="userData.profile_picture" alt="Profile picture"
-          class="profile-image">
-        <div class="avatar-placeholder" *ngIf="!userData?.profile_picture">
-          {{ userData?.name?.charAt(0) || 'U' }}
+        <div class="avatar-container">
+          <img *ngIf="userData?.profile_picture" [src]="userData.profile_picture" alt="Profile picture"
+            class="profile-image">
+          <div class="avatar-placeholder" *ngIf="!userData?.profile_picture">
+            {{ userData.display_name?.charAt(0) || 'U' }}
+          </div>
         </div>
         <div class="user-details">
-          <h1>Olá, {{ userData?.name || 'Estudante' }}!</h1>
+          <h1>Olá, {{ userData.display_name || 'Estudante' }}!</h1>
           <p>Bem-vindo de volta à sua jornada de aprendizado.</p>
+          <small class="user-email" *ngIf="userData?.email">{{ userData.email }}</small>
         </div>
       </div>
     </div>
@@ -28,7 +30,7 @@
           <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-info">
-          <h3>{{ userStats.completedExercises }}</h3>
+          <h3>{{ userStats.solvedExercises }}</h3>
           <p>Exercícios Completados</p>
         </div>
       </div>
@@ -38,95 +40,119 @@
           <i class="fas fa-book-open"></i>
         </div>
         <div class="stat-info">
-          <h3>{{ userStats.completedArticles }}</h3>
+          <h3>{{ userStats.readArticles.count }}</h3>
           <p>Artigos Lidos</p>
         </div>
       </div>
 
       <div class="stat-card">
         <div class="stat-icon">
-          <i class="fas fa-clock"></i>
+          <i class="fas fa-calendar-check"></i>
         </div>
         <div class="stat-info">
-          <h3>{{ formatTime(userStats.totalTimeSpent) }}</h3>
-          <p>Tempo de Estudo</p>
+          <h3>{{ levelProgressData.length || 0 }}</h3>
+          <p>Níveis Alcançados</p>
         </div>
       </div>
     </div>
 
     <!-- Language Level Progress Section -->
     <div class="level-progress-section">
-      <h2>Seu Progresso por Níveis</h2>
+      <div class="section-header">
+        <h2>Seu Progresso por Níveis</h2>
+        <!-- <div class="action-buttons">
+          <button class="action-btn">Ver Detalhes</button>
+        </div> -->
+      </div>
 
       <div class="levels-grid">
-        <div class="level-card" *ngFor="let level of levelProgressData">
-          <div class="level-header">
-            <h3>{{ level.level }} - {{ level.description }}</h3>
-            <span class="level-progress">{{ level.progress }}%</span>
-          </div>
-
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="level.progress"></div>
-          </div>
-
-          <div class="level-stats">
-            <span>{{ level.completedExercises }}/{{ level.totalExercises }} exercícios completos</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Courses Section -->
-    <div class="recent-courses-section">
-      <h2>Seus Cursos por Nível</h2>
-
-      <div *ngFor="let level of levelProgressData" class="level-courses">
-        <div *ngIf="hasCourses(level.level)" class="level-section">
-          <h3 class="level-title">{{ level.level }} - {{ level.description }}</h3>
-
-          <div class="courses-grid">
-            <div class="course-card" *ngFor="let course of getCoursesByLevel(level.level)">
-              <div class="course-header">
-                <h3>{{ course.title }}</h3>
-                <span class="progress-percent">{{ course.progress }}%</span>
-              </div>
-
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="course.progress"></div>
-              </div>
-
-              <div class="course-footer">
-                <span class="last-accessed">Último acesso: {{ course.lastAccessed | date:'dd/MM/yyyy' }}</span>
-                <button class="continue-btn">Continuar</button>
+        <div class="level-card" *ngFor="let level of levelProgressData"
+          [ngClass]="'level-' + level.level.toLowerCase()">
+          <div class="level-content">
+            <div class="level-header">
+              <h3>Nível {{ level.level }}</h3>
+            </div>
+            <div class="level-stats">
+              <div class="exercises-count">
+                <i class="fas fa-check-circle"></i>
+                <span><strong>{{ level.solvedExercises }}</strong> exercícios respondidos</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="no-courses" *ngIf="recentCourses.length === 0">
-        <p>Você ainda não começou nenhum curso. Explore nosso catálogo para começar!</p>
-        <button class="explore-btn">Explorar Cursos</button>
-      </div>
-    </div>
-
-    <!-- Suggested Next Steps -->
-    <div class="next-steps-section">
-      <h2>Próximos Passos Sugeridos</h2>
-      <div class="suggestions">
-        <div class="suggestion-card">
-          <div class="suggestion-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <div class="suggestion-content">
-            <h4>Complete seu perfil</h4>
-            <p>Adicione suas habilidades e interesses para recomendações personalizadas.</p>
-            <button class="action-btn">Atualizar Perfil</button>
+        <!-- Empty level card to encourage progress -->
+        <div class="level-card empty-level" *ngIf="levelProgressData.length < 6">
+          <div class="empty-level-content">
+            <div class="empty-level-icon">
+              <i class="fas fa-plus-circle"></i>
+            </div>
+            <h3>Próximo Nível</h3>
+            <p>Continue praticando para desbloquear mais níveis</p>
+            <button class="explore-btn">Explorar Exercícios</button>
           </div>
         </div>
-
-
       </div>
     </div>
+
+    <!-- Recent Activity / Learning Streak -->
+    <!-- <div class="activity-section">
+      <div class="section-header">
+        <h2>Sua Atividade Recente</h2>
+      </div>
+      <div class="streak-container">
+        <div class="streak-info">
+          <div class="streak-icon">
+            <i class="fas fa-fire"></i>
+          </div>
+          <div class="streak-text">
+            <h3>3 Dias</h3>
+            <p>Sequência de estudos! Continue assim!</p>
+          </div>
+        </div>
+        <div class="streak-calendar">
+          <div class="calendar-day active">S</div>
+          <div class="calendar-day active">T</div>
+          <div class="calendar-day active">Q</div>
+          <div class="calendar-day">Q</div>
+          <div class="calendar-day">S</div>
+          <div class="calendar-day">S</div>
+          <div class="calendar-day">D</div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Recommended Next Steps -->
+    <!-- <div class="recommendations-section">
+      <div class="section-header">
+        <h2>Recomendado para Você</h2>
+      </div>
+      <div class="recommendations-grid">
+        <div class="recommendation-card">
+          <div class="recommendation-icon">
+            <i class="fas fa-puzzle-piece"></i>
+          </div>
+          <h3>Exercícios de Vocabulário</h3>
+          <p>Fortaleça seu vocabulário com exercícios diários</p>
+          <button class="recommendation-btn">Começar</button>
+        </div>
+        <div class="recommendation-card">
+          <div class="recommendation-icon">
+            <i class="fas fa-headphones"></i>
+          </div>
+          <h3>Prática de Audição</h3>
+          <p>Melhore sua compreensão auditiva com áudios autênticos</p>
+          <button class="recommendation-btn">Começar</button>
+        </div>
+        <div class="recommendation-card">
+          <div class="recommendation-icon">
+            <i class="fas fa-comment-dots"></i>
+          </div>
+          <h3>Conversação</h3>
+          <p>Pratique diálogos comuns em situações do dia a dia</p>
+          <button class="recommendation-btn">Começar</button>
+        </div>
+      </div>
+    </div> -->
   </div>
 </div>

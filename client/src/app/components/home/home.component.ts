@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
     // Check authentication status
     this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
-      this.userName = user?.name ?? null;
+      this.userName = user?.display_name ?? null;
       this.loggedIn = this.isAuthenticated;
     });
 
@@ -152,10 +152,6 @@ export class HomeComponent implements OnInit {
 
   seeMoreArticles(): void {
     this.showArticlesUpTo += 5; // Load 5 more articles
-  }
-
-  login(): void {
-    this.authService.initiateGoogleLogin();
   }
 
   viewArticle(articleId: number): void {

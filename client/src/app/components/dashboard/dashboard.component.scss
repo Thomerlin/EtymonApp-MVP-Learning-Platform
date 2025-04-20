@@ -1,8 +1,16 @@
+/* Dashboard Container */
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  font-family: 'Roboto', sans-serif;
+  color: #2d3748;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 
   h1 {
     font-size: 2.5rem;
@@ -16,9 +24,207 @@
   }
 }
 
-/* Language Level Progress Section */
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3182ce;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  p {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #4a5568;
+  }
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Welcome Section */
+.welcome-section {
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  color: white;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    
+    .avatar-container {
+      flex-shrink: 0;
+      
+      .profile-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        border: 3px solid white;
+      }
+    }
+    
+    .user-details {
+      h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+      }
+      
+      p {
+        font-size: 1.1rem;
+        margin: 0;
+        opacity: 0.9;
+      }
+
+      .user-email {
+        display: block;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        opacity: 0.8;
+      }
+    }
+  }
+  
+  @media (max-width: 576px) {
+    padding: 1.5rem;
+    
+    .user-info {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+}
+
+/* Stats Section */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  
+  .stat-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      background-color: #ebf4ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      
+      i {
+        font-size: 1.8rem;
+        color: #3182ce;
+      }
+    }
+    
+    .stat-info {
+      h3 {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 0 0 0.3rem 0;
+        color: #2d3748;
+      }
+      
+      p {
+        margin: 0;
+        color: #718096;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+/* Section Header Style */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+  }
+  
+  .action-buttons {
+    .action-btn {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: #3182ce;
+      }
+    }
+  }
+}
+
+/* Level Progress Section */
 .level-progress-section {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   
   h2 {
     font-size: 1.8rem;
@@ -34,48 +240,332 @@
     gap: 1.5rem;
     
     .level-card {
-      background-color: #ffffff;
+      position: relative;
       border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background-color: #f8f9fa;
+      display: flex;
+      padding: 0;
       
-      .level-header {
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .level-badge {
+        width: 50px;
+        background-color: #3182ce;
+        color: white;
+        font-weight: bold;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+      
+      .level-content {
+        flex: 1;
+        padding: 1.5rem;
         
+        .level-header {
+          margin-bottom: 1rem;
+          
+          h3 {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 600;
+          }
+        }
+        
+        .level-stats {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          
+          .exercises-count, .total-exercises {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #718096;
+            font-size: 0.9rem;
+            
+            i {
+              font-size: 1rem;
+            }
+            
+            strong {
+              color: #2d3748;
+              font-weight: 600;
+            }
+          }
+          
+          .exercises-count i {
+            color: #38a169;
+          }
+          
+          .total-exercises i {
+            color: #3182ce;
+          }
+        }
+        
+        .level-actions {
+          .level-btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%;
+            
+            &:hover {
+              background-color: #3182ce;
+            }
+          }
+        }
+      }
+      
+      &.empty-level {
+        background-color: #f7fafc;
+        border: 2px dashed #cbd5e0;
+        
+        .empty-level-content {
+          flex: 1;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          
+          .empty-level-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #ebf8ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            
+            i {
+              font-size: 1.8rem;
+              color: #4299e1;
+            }
+          }
+          
+          h3 {
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            color: #2d3748;
+          }
+          
+          p {
+            margin: 0 0 1.5rem 0;
+            color: #718096;
+            font-size: 0.9rem;
+          }
+          
+          .explore-btn {
+            background-color: #ebf8ff;
+            color: #4299e1;
+            border: 1px solid #bee3f8;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:hover {
+              background-color: #4299e1;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    
+    .levels-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+/* Level color coding */
+.level-a1 .level-badge { background-color: #27ae60; }
+.level-a2 .level-badge { background-color: #2ecc71; }
+.level-b1 .level-badge { background-color: #f39c12; }
+.level-b2 .level-badge { background-color: #e67e22; }
+.level-c1 .level-badge { background-color: #e74c3c; }
+.level-c2 .level-badge { background-color: #c0392b; }
+
+/* Activity Section */
+.activity-section {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  
+  .streak-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    .streak-info {
+      display: flex;
+      align-items: center;
+      
+      .streak-icon {
+        width: 60px;
+        height: 60px;
+        background-color: #feebeb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        
+        i {
+          font-size: 1.8rem;
+          color: #e53e3e;
+        }
+      }
+      
+      .streak-text {
         h3 {
-          font-size: 1.2rem;
-          margin: 0;
-          color: #2c3e50;
+          font-size: 1.5rem;
+          margin: 0 0 0.2rem 0;
           font-weight: 600;
         }
         
-        .level-progress {
-          font-weight: bold;
-          color: #3498db;
+        p {
+          margin: 0;
+          color: #718096;
         }
       }
+    }
+    
+    .streak-calendar {
+      display: flex;
+      justify-content: space-between;
       
-      .progress-bar {
-        height: 8px;
-        background-color: #ecf0f1;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 1rem;
+      .calendar-day {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f7fafc;
+        color: #a0aec0;
+        font-weight: 600;
         
-        .progress-fill {
-          height: 100%;
-          background-color: #3498db;
-          border-radius: 4px;
+        &.active {
+          background-color: #fed7d7;
+          color: #e53e3e;
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    
+    .streak-calendar {
+      .calendar-day {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+/* Recommendations Section */
+.recommendations-section {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  
+  .recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    
+    .recommendation-card {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      }
+      
+      .recommendation-icon {
+        width: 70px;
+        height: 70px;
+        background-color: #ebf8ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        
+        i {
+          font-size: 2rem;
+          color: #3182ce;
         }
       }
       
-      .level-stats {
-        color: #7f8c8d;
+      h3 {
+        font-size: 1.2rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+      }
+      
+      p {
+        color: #718096;
+        margin: 0 0 1.5rem 0;
         font-size: 0.9rem;
       }
+      
+      .recommendation-btn {
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1.5rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: #3182ce;
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    
+    .recommendations-grid {
+      grid-template-columns: 1fr;
     }
   }
 }

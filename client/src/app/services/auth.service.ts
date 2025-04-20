@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 interface User {
   id: number;
   email: string;
-  name?: string;
+  display_name?: string;
   profile_picture?: string;
 }
 
@@ -40,16 +40,29 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.get(`${this.apiUrl}/auth/logout`).subscribe();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('tokenExpiration');
-    this.currentUserSubject.next(null);
-    if (this.tokenExpirationTimer) {
-      clearTimeout(this.tokenExpirationTimer);
-    }
-    this.tokenExpirationTimer = null;
-    this.router.navigate(['/login']);
+    // First, clear local data
+    const clearLocalData = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tokenExpiration');
+      this.currentUserSubject.next(null);
+      if (this.tokenExpirationTimer) {
+        clearTimeout(this.tokenExpirationTimer);
+      }
+      this.tokenExpirationTimer = null;
+      this.router.navigate(['/login']);
+    };
+
+    // Then attempt to notify the server
+    this.http.get(`${this.apiUrl}/auth/logout`).pipe(
+      catchError(error => {
+        console.error('Logout error:', error);
+        return of(null);
+      }),
+      finalize(() => {
+        clearLocalData();
+      })
+    ).subscribe();
   }
 
   getToken(): string | null {
@@ -83,7 +96,7 @@ export class AuthService {
         const userData = {
           id: user.id,
           email: user.email,
-          name: user.name || user.email.split('@')[0],
+          display_name: user.display_name || user.email.split('@')[0],
           profile_picture: user.profile_picture
         };
         localStorage.setItem('user', JSON.stringify(userData));
@@ -118,7 +131,12 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(userJson);
+      const user = JSON.parse(userJson);
+      // Ensure display_name exists
+      if (!user.display_name && user.email) {
+        user.display_name = user.email.split('@')[0];
+      }
+      return user;
     } catch (e) {
       localStorage.removeItem('user');
       return null;

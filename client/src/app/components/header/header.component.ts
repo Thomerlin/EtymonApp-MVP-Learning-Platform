@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
     // Check authentication status
     this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
-      this.userName = user?.name ?? null;
+      this.userName = user?.display_name ?? null;
     });
 
     // Check initial dark mode setting
@@ -35,10 +35,7 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    alert('Logout functionality is not implemented yet.'); // Placeholder for logout functionality
-    // this.authService.logout().subscribe(() => {
-    //   this.router.navigate(['/']);
-    // });
+    this.authService.logout();
   }
 
   goToDashboard(): void {
