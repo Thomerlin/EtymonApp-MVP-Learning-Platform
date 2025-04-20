@@ -2,57 +2,62 @@ const { validateExercise, updateReadingTime } = require('../services/exerciseSer
 // const { normalizeString } = require('../utils/helpers');
 
 const validate = async (req, res) => {
-  const { exerciseId, answer, type, articleId, level } = req.body; // Adicionado level
+  const { exerciseId, answer, type, articleId, level } = req.body;
+  const userId = req.user?.id;
 
-  if (!exerciseId || !answer || !type || !articleId || !level) { // Validar level
+  if (!userId) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  if (!exerciseId || !answer || !type || !articleId || !level) {
     return res.status(400).json({ error: "exerciseId, answer, type, articleId, and level are required" });
   }
 
   // Call the appropriate validation based on the type
   switch (type) {
     case "multiple_choice":
-      validateMultipleChoice(exerciseId, answer, articleId, level, type, res); // Passar level
+      validateMultipleChoice(exerciseId, answer, articleId, level, type, userId, res);
       break;
     case "fill_in_the_blanks":
-      validateGapFill(exerciseId, answer, articleId, level, type, res); // Passar level
+      validateGapFill(exerciseId, answer, articleId, level, type, userId, res);
       break;
     case "true_false":
-      validateTrueFalse(exerciseId, answer, articleId, level, type, res); // Passar level
+      validateTrueFalse(exerciseId, answer, articleId, level, type, userId, res);
       break;
     case "vocabulary_matching":
-      validateVocabularyMatching(exerciseId, answer, articleId, level, type, res); // Passar level
+      validateVocabularyMatching(exerciseId, answer, articleId, level, type, userId, res);
       break;
-    case "writing_with_audio": // Changed from exercises_writing_with_audio for consistency
-      validateWriting(exerciseId, answer, articleId, level, type, res);
+    case "writing_with_audio":
+      validateWriting(exerciseId, answer, articleId, level, type, userId, res);
       break;
     default:
       res.status(400).json({ error: "Invalid exercise type" });
   }
 };
 
-const validateMultipleChoice = (exerciseId, answer, articleId, level, type, res) => {
+const validateMultipleChoice = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT answer FROM exercises_multiple_choice WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => row.answer === answer);
 };
 
-const validateGapFill = (exerciseId, answer, articleId, level, type, res) => {
+const validateGapFill = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT answer FROM exercises_fill_in_the_blanks WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => row.answer === answer);
 };
 
-const validateTrueFalse = (exerciseId, answer, articleId, level, type, res) => {
+const validateTrueFalse = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT answer FROM exercises_true_false WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.answer === answer);
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => row.answer === answer);
 };
 
-const validateVocabularyMatching = (exerciseId, answer, articleId, level, type, res) => {
+const validateVocabularyMatching = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT definition FROM exercises_vocabulary_matching WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => row.definition === answer);
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => row.definition === answer);
 };
 
-const validateWriting = (exerciseId, answer, articleId, level, type, res) => {
+const validateWriting = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT sentence FROM exercises_writing_with_audio WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, res, query, (row, answer) => {
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => {
     // Normalize both strings by trimming whitespace and converting to lowercase
     const correctAnswer = row.sentence.trim().toLowerCase();
     const userInput = answer.trim().toLowerCase();
@@ -61,9 +66,14 @@ const validateWriting = (exerciseId, answer, articleId, level, type, res) => {
 };
 
 const updateReadingTimeHandler = async (req, res) => {
-  const { userId, articleId, level, seconds } = req.body;
+  const userId = req.user?.id;
+  const { articleId, level, seconds } = req.body;
   
-  if (!userId || !articleId || !level || seconds === undefined) {
+  if (!userId) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  
+  if (!articleId || !level || seconds === undefined) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
   

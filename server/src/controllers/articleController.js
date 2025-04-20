@@ -1,10 +1,9 @@
 const db = require('../db/database');
 const { getAnsweredCorrectlyFlag, getArticlesSummary, getRandomLevel } = require('../services/articleService');
 
-
 const getArticle = async (req, res) => {
   const articleId = req.params.id;
-  const userId = 1;
+  const userId = req.user?.id; // Optional - can be undefined for public access
 
   try {
     const article = await new Promise((resolve, reject) => {
@@ -40,12 +39,20 @@ const getArticle = async (req, res) => {
       });
     }
 
-    await Promise.all(levels.map(level => [
-      getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.multiple_choice.filter(e => e.level_id === level.id), 'multiple_choice'),
-      getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.fill_in_the_blanks.filter(e => e.level_id === level.id), 'fill_in_the_blanks'),
-      getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.true_false.filter(e => e.level_id === level.id), 'true_false'),
-      getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.writing_with_audio.filter(e => e.level_id === level.id), 'writing_with_audio')
-    ]).flat());
+    // Only get progress flags if user is authenticated
+    if (userId) {
+      await Promise.all(levels.map(level => [
+        getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.multiple_choice.filter(e => e.level_id === level.id), 'multiple_choice'),
+        getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.fill_in_the_blanks.filter(e => e.level_id === level.id), 'fill_in_the_blanks'),
+        getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.true_false.filter(e => e.level_id === level.id), 'true_false'),
+        getAnsweredCorrectlyFlag(userId, articleId, levels, exercises.writing_with_audio.filter(e => e.level_id === level.id), 'writing_with_audio')
+      ]).flat());
+    } else {
+      // For unauthenticated users, set answeredCorrectly to false for all exercises
+      Object.values(exercises).forEach(exerciseType => {
+        exerciseType.forEach(ex => ex.answeredCorrectly = false);
+      });
+    }
 
     const articleLevels = levels.map(level => ({
       ...level,
@@ -72,8 +79,11 @@ const getArticle = async (req, res) => {
 };
 
 const getArticlesSummaryHandler = async (req, res) => {
+  // Allow both authenticated and non-authenticated users
+  const userId = req.user?.id; // Optional - will be undefined for anonymous users
+  
   try {
-    const articles = await getArticlesSummary();
+    const articles = await getArticlesSummary(userId);
     res.json(articles);
   } catch (err) {
     res.status(500).json({ error: "Error fetching articles summary" });

@@ -67,8 +67,11 @@ const checkIfAnsweredCorrectly = (userId, articleId, level, exerciseId, type, ca
 };
 
 // Updated validation function that only saves progress for correct answers
-const validateExercise = (exerciseId, answer, articleId, level, type, res, validationQuery, correctCondition) => {
-  const userId = 1; // Replace with actual user ID logic
+const validateExercise = (exerciseId, answer, articleId, level, type, userId, res, validationQuery, correctCondition) => {
+  if (!userId) {
+    return res.status(401).json({ error: "Authentication required to save progress" });
+  }
+
   checkIfAnsweredCorrectly(userId, articleId, level, exerciseId, type, (err, alreadyAnswered) => {
     if (err) {
       return res.status(500).json({ error: "Error checking progress" });

@@ -5,8 +5,8 @@ const { authenticateJWT } = require('../middleware/auth');
 const { validate } = require('../controllers/exerciseController');
 const { checkCooldown } = require('../middleware/cooldown');
 
-// Get exercises (requires auth)
-router.get('/:level_id/:type', authenticateJWT, (req, res) => {
+// Public route - exercise retrieval doesn't require auth
+router.get('/:level_id/:type', (req, res) => {
   const { level_id, type } = req.params;
   
   let tableName;
@@ -38,6 +38,7 @@ router.get('/:level_id/:type', authenticateJWT, (req, res) => {
   });
 });
 
-router.post('/validate', checkCooldown, validate);
+// Protected route - validation requires auth
+router.post('/validate', authenticateJWT, checkCooldown, validate);
 
 module.exports = router;
