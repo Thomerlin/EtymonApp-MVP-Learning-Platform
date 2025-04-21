@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { ProgressService } from '../../services/progress.service';
-
+import { Router } from '@angular/router';
 
 // Updated interface to match actual API response
 interface UserProgressStats {
@@ -64,7 +64,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -123,5 +124,12 @@ export class DashboardComponent implements OnInit {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return hours > 0 ? `${hours}h ${remainingMinutes}min` : `${remainingMinutes}min`;
+  }
+
+  /**
+   * Navigates to the home page
+   */
+  navigateToHome(): void {
+    this.router.navigate(['/']);
   }
 }
