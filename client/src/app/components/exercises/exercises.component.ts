@@ -52,8 +52,12 @@ export class ExercisesComponent implements OnInit, OnChanges {
   @Input() currentLevel!: string;
   @Input() isAuthenticated = false;
   @Output() authModalRequested = new EventEmitter<void>();
+  @Output() exerciseValidated = new EventEmitter<void>(); // Add new output event
 
   @ViewChild(ProgressExercisesComponent) progressComponent!: ProgressExercisesComponent;
+
+  // Add userId property
+  userId: number = 0;
 
   exerciseId: number | null = null;
   answer: string = "";
@@ -98,6 +102,10 @@ export class ExercisesComponent implements OnInit, OnChanges {
     // Check authentication status
     this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
+      // Set userId when user is authenticated
+      if (user) {
+        this.userId = user.id;
+      }
 
       // If user just logged in and there was a pending exercise validation
       if (this.isAuthenticated && this.lastAttemptedExerciseData) {
@@ -186,6 +194,9 @@ export class ExercisesComponent implements OnInit, OnChanges {
             if (this.progressComponent) {
               this.progressComponent.getData(this.article.id.toString(), level); // Update progress dynamically
             }
+
+            // Emit event to notify that exercise was validated correctly
+            this.exerciseValidated.emit();
 
             // Allow time for success animation to play
             setTimeout(() => {

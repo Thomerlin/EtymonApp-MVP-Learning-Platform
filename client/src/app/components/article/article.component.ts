@@ -268,4 +268,11 @@ export class ArticleComponent implements OnInit {
   closeAuthModal(): void {
     this.showAuthModal = false;
   }
+
+  // Method to reload the article when an exercise is validated correctly
+  reloadArticle() {
+    if (this.article && this.article.id) {
+      this.getArticleById(this.article.id);
+    }
+  }
 }
