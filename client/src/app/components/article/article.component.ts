@@ -24,6 +24,7 @@ export class ArticleComponent implements OnInit {
   article: Article | null = null;
   level: string = "A1";
   currentLevel: string = "A1";
+  currentLevelId: number | null = null; // Track current level ID for audio
   text: string = "";
   phonetics: string = "";
   title: string = "";
@@ -129,6 +130,12 @@ export class ArticleComponent implements OnInit {
       if (level) {
         this.text = level.content;
         this.phonetics = level.phonetics;
+        
+        // Store the level ID for audio playback
+        this.currentLevelId = level.id;
+        
+        // Update the TTS service with the current level ID
+        this.ttsService.setCurrentLevelId(level.id);
 
         // Divide o conteúdo em parágrafos e sentenças
         const paragraphs = this.text.split('\n\n ').map(p => p.trim()).filter(p => p);
@@ -180,6 +187,9 @@ export class ArticleComponent implements OnInit {
     this.isLoading = true; // Set loading state to true
     this.level = level;
     this.currentLevel = level;
+    
+    // Stop any playing audio when changing levels
+    this.ttsService.stopAudio('article');
     
     // Add a delay to ensure the loading animation is visible
     setTimeout(() => {
@@ -244,7 +254,13 @@ export class ArticleComponent implements OnInit {
   }
 
   playArticleAudio() {
-    this.ttsService.toggleAudio(this.text, 'article');
+    if (this.currentLevelId && this.text) {
+      // Use the pre-generated audio through the TTS service
+      this.ttsService.playLevelAudio(this.currentLevelId, this.text);
+    } else {
+      // Fall back to regular TTS if level ID is not available
+      this.ttsService.toggleAudio(this.text, 'article');
+    }
   }
 
   pauseArticleAudio() {

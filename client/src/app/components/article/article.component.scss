@@ -94,6 +94,14 @@
       }
     }
 
+    .audio-quality-tag {
+      margin-left: 6px;
+      padding: 2px 5px;
+      font-size: 0.7em;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
     &:hover {
       background-color: var(--button-hover);
     }

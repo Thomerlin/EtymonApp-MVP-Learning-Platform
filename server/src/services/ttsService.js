@@ -83,10 +83,10 @@ const cache = new SimpleCache();
 /**
  * Converts text to speech using Google Cloud TTS with improved security
  */
-async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Casual-K") {
+async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Casual-K", speakingRate = 0.7) {
   try {
     // Validar entradas
-    if (!text || text.length > 1000) {
+    if (!text) {
       throw new Error('Text must be provided and less than 1000 characters');
     }
     
@@ -94,7 +94,7 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
       throw new Error('Language and voice must be provided');
     }
 
-    const cacheKey = `${text}-${language}-${voice}`;
+    const cacheKey = `${text}-${language}-${voice}-${speakingRate}`;
     if (cache.has(cacheKey)) {
       const cachedAudio = cache.get(cacheKey);
       if (cachedAudio) return cachedAudio;
@@ -121,7 +121,7 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
       voice: voiceParams,
       audioConfig: { 
         audioEncoding: 'MP3',
-        speakingRate: 0.9,
+        speakingRate: speakingRate,
         pitch: 0.0
       },
     };
@@ -142,6 +142,62 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
     console.error('Error in TTS service:', error.message);
     throw error;
   }
+}
+
+/**
+ * Process multiple text chunks for TTS conversion
+ * @param {string} text - Text to convert to speech
+ * @param {string} language - Language code for TTS
+ * @param {string} voice - Voice model to use
+ * @param {number} speakingRate - Speaking rate (1.0 is normal speed)
+ * @returns {Promise<Buffer>} - Audio content as buffer
+ */
+async function processContentAudio(text, language = 'en-US', voice = "en-US-Casual-K", speakingRate = 1.0) {
+  try {
+    // For longer texts, we need to chunk it into manageable segments
+    const chunks = chunkText(text, 500);
+    const audioBuffers = [];
+    
+    // Process each chunk sequentially to avoid rate limits
+    for (const chunk of chunks) {
+      const audioContent = await textToSpeechConverter(chunk, language, voice, speakingRate);
+      audioBuffers.push(Buffer.from(audioContent));
+    }
+    
+    // Combine all audio buffers into one
+    return Buffer.concat(audioBuffers);
+  } catch (error) {
+    console.error('Error in batch TTS processing:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Split text into manageable chunks for TTS processing
+ * @param {string} text - Text to split into chunks
+ * @param {number} maxLength - Maximum length of each chunk
+ * @returns {string[]} - Array of text chunks
+ */
+function chunkText(text, maxLength = 500) {
+  const chunks = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  let currentChunk = '';
+  
+  for (const sentence of sentences) {
+    // If adding this sentence would exceed the chunk size, start a new chunk
+    if (currentChunk.length + sentence.length > maxLength && currentChunk.length > 0) {
+      chunks.push(currentChunk.trim());
+      currentChunk = '';
+    }
+    currentChunk += sentence + ' ';
+  }
+  
+  // Add the last chunk if it has content
+  if (currentChunk.trim().length > 0) {
+    chunks.push(currentChunk.trim());
+  }
+  
+  return chunks;
 }
 
 // Funções auxiliares de validação e sanitização
@@ -179,5 +235,6 @@ function validateVoiceName(voice) {
 }
 
 module.exports = {
-  textToSpeechConverter
+  textToSpeechConverter,
+  processContentAudio
 };

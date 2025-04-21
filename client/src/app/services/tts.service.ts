@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 // Define the possible audio contexts
 export type AudioContextType = 'article' | 'exercise' | 'popup' | '';
@@ -9,7 +10,8 @@ export type AudioContextType = 'article' | 'exercise' | 'popup' | '';
   providedIn: 'root'
 })
 export class TtsService {
-  private apiUrl = "http://localhost:3000/api/tts";
+  private apiUrl = `${environment.apiUrl}/api/tts`;
+  private serverUrl = environment.apiUrl;
 
   // Audio elements for each context
   private audioElements: Record<AudioContextType, HTMLAudioElement> = {
@@ -18,6 +20,9 @@ export class TtsService {
     popup: new Audio(),
     '': new Audio() // legacy default
   };
+
+  // Track the current level ID for server-generated audio
+  private currentLevelIdSubject = new BehaviorSubject<number | null>(null);
 
   // Playing state for each context
   private isArticlePlayingSubject = new BehaviorSubject<boolean>(false);
@@ -73,6 +78,35 @@ export class TtsService {
       audioElement.onplay = () => {
         this.updatePlaybackState(context as AudioContextType, true, false);
       };
+    });
+  }
+
+  /**
+   * Play pre-generated audio from the server for the given level
+   * @param levelId The ID of the level to play audio for
+   * @param text The text content (for state tracking only)
+   */
+  playLevelAudio(levelId: number, text: string): void {
+    // Stop any playing audio first
+    this.stopAudio('article');
+    
+    // Set current text and level ID
+    this.articleTextSubject.next(text);
+    this.currentLevelIdSubject.next(levelId);
+    
+    // Get the audio element for articles
+    const audioElement = this.audioElements['article'];
+    
+    // Set the source to the server-side audio endpoint
+    audioElement.src = `${this.serverUrl}/api/article/audio/${levelId}`;
+    
+    // Play the audio
+    audioElement.play().catch(error => {
+      console.error('Error playing level audio:', error);
+      this.updatePlaybackState('article', false, false);
+      
+      // Fallback to TTS if server audio fails
+      this.speak(text, 'article');
     });
   }
 
@@ -136,6 +170,16 @@ export class TtsService {
    */
   speak(text: string, context: AudioContextType = '', language: string = 'en-US', voice: string = 'en-US-Casual-K', callback?: () => void): void {
     if (!text) return;
+
+    // Special handling for articles with server-generated audio
+    if (context === 'article') {
+      const currentLevelId = this.currentLevelIdSubject.getValue();
+      if (currentLevelId) {
+        // If we have a level ID, use the pre-generated audio
+        this.playLevelAudio(currentLevelId, text);
+        return;
+      }
+    }
 
     const audioElement = this.audioElements[context] || this.audioElements[''];
 
@@ -209,6 +253,14 @@ export class TtsService {
         this.updatePlaybackState(context, false, false);
       }
     });
+  }
+
+  /**
+   * Set the current level ID for server-generated article audio
+   * @param levelId The level ID
+   */
+  setCurrentLevelId(levelId: number | null): void {
+    this.currentLevelIdSubject.next(levelId);
   }
 
   /**
@@ -300,8 +352,6 @@ export class TtsService {
     
     // Update the playback state
     this.updatePlaybackState(context, false, false);
-    
-    
   }
 
   /**

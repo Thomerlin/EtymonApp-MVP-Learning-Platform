@@ -89,11 +89,30 @@
       <div *ngFor="let level of article.levels" [hidden]="level.level !== currentLevel">
         <h2>Content for Level {{ level.level }}</h2>
 
-        <button class="audio-button" (click)="playArticleAudio()">
-          <span *ngIf="!isArticlePlaying && !isArticlePaused"><i class="play-icon"></i> Play Full Article</span>
-          <span *ngIf="isArticlePlaying"><i class="pause-icon"></i> Pause</span>
-          <span *ngIf="!isArticlePlaying && isArticlePaused"><i class="play-icon"></i> Resume</span>
-        </button>
+        <!-- Updated audio button with indication of pre-generated audio -->
+        <div class="audio-controls">
+          <button class="audio-button" (click)="playArticleAudio()" 
+                  [title]="level.hasAudio ? 'Play high-quality audio' : 'Play article using text-to-speech'">
+            <span *ngIf="!isArticlePlaying && !isArticlePaused">
+              <i class="play-icon"></i> Play Article
+              <small *ngIf="level.hasAudio" class="audio-quality-tag">HD Audio</small>
+            </span>
+            <span *ngIf="isArticlePlaying">
+              <i class="pause-icon"></i> Pause
+            </span>
+            <span *ngIf="!isArticlePlaying && isArticlePaused">
+              <i class="play-icon"></i> Resume
+            </span>
+          </button>
+          
+          <!-- Stop button when audio is playing or paused -->
+          <button *ngIf="isArticlePlaying || isArticlePaused" 
+                  class="stop-button" 
+                  (click)="stopArticleAudio()">
+            <i class="stop-icon"></i> Stop
+          </button>
+        </div>
+
         <div class="text-container">
           <!-- Primeiro parágrafo -->
           <div class="paragraph">

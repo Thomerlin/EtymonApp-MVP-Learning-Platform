@@ -1,11 +1,11 @@
 const db = require('../db/database');
+const { processContentAudio } = require('../services/ttsService');
 
 /**
  * Inserts a complete article with all its associated content into the database
  * Only accessible by admin users
  */
 const insertContent = async (req, res) => {
-  console.log('passou aqui');
   try {
     const articleData = req.body;
 
@@ -28,7 +28,7 @@ const insertContent = async (req, res) => {
       db.run(
         'INSERT INTO articles (title, article_link, summary, created_date) VALUES (?, ?, ?, ?)',
         [articleData.title, articleData.article_link, articleData.summary, articleData.created_date],
-        function(err) {
+        async function(err) {
           if (err) {
             console.error('Erro ao inserir artigo:', err.message);
             db.run('ROLLBACK');
@@ -42,45 +42,76 @@ const insertContent = async (req, res) => {
           let processedLevels = 0;
 
           // Insert each level
-          levelKeys.forEach(levelKey => {
-            const level = articleData.levels[levelKey];
+          for (const levelKey of levelKeys) {
+            try {
+              const level = articleData.levels[levelKey];
 
-            if (!level.text || !level.text.content) {
-              errorCount++;
-              processedLevels++;
-              console.error(`Conteúdo textual ausente para o nível ${levelKey}`);
-              if (processedLevels === levelKeys.length) {
-                finishTransaction();
-              }
-              return;
-            }
-
-            // Insert level
-            db.run(
-              'INSERT INTO levels (article_id, level, content, phonetics) VALUES (?, ?, ?, ?)',
-              [
-                articleId,
-                levelKey,
-                level.text.content,
-                level.text.phonetics || ''
-              ],
-              function(err) {
-                if (err) {
-                  errorCount++;
-                  console.error(`Erro ao inserir nível ${levelKey}:`, err.message);
-                } else {
-                  const levelId = this.lastID;
-                  insertExercises(levelId, level.exercises);
-                  successCount++;
-                }
-
+              if (!level.text || !level.text.content) {
+                errorCount++;
                 processedLevels++;
+                console.error(`Conteúdo textual ausente para o nível ${levelKey}`);
                 if (processedLevels === levelKeys.length) {
                   finishTransaction();
                 }
+                continue;
               }
-            );
-          });
+
+              // Generate audio content using TTS service
+              console.log(`Generating audio for level ${levelKey}...`);
+              let audioContent = null;
+              try {
+                // Determine language based on level prefix
+                const language = determineLanguageFromLevel(levelKey);
+                const voice = determineVoiceFromLanguage(language);
+                
+                // Use normal speaking rate (1.0) for content audio
+                audioContent = await processContentAudio(
+                  level.text.content, 
+                  language, 
+                  voice,
+                  0.85  // Normal speaking rate for content
+                );
+                console.log(`Audio generated for level ${levelKey}: ${audioContent.length} bytes`);
+              } catch (ttsError) {
+                console.error(`Error generating audio for level ${levelKey}:`, ttsError);
+                // Continue without audio if TTS fails
+              }
+
+              // Insert level with audio content
+              db.run(
+                'INSERT INTO levels (article_id, level, content, phonetics, audio_content) VALUES (?, ?, ?, ?, ?)',
+                [
+                  articleId,
+                  levelKey,
+                  level.text.content,
+                  level.text.phonetics || '',
+                  audioContent
+                ],
+                function(err) {
+                  if (err) {
+                    errorCount++;
+                    console.error(`Erro ao inserir nível ${levelKey}:`, err.message);
+                  } else {
+                    const levelId = this.lastID;
+                    insertExercises(levelId, level.exercises);
+                    successCount++;
+                  }
+
+                  processedLevels++;
+                  if (processedLevels === levelKeys.length) {
+                    finishTransaction();
+                  }
+                }
+              );
+            } catch (levelError) {
+              console.error(`Error processing level ${levelKey}:`, levelError);
+              errorCount++;
+              processedLevels++;
+              if (processedLevels === levelKeys.length) {
+                finishTransaction();
+              }
+            }
+          }
 
           // Function to insert exercises for a level
           function insertExercises(levelId, exercises) {
@@ -132,6 +163,32 @@ const insertContent = async (req, res) => {
                   [levelId, exercise.sentence]
                 );
               });
+            }
+          }
+
+          // Helper function to determine language based on level code
+          function determineLanguageFromLevel(levelCode) {
+            // Default to English
+            if (!levelCode || typeof levelCode !== 'string') return 'en-US';
+            
+            // Check for language code at beginning of level
+            if (levelCode.startsWith('pt')) return 'pt-BR';
+            if (levelCode.startsWith('es')) return 'es-ES';
+            if (levelCode.startsWith('fr')) return 'fr-FR';
+            if (levelCode.startsWith('de')) return 'de-DE';
+            
+            // Default to English if no match
+            return 'en-US';
+          }
+          
+          // Helper function to get appropriate voice for language
+          function determineVoiceFromLanguage(language) {
+            switch (language) {
+              case 'pt-BR': return 'pt-BR-Wavenet-A';
+              case 'es-ES': return 'es-ES-Wavenet-B';
+              case 'fr-FR': return 'fr-FR-Wavenet-C';
+              case 'de-DE': return 'de-DE-Wavenet-B';
+              default: return 'en-US-Casual-K'; // Default English voice
             }
           }
 

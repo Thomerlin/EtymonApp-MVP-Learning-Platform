@@ -3,13 +3,20 @@ const { textToSpeechConverter } = require('../services/ttsService');
 // Convert text to speech
 const synthesizeSpeech = async (req, res) => {
   try {
-    const { text, language, voice } = req.body;
+    const { text, language, voice, speakingRate } = req.body;
     
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
     }
     
-    const audioContent = await textToSpeechConverter(text, language, voice);
+    // Use slower speaking rate (0.8) by default for direct API requests
+    // Allow custom rate if specified in the request
+    const rate = speakingRate !== undefined ? parseFloat(speakingRate) : 0.7;
+    
+    // Validate speaking rate is within reasonable bounds
+    const validRate = Math.max(0.5, Math.min(2.0, rate));
+    
+    const audioContent = await textToSpeechConverter(text, language, voice, validRate);
     
     // Send audio as binary response
     res.set({

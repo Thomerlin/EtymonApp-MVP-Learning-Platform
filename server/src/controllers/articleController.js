@@ -15,7 +15,7 @@ const getArticle = async (req, res) => {
     });
 
     const levels = await new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM levels WHERE article_id = ?`, [articleId], (err, rows) => {
+      db.all(`SELECT id, level, content, phonetics FROM levels WHERE article_id = ?`, [articleId], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
@@ -56,6 +56,7 @@ const getArticle = async (req, res) => {
 
     const articleLevels = levels.map(level => ({
       ...level,
+      hasAudio: true, // Indicate that audio is available
       exercises: {
         multiple_choice: exercises.multiple_choice.filter(e => e.level_id === level.id),
         fill_in_the_blanks: exercises.fill_in_the_blanks.filter(e => e.level_id === level.id),
@@ -75,6 +76,29 @@ const getArticle = async (req, res) => {
     res.json(completeArticle);
   } catch (err) {
     res.status(err.message === "Article not found" ? 404 : 500).json({ error: err.message });
+  }
+};
+
+const getLevelAudio = async (req, res) => {
+  const levelId = req.params.levelId;
+
+  try {
+    db.get(`SELECT audio_content FROM levels WHERE id = ?`, [levelId], (err, row) => {
+      if (err) {
+        console.error('Error retrieving audio content:', err);
+        return res.status(500).json({ error: 'Error retrieving audio content' });
+      }
+      
+      if (!row || !row.audio_content) {
+        return res.status(404).json({ error: 'Audio content not found' });
+      }
+      
+      res.set('Content-Type', 'audio/mp3');
+      res.send(row.audio_content);
+    });
+  } catch (err) {
+    console.error('Error in getLevelAudio:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -103,5 +127,6 @@ const getRandomLevelHandler = async (req, res) => {
 module.exports = { 
   getArticle,
   getArticlesSummaryHandler,
-  getRandomLevelHandler 
+  getRandomLevelHandler,
+  getLevelAudio
 };

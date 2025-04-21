@@ -55,6 +55,7 @@ const initializeNestedTables = () => {
     level TEXT NOT NULL,
     content TEXT NOT NULL,
     phonetics TEXT NOT NULL,
+    audio_content BLOB,
     FOREIGN KEY(article_id) REFERENCES articles(id)
   )`, (err) => {
     if (err) console.error('Error creating table levels:', err.message);

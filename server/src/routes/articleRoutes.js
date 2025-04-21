@@ -3,7 +3,8 @@ const router = express.Router();
 const { 
   getArticle,
   getArticlesSummaryHandler,
-  getRandomLevelHandler 
+  getRandomLevelHandler,
+  getLevelAudio // New route for audio content
 } = require('../controllers/articleController');
 const { updateReadingTimeHandler } = require('../controllers/exerciseController');
 const { authenticateJWT } = require('../middleware/auth');
@@ -12,6 +13,7 @@ const { authenticateJWT } = require('../middleware/auth');
 router.get('/articles/:id', getArticle);
 router.get('/articles-summary', getArticlesSummaryHandler);
 router.get('/random-level', getRandomLevelHandler);
+router.get('/audio/:levelId', getLevelAudio); // New route for audio content
 
 // Protected route - requires authentication
 router.post('/track-reading-time', authenticateJWT, updateReadingTimeHandler);

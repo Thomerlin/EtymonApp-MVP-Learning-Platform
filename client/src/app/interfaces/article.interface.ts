@@ -42,6 +42,7 @@ export interface Level {
   content: string;
   phonetics: string;
   exercises: Exercises;
+  hasAudio: boolean;
 }
 
 export interface Article {
