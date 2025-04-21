@@ -117,9 +117,36 @@ const requireAdmin = async (req, res, next) => {
   }
 };
 
+// Optional JWT authentication - doesn't reject request if token is missing/invalid
+const optionalAuthJWT = (req, res, next) => {
+  const token = extractTokenFromRequest(req);
+  
+  if (!token) {
+    console.log('optionalAuthJWT: No token provided, continuing as unauthenticated');
+    return next();
+  }
+
+  try {
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET not defined in environment variables');
+      return next();
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    console.log('optionalAuthJWT: User authenticated:', req.user.id);
+  } catch (error) {
+    console.log('optionalAuthJWT: Invalid token, continuing as unauthenticated');
+    // Don't reject the request, just continue without user object
+  }
+  
+  next();
+};
+
 module.exports = {
   authenticateJWT,
   checkUserExists,
   extractTokenFromRequest,
-  requireAdmin
+  requireAdmin,
+  optionalAuthJWT
 };

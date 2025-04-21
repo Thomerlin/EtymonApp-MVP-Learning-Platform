@@ -7,10 +7,10 @@ const {
   getLevelAudio // New route for audio content
 } = require('../controllers/articleController');
 const { updateReadingTimeHandler } = require('../controllers/exerciseController');
-const { authenticateJWT } = require('../middleware/auth');
+const { authenticateJWT, optionalAuthJWT } = require('../middleware/auth');
 
 // Public routes - accessible without authentication
-router.get('/articles/:id', getArticle);
+router.get('/articles/:id', optionalAuthJWT, getArticle); // Updated to use optional authentication
 router.get('/articles-summary', getArticlesSummaryHandler);
 router.get('/random-level', getRandomLevelHandler);
 router.get('/audio/:levelId', getLevelAudio); // New route for audio content

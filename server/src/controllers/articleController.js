@@ -3,7 +3,8 @@ const { getAnsweredCorrectlyFlag, getArticlesSummary, getRandomLevel } = require
 
 const getArticle = async (req, res) => {
   const articleId = req.params.id;
-  const userId = req.user?.id; // Optional - can be undefined for public access
+  // Extract user ID from req.user (if authenticated) or from query parameter
+  const userId = req.user?.id || req.query.userId || null;
 
   try {
     const article = await new Promise((resolve, reject) => {
@@ -73,8 +74,10 @@ const getArticle = async (req, res) => {
       level.exercises.true_false.forEach(ex => delete ex.answer);
     });
 
+    console.log(`Article ${articleId} retrieved with userId: ${userId || 'anonymous'}`);
     res.json(completeArticle);
   } catch (err) {
+    console.error(`Error retrieving article ${articleId}:`, err);
     res.status(err.message === "Article not found" ? 404 : 500).json({ error: err.message });
   }
 };
