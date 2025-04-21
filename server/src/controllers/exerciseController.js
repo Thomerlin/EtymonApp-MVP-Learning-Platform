@@ -42,7 +42,11 @@ const validateMultipleChoice = (exerciseId, answer, articleId, level, type, user
 
 const validateGapFill = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT answer FROM exercises_fill_in_the_blanks WHERE id = ?`;
-  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => row.answer === answer);
+  validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => {
+    const correctAnswer = row.answer.trim().toLowerCase();
+    const userInput = answer.trim().toLowerCase();
+    return correctAnswer === userInput;
+  });
 };
 
 const validateTrueFalse = (exerciseId, answer, articleId, level, type, userId, res) => {
@@ -58,9 +62,8 @@ const validateVocabularyMatching = (exerciseId, answer, articleId, level, type, 
 const validateWriting = (exerciseId, answer, articleId, level, type, userId, res) => {
   const query = `SELECT sentence FROM exercises_writing_with_audio WHERE id = ?`;
   validateExercise(exerciseId, answer, articleId, level, type, userId, res, query, (row, answer) => {
-    // Normalize both strings by trimming whitespace and converting to lowercase
-    const correctAnswer = row.sentence.trim().toLowerCase();
-    const userInput = answer.trim().toLowerCase();
+    const correctAnswer = row.sentence.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    const userInput = answer.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
     return correctAnswer === userInput;
   });
 };
@@ -68,15 +71,15 @@ const validateWriting = (exerciseId, answer, articleId, level, type, userId, res
 const updateReadingTimeHandler = async (req, res) => {
   const userId = req.user?.id;
   const { articleId, level, seconds } = req.body;
-  
+
   if (!userId) {
     return res.status(401).json({ error: "Authentication required" });
   }
-  
+
   if (!articleId || !level || seconds === undefined) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
-  
+
   try {
     await updateReadingTime(userId, articleId, level, seconds);
     res.json({ success: true, message: "Reading time updated" });
