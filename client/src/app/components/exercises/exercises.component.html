@@ -126,9 +126,9 @@
               <div class="audio-control">
                 <button class="audio-button" [class.active]="isExercisePlaying || isExercisePaused"
                   (click)="playWritingAudio(allExercises[currentExerciseIndex].id)">
-                  <span *ngIf="!isExercisePlaying && !isExercisePaused">▶️ Play</span>
-                  <span *ngIf="isExercisePlaying">⏸️ Pause</span>
-                  <span *ngIf="!isExercisePlaying && isExercisePaused">▶️ Resume</span>
+                  <span *ngIf="!isExercisePlaying && !isExercisePaused"><i class="play-icon"></i> Play Sentence</span>
+                  <span *ngIf="isExercisePlaying"><i class="pause-icon"></i> Pause Sentence</span>
+                  <span *ngIf="!isExercisePlaying && isExercisePaused"><i class="play-icon"></i> Resume Sentence</span>
                 </button>
               </div>
               <textarea class="writing-textarea" [(ngModel)]="answers[allExercises[currentExerciseIndex].id]"

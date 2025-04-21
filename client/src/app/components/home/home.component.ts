@@ -161,4 +161,11 @@ export class HomeComponent implements OnInit {
   redirectToArticle(articleId: number, level: string): void {
     this.router.navigate(['/article', articleId], { queryParams: { level } });
   }
+
+  sortLevels(levels: any[]): any[] {
+    const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    return [...levels].sort((a, b) => {
+      return levelOrder.indexOf(a.level) - levelOrder.indexOf(b.level);
+    });
+  }
 }

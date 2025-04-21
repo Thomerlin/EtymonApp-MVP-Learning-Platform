@@ -171,6 +171,16 @@ a {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        
+        .play-icon {
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border-style: solid;
+          border-width: 6px 0 6px 10px;
+          border-color: transparent transparent transparent currentColor;
+          margin-right: 8px;
+        }
 
         &:hover {
           background-color: var(--button-hover);
@@ -209,7 +219,7 @@ a {
     .articles-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
+      gap: 70px 25px;
       margin: 30px 0;
     }
 
@@ -447,6 +457,18 @@ a {
       margin-left: 10px;
       cursor: pointer;
       transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+
+      .play-icon {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 5px 0 5px 8px;
+        border-color: transparent transparent transparent currentColor;
+        margin-right: 6px;
+      }
 
       &:hover {
         background-color: var(--button-hover);

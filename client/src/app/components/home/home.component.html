@@ -43,7 +43,7 @@
           [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
           <span class="sentence-text">
             <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-              <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5 )">{{
+              <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i)">{{
                 word.text }}</span>
               <span class="popup" *ngIf="word.phonetic">
                 {{ replaceHyphensWithSpaces(word.phonetic) }}
@@ -56,7 +56,7 @@
 
     <div class="action-buttons">
       <button class="audio-button" (click)="playAudio(randomExerciseLevel.content)">
-        ▶️ Play Full Text
+        <i class="play-icon"></i> Play Full Text
       </button>
       <button class="access-article-btn" [routerLink]="['/article', randomExerciseLevel.article_id]">
         Continue Reading
@@ -89,13 +89,10 @@
         <div *ngIf="article.levels?.length > 0" class="article-levels">
           <h4>Available Levels:</h4>
           <div class="level-buttons">
-            <button *ngFor="let level of article.levels" (click)="redirectToArticle(article.id, level.level)"
-              class="level-button">
+            <button *ngFor="let level of sortLevels(article.levels)"
+              (click)="redirectToArticle(article.id, level.level)" class="level-button">
               {{ level.level }}
             </button>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-bar-fill" [style.width.%]="article.totalPercentage"></div>
           </div>
         </div>
 
@@ -121,7 +118,7 @@
       <button class="close-popup-btn" (click)="closePopup()">×</button>
       <p class="popup-sentence">{{ popupContent?.text }}
         <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
-          ▶️ Play
+          <i class="play-icon"></i> Play
         </button>
       </p>
       <p class="popup-phonetic">

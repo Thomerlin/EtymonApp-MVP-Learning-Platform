@@ -90,9 +90,9 @@
         <h2>Content for Level {{ level.level }}</h2>
 
         <button class="audio-button" (click)="playArticleAudio()">
-          <span *ngIf="!isArticlePlaying && !isArticlePaused">▶️ Play Full Article</span>
-          <span *ngIf="isArticlePlaying">⏸️ Pause</span>
-          <span *ngIf="!isArticlePlaying && isArticlePaused">▶️ Resume</span>
+          <span *ngIf="!isArticlePlaying && !isArticlePaused"><i class="play-icon"></i> Play Full Article</span>
+          <span *ngIf="isArticlePlaying"><i class="pause-icon"></i> Pause</span>
+          <span *ngIf="!isArticlePlaying && isArticlePaused"><i class="play-icon"></i> Resume</span>
         </button>
         <div class="text-container">
           <!-- Primeiro parágrafo -->
@@ -150,9 +150,15 @@
       <button class="close-popup-btn" (click)="closePopup()">×</button>
       <p class="popup-sentence">{{ popupContent?.text }}
         <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
-          <span *ngIf="!isPopupPlaying && !isPopupPaused || currentPopupText !== popupContent?.text">▶️ Play</span>
-          <span *ngIf="isPopupPlaying && currentPopupText === popupContent?.text">⏸️ Pause</span>
-          <span *ngIf="!isPopupPlaying && isPopupPaused && currentPopupText === popupContent?.text">▶️ Resume</span>
+          <span *ngIf="!isPopupPlaying && !isPopupPaused || currentPopupText !== popupContent?.text">
+            <i class="play-icon"></i> Play
+          </span>
+          <span *ngIf="isPopupPlaying && currentPopupText === popupContent?.text">
+            <i class="pause-icon"></i> Pause
+          </span>
+          <span *ngIf="!isPopupPlaying && isPopupPaused && currentPopupText === popupContent?.text">
+            <i class="play-icon"></i> Resume
+          </span>
         </button>
       </p>
       <p class="popup-phonetic">

@@ -283,6 +283,41 @@
     gap: 5px;
     transition: background-color 0.3s ease;
 
+    .play-icon {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 6px 0 6px 10px;
+      border-color: transparent transparent transparent currentColor;
+      margin-right: 6px;
+    }
+
+    .pause-icon {
+      display: inline-block;
+      width: 8px;
+      height: 12px;
+      position: relative;
+      margin-right: 6px;
+      
+      &:before, &:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 3px;
+        height: 12px;
+        background-color: currentColor;
+      }
+      
+      &:before {
+        left: 0;
+      }
+      
+      &:after {
+        right: 0;
+      }
+    }
+
     &.active {
       background-color: var(--button-hover);
     }
