@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
+import { Location } from '@angular/common'; // Add Location import
 import { TtsService } from '../../services/tts.service';
 import { AuthService } from '../../services/auth.service';
 import { ArticleService } from '../../services/article.service';
@@ -22,8 +23,12 @@ interface Sentence {
 })
 export class ArticleComponent implements OnInit {
   article: Article | null = null;
+
+  userId: number = 0;
+
   level: string = "A1";
   currentLevel: string = "A1";
+  selectedLevel: string = "A1"; // Add selectedLevel property
   currentLevelId: number | null = null; // Track current level ID for audio
   text: string = "";
   phonetics: string = "";
@@ -50,24 +55,49 @@ export class ArticleComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ttsService: TtsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private location: Location // Add Location service
   ) { }
 
   ngOnInit() {
     // Check authentication status
     this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
+      this.userId = user ? user.id : 0;
     });
 
+    // Subscribe to both params and queryParams changes
     this.route.params.subscribe(params => {
       const id = +params['id'];
-      this.isLoading = true; // Set loading state when initially loading the article
-      this.route.queryParams.subscribe(queryParams => {
-        this.level = queryParams['level'] || this.level;
-        this.currentLevel = this.level;
-        this.getArticleById(id);
-      });
+      if (id) {
+        this.isLoading = true; // Set loading state when initially loading the article
+        this.route.queryParams.subscribe(queryParams => {
+          this.level = queryParams['level'] || this.level;
+          this.currentLevel = this.level;
+          this.getArticleById(id);
+        });
+      }
     });
+    
+    // Watch for changes to query params separately (for when only level changes)
+    this.route.queryParams.subscribe(queryParams => {
+      if (queryParams['level'] && queryParams['level'] !== this.currentLevel) {
+        this.level = queryParams['level'];
+        this.currentLevel = this.level;
+        
+        // Only reload if we already have an article
+        if (this.article && this.article.id) {
+          this.isLoading = true;
+          this.loadLevel();
+          
+          // Add a delay before setting loading to false to show the animation
+          setTimeout(() => {
+            this.isLoading = false;
+          }, 800);
+        }
+      }
+    });
+
     document.addEventListener('click', this.closePopupOnOutsideClick.bind(this));
 
     // Subscribe to TTS service's playing/paused status for article
@@ -104,7 +134,6 @@ export class ArticleComponent implements OnInit {
   getArticleById(id: number) {
     this.articleService.getArticle(id).subscribe(
       (res: Article) => {
-        console.log(res);
         this.article = res;
         this.title = res.title;
         this.createdDate = res.createdDate;
@@ -187,6 +216,7 @@ export class ArticleComponent implements OnInit {
     this.isLoading = true; // Set loading state to true
     this.level = level;
     this.currentLevel = level;
+    this.selectedLevel = level; // Update selectedLevel too
     
     // Stop any playing audio when changing levels
     this.ttsService.stopAudio('article');
@@ -253,22 +283,24 @@ export class ArticleComponent implements OnInit {
     }
   }
 
+  // Simplified playArticleAudio method that just toggles play/pause
   playArticleAudio() {
-    if (this.currentLevelId && this.text) {
-      // Use the pre-generated audio through the TTS service
-      this.ttsService.playLevelAudio(this.currentLevelId, this.text);
+    if (this.isArticlePlaying) {
+      // If playing, pause it
+      this.ttsService.pauseAudio('article');
     } else {
-      // Fall back to regular TTS if level ID is not available
-      this.ttsService.toggleAudio(this.text, 'article');
+      // If not playing, either start new or resume
+      if (this.isArticlePaused) {
+        this.ttsService.resumeAudio('article');
+      } else {
+        // Start new playback
+        if (this.currentLevelId && this.text) {
+          this.ttsService.playLevelAudio(this.currentLevelId, this.text);
+        } else {
+          this.ttsService.speak(this.text, 'article');
+        }
+      }
     }
-  }
-
-  pauseArticleAudio() {
-    this.ttsService.pauseAudio('article');
-  }
-
-  resumeArticleAudio() {
-    this.ttsService.resumeAudio('article');
   }
 
   stopArticleAudio() {
@@ -287,8 +319,48 @@ export class ArticleComponent implements OnInit {
 
   // Method to reload the article when an exercise is validated correctly
   reloadArticle() {
-    if (this.article && this.article.id) {
-      this.getArticleById(this.article.id);
+    // No longer reloading the entire article
+    // Just update the parts needed or do nothing
+    console.log('Exercise validated successfully');
+    
+    // If specific UI updates are needed without reloading the whole article:
+    // this.updateSpecificUI();
+  }
+
+  // Add handleExerciseValidated method
+  handleExerciseValidated(): void {
+    console.log('Exercise validated successfully');
+    // We can use this to update UI elements or progress if needed
+    // without reloading the whole article
+  }
+
+  // Add a method to handle level changes from exercises component
+  changeLevel(newLevel: string): void {
+    // Update the selected level
+    this.selectedLevel = newLevel;
+    this.level = newLevel;
+    this.currentLevel = newLevel;
+    
+    // Update the URL to reflect the new level without reloading the page
+    if (this.article && this.article.id) { // Use article.id instead of slug
+      const urlTree = this.router.createUrlTree([], {
+        relativeTo: this.route,
+        queryParams: { level: newLevel },
+        queryParamsHandling: 'merge',
+      });
+      
+      this.location.go(urlTree.toString());
     }
+
+    // Load the content for the new level
+    this.loadLevel();
+    
+    // Scroll to exercises section
+    setTimeout(() => {
+      const exercisesElement = document.querySelector('.exercises-container');
+      if (exercisesElement) {
+        exercisesElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   }
 }

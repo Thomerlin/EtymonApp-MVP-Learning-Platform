@@ -2,17 +2,23 @@ export interface MultipleChoiceExercise {
   id: number;
   question: string;
   options: string;
+  answeredCorrectly: boolean;
+
 }
 
 export interface FillInTheBlanksExercise {
   id: number;
   sentence: string;
   hint: string;
+  answeredCorrectly: boolean;
+
 }
 
 export interface TrueFalseExercise {
   id: number;
   statement: string;
+  answeredCorrectly: boolean;
+
 }
 
 export interface VocabularyMatchingExercise {
@@ -26,6 +32,8 @@ export interface VocabularyMatchingExercise {
 export interface WritingWithAudioExercise {
   id: number;
   sentence: string;
+  answeredCorrectly: boolean;
+
 }
 
 export interface Exercises {

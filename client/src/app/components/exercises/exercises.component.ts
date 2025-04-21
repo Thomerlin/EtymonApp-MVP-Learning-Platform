@@ -1,17 +1,18 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 import { TtsService } from '../../services/tts.service';
 import { AuthService } from '../../services/auth.service';
 import { ProgressExercisesComponent } from '../progress-exercises/progress-exercises.component';
 import { ExerciseService } from '../../services/exercise.service';
-import { 
-  Article, 
-  Level, 
+import {
+  Article,
+  Level,
   MultipleChoiceExercise,
   FillInTheBlanksExercise,
   TrueFalseExercise,
   VocabularyMatchingExercise,
   WritingWithAudioExercise,
-  Exercises 
+  Exercises
 } from '../../interfaces/article.interface';
 
 // Define additional types for exercises with extra properties
@@ -21,19 +22,19 @@ interface VocabularyMatchingExerciseWithFlipped extends VocabularyMatchingExerci
 
 interface MultipleChoiceExerciseWithType extends MultipleChoiceExercise {
   type: 'multiple_choice';
-  answeredCorrectly?: boolean;
+  answeredCorrectly: boolean;
 }
 interface FillInTheBlanksExerciseWithType extends FillInTheBlanksExercise {
   type: 'fill_in_the_blanks';
-  answeredCorrectly?: boolean;
+  answeredCorrectly: boolean;
 }
 interface TrueFalseExerciseWithType extends TrueFalseExercise {
   type: 'true_false';
-  answeredCorrectly?: boolean;
+  answeredCorrectly: boolean;
 }
 interface WritingWithAudioExerciseWithType extends WritingWithAudioExercise {
   type: 'writing_with_audio';
-  answeredCorrectly?: boolean;
+  answeredCorrectly: boolean;
 }
 
 type ExerciseWithType =
@@ -52,7 +53,8 @@ export class ExercisesComponent implements OnInit, OnChanges {
   @Input() currentLevel!: string;
   @Input() isAuthenticated = false;
   @Output() authModalRequested = new EventEmitter<void>();
-  @Output() exerciseValidated = new EventEmitter<void>(); // Add new output event
+  @Output() exerciseValidated = new EventEmitter<void>();
+  @Output() levelChanged = new EventEmitter<string>(); // Add new output event to navigate to next level
 
   @ViewChild(ProgressExercisesComponent) progressComponent!: ProgressExercisesComponent;
 
@@ -79,10 +81,14 @@ export class ExercisesComponent implements OnInit, OnChanges {
   // Add loading state
   isLoading: boolean = false;
 
+  // Add property to track if all exercises are completed
+  allExercisesCompleted: boolean = false;
+
   constructor(
     private exerciseService: ExerciseService,
     private ttsService: TtsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -154,6 +160,10 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
         this.currentExerciseIndex = 0;
 
+        if (this.allExercises.every((ex: ExerciseWithType) => ex.answeredCorrectly === true)) {
+          this.checkAllExercisesCompleted()
+        }
+
         // Add a delay for the placeholder to be visible
         setTimeout(() => {
           this.isLoading = false; // Set loading to false after data is processed
@@ -184,7 +194,6 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
       this.exerciseService.validateExercise(exerciseId, answer, type, this.article.id, level).subscribe(
         res => {
-          console.log(res.message);
           if (res.message === "Correct answer! Progress saved.") {
             this.answers[exerciseId] = answer; // Save the correct answer
 
@@ -195,15 +204,26 @@ export class ExercisesComponent implements OnInit, OnChanges {
               this.progressComponent.getData(this.article.id.toString(), level); // Update progress dynamically
             }
 
-            // Emit event to notify that exercise was validated correctly
-            this.exerciseValidated.emit();
-
             // Allow time for success animation to play
             setTimeout(() => {
               this.showSuccessAnimation = false;
               this.clearInputForExerciseType(type, exerciseId); // Clear input after success
               this.moveToNextExercise();
-              this.refreshExercises();
+
+              // Only refresh the exercise set, not the whole article
+              if (this.allExercises[this.currentExerciseIndex].answeredCorrectly !== true) {
+                const currentExercise = this.allExercises[this.currentExerciseIndex];
+                if (currentExercise) {
+                  currentExercise.answeredCorrectly = true;
+                }
+              }
+
+              // Check if all exercises are answered correctly
+              this.checkAllExercisesCompleted();
+
+              // Emit event to notify that exercise was validated correctly
+              // but don't trigger full page refresh
+              this.exerciseValidated.emit();
             }, 1000);
           } else {
             this.clearInputForExerciseType(type, exerciseId); // Clear input after failure
@@ -255,7 +275,13 @@ export class ExercisesComponent implements OnInit, OnChanges {
   }
 
   refreshExercises() {
-    this.loadExercises();
+    // Instead of reloading everything, just filter out completed exercises
+    this.allExercises = this.allExercises.filter(ex => !ex.answeredCorrectly);
+
+    if (this.allExercises.length === 0) {
+      // If all exercises are complete, we can reload to get fresh data
+      this.loadExercises();
+    }
   }
 
   handleIncorrectAnswer(exerciseId: number) {
@@ -281,7 +307,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
       this.incorrectExercises = [];
       this.currentExerciseIndex = 0;
     } else {
-      console.log("All exercises completed!");
+      this.checkAllExercisesCompleted();
     }
   }
 
@@ -343,4 +369,47 @@ export class ExercisesComponent implements OnInit, OnChanges {
   hasPendingExercises(): boolean {
     return this.allExercises.some(ex => !ex.answeredCorrectly);
   }
+
+  // Add method to check if all exercises are completed
+  checkAllExercisesCompleted(): void {
+    // Check if every exercise has been answered correctly
+    this.allExercisesCompleted = this.allExercises.every(exercise => exercise.answeredCorrectly === true);
+  }
+
+  // Method to get next level based on current level
+  getNextLevel(): string {
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const currentIndex = levels.indexOf(this.currentLevel);
+
+    // If current level is not found or is the last one, return current level
+    if (currentIndex === -1 || currentIndex === levels.length - 1) {
+      return this.currentLevel;
+    }
+
+    // Return the next level
+    return levels[currentIndex + 1];
+  }
+
+  // Method to navigate to next level
+  navigateToNextLevel(): void {
+    const nextLevel = this.getNextLevel();
+    if (nextLevel !== this.currentLevel) {
+      // Instead of just emitting an event, use router to navigate to the same article with new level
+      if (this.article.id) {
+        this.router.navigate(['/article', this.article.id], {
+          queryParams: { level: nextLevel },
+          queryParamsHandling: 'merge' // Preserve other query parameters if any
+        });
+      } else {
+        // Fallback to event emission if no article ID available
+        this.levelChanged.emit(nextLevel);
+      }
+    }
+  }
+
+  // Add method to navigate to home
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
 }
+

@@ -55,11 +55,8 @@
     </div>
 
     <div class="action-buttons">
-      <button class="audio-button" (click)="playAudio(randomExerciseLevel.content)">
-        <i class="play-icon"></i> Play Full Text
-      </button>
       <button class="access-article-btn" [routerLink]="['/article', randomExerciseLevel.article_id]">
-        Continue Reading
+        Continue Reading and Listening
       </button>
     </div>
   </div>
@@ -117,9 +114,6 @@
     <div class="popup-content">
       <button class="close-popup-btn" (click)="closePopup()">×</button>
       <p class="popup-sentence">{{ popupContent?.text }}
-        <button (click)="playAudio(popupContent?.text)" class="audio-control-btn">
-          <i class="play-icon"></i> Play
-        </button>
       </p>
       <p class="popup-phonetic">
         {{ popupContent?.phonetic }}

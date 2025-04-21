@@ -46,8 +46,12 @@
     }
   }
 
+  .audio-controls {
+    margin: 20px 0;
+  }
+
   .audio-button {
-    padding: 10px 15px;
+    padding: 12px 20px;
     background-color: var(--button-primary);
     color: var(--button-text);
     border: none;
@@ -56,54 +60,49 @@
     transition: background-color 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 500;
 
     .play-icon {
       display: inline-block;
       width: 0;
       height: 0;
       border-style: solid;
-      border-width: 6px 0 6px 10px;
+      border-width: 8px 0 8px 12px;
       border-color: transparent transparent transparent currentColor;
-      margin-right: 6px;
+      margin-right: 10px;
     }
 
     .pause-icon {
       display: inline-block;
-      width: 8px;
-      height: 12px;
+      width: 12px;
+      height: 16px;
       position: relative;
-      margin-right: 6px;
-      
-      &:before, &:after {
+      margin-right: 10px;
+
+      &:before,
+      &:after {
         content: "";
         position: absolute;
         top: 0;
-        width: 3px;
-        height: 12px;
+        width: 4px;
+        height: 16px;
         background-color: currentColor;
       }
-      
+
       &:before {
         left: 0;
       }
-      
+
       &:after {
         right: 0;
       }
     }
 
-    .audio-quality-tag {
-      margin-left: 6px;
-      padding: 2px 5px;
-      font-size: 0.7em;
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-    }
-
     &:hover {
       background-color: var(--button-hover);
+      transform: translateY(-2px);
     }
   }
 
@@ -266,15 +265,16 @@
         border-color: transparent transparent transparent currentColor;
         margin-right: 6px;
       }
-      
+
       .pause-icon {
         display: inline-block;
         width: 8px;
         height: 10px;
         position: relative;
         margin-right: 6px;
-        
-        &:before, &:after {
+
+        &:before,
+        &:after {
           content: "";
           position: absolute;
           top: 0;
@@ -282,11 +282,11 @@
           height: 10px;
           background-color: currentColor;
         }
-        
+
         &:before {
           left: 0;
         }
-        
+
         &:after {
           right: 0;
         }

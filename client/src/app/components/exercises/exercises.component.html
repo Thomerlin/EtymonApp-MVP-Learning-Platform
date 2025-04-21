@@ -55,8 +55,24 @@
     </div>
   </div>
 
+  <!-- Congratulations message when all exercises are completed -->
+  <div *ngIf="allExercisesCompleted && !isLoading" class="congrats-container">
+    <div class="congrats-message">
+      <div class="trophy-icon">🏆</div>
+      <h2>Congratulations!</h2>
+      <p>You've successfully completed all exercises!</p>
+      <p>Keep practicing to improve your English!</p>
+      <button class="btn-restart" (click)="navigateToNextLevel()">
+        Advance to level {{ getNextLevel() }}
+      </button>
+      <button *ngIf="getNextLevel() === currentLevel" class="btn-restart" (click)="navigateToHome()">
+        Practice again
+      </button>
+    </div>
+  </div>
+
   <!-- Actual exercises content shown when not loading -->
-  <div [hidden]="isLoading" class="exercises-content">
+  <div [hidden]="isLoading || allExercisesCompleted" class="exercises-content">
     <div *ngIf="allExercises.length > 0" class="exercise-wrapper">
       <ng-container [ngSwitch]="allExercises[currentExerciseIndex]?.type">
         <!-- Multiple Choice -->
@@ -142,26 +158,25 @@
         </div>
       </ng-container>
     </div>
+  </div>
 
-    <!-- Article Progress only shown to authenticated users -->
-    <div *ngIf="isAuthenticated" class="articleProgressSection">
-      <app-progress-exercises [articleId]="article && article.id ? article.id.toString() : ''" [level]="currentLevel" [userId]="userId">
-      </app-progress-exercises>
-    </div>
+  <!-- Article Progress only shown to authenticated users -->
+  <div *ngIf="isAuthenticated" class="articleProgressSection">
+    <app-progress-exercises [articleId]="article && article.id ? article.id.toString() : ''" [level]="currentLevel" [userId]="userId">
+    </app-progress-exercises>
+  </div>
 
-    <!-- Vocabulary Matching -->
-    <div class="flashcard-container">
-      <!-- Using regular div instead of ng-container to properly maintain grid structure -->
-      <div class="flashcard" *ngFor="let flashcard of vocabularyFlashcards" 
-           [class.flipped]="flashcard.flipped" 
-           (click)="flipFlashcard(flashcard)">
-        <div class="flashcard-front">
-          <h3>{{ flashcard.word }}</h3>
-        </div>
-        <div class="flashcard-back">
-          <p><strong>Definition:</strong> {{ flashcard.definition }}</p>
-          <p><strong>Example:</strong> {{ flashcard.example }}</p>
-        </div>
+  <!-- Vocabulary Matching -->
+  <div *ngIf="allExercisesCompleted" class="flashcard-container">
+    <div class="flashcard" *ngFor="let flashcard of vocabularyFlashcards" 
+         [class.flipped]="flashcard.flipped" 
+         (click)="flipFlashcard(flashcard)">
+      <div class="flashcard-front">
+        <h3>{{ flashcard.word }}</h3>
+      </div>
+      <div class="flashcard-back">
+        <p><strong>Definition:</strong> {{ flashcard.definition }}</p>
+        <p><strong>Example:</strong> {{ flashcard.example }}</p>
       </div>
     </div>
   </div>
