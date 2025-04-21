@@ -2,54 +2,17 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, ViewChild, Output, 
 import { TtsService } from '../../services/tts.service';
 import { AuthService } from '../../services/auth.service';
 import { ProgressExercisesComponent } from '../progress-exercises/progress-exercises.component';
-import { ArticleService } from '../../services/article.service';
 import { ExerciseService } from '../../services/exercise.service';
-
-interface MultipleChoiceExercise {
-  id: number;
-  question: string;
-  options: string;
-}
-
-interface FillInTheBlanksExercise {
-  id: number;
-  sentence: string;
-  hint: string;
-}
-
-interface TrueFalseExercise {
-  id: number;
-  statement: string;
-}
-
-interface VocabularyMatchingExercise {
-  id: number;
-  word: string;
-  definition: string;
-  example: string;
-  flipped?: boolean;
-}
-
-interface WritingWithAudioExercise {
-  id: number;
-  sentence: string;
-}
-
-interface Exercises {
-  multiple_choice: MultipleChoiceExercise[];
-  fill_in_the_blanks: FillInTheBlanksExercise[];
-  true_false: TrueFalseExercise[];
-  vocabulary_matching: VocabularyMatchingExercise[];
-  writing_with_audio: WritingWithAudioExercise[];
-}
-
-interface Level {
-  id: number;
-  level: string;
-  content: string;
-  phonetics: string;
-  exercises: Exercises;
-}
+import { 
+  Article, 
+  Level, 
+  MultipleChoiceExercise,
+  FillInTheBlanksExercise,
+  TrueFalseExercise,
+  VocabularyMatchingExercise,
+  WritingWithAudioExercise,
+  Exercises 
+} from '../../interfaces/article.interface';
 
 // Define additional types for exercises with extra properties
 interface VocabularyMatchingExerciseWithFlipped extends VocabularyMatchingExercise {
@@ -72,9 +35,6 @@ interface WritingWithAudioExerciseWithType extends WritingWithAudioExercise {
   type: 'writing_with_audio';
   answeredCorrectly?: boolean;
 }
-interface WritingWithAudioExerciseWithType extends WritingWithAudioExercise {
-  type: 'writing_with_audio';
-}
 
 type ExerciseWithType =
   | MultipleChoiceExerciseWithType
@@ -88,7 +48,7 @@ type ExerciseWithType =
   styleUrls: ['./exercises.component.scss']
 })
 export class ExercisesComponent implements OnInit, OnChanges {
-  @Input() articleId!: number;
+  @Input() article!: Article;
   @Input() currentLevel!: string;
   @Input() isAuthenticated = false;
   @Output() authModalRequested = new EventEmitter<void>();
@@ -116,7 +76,6 @@ export class ExercisesComponent implements OnInit, OnChanges {
   isLoading: boolean = false;
 
   constructor(
-    private articleService: ArticleService,
     private exerciseService: ExerciseService,
     private ttsService: TtsService,
     private authService: AuthService
@@ -150,56 +109,48 @@ export class ExercisesComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes['articleId'] && !changes['articleId'].firstChange) ||
+    if ((changes['article.id'] && !changes['article.id'].firstChange) ||
       (changes['currentLevel'] && !changes['currentLevel'].firstChange)) {
       this.isLoading = true; // Set loading state to true when level changes
       this.loadExercises();
-    } else if (changes['articleId']?.firstChange || changes['currentLevel']?.firstChange) {
+    } else if (changes['article.id']?.firstChange || changes['currentLevel']?.firstChange) {
       this.isLoading = true; // Set loading state to true on first load
       this.loadExercises();
     }
   }
 
   loadExercises() {
-    if (this.articleId) {
-      this.articleService.getArticle(this.articleId).subscribe(
-        article => {
-          const level = article.levels.find((l: Level) => l.level === this.currentLevel);
-          if (level) {
-            // Process vocabulary matching exercises
-            this.vocabularyFlashcards = level.exercises?.vocabulary_matching.map((exercise: VocabularyMatchingExercise): VocabularyMatchingExerciseWithFlipped => ({
-              ...exercise,
-              flipped: false
-            })) || [];
+    if (this.article.id) {
+      const level = this.article.levels.find((l: Level) => l.level === this.currentLevel);
+      if (level) {
+        // Process vocabulary matching exercises
+        this.vocabularyFlashcards = level.exercises?.vocabulary_matching.map((exercise: VocabularyMatchingExercise): VocabularyMatchingExerciseWithFlipped => ({
+          ...exercise,
+          flipped: false
+        })) || [];
 
-            this.exerciseId = level.exercises?.multiple_choice?.[0]?.id || null;
+        this.exerciseId = level.exercises?.multiple_choice?.[0]?.id || null;
 
-            // Format multiple choice options
-            level.exercises?.multiple_choice?.forEach((exercicio: MultipleChoiceExercise) => {
-              exercicio.options = exercicio.options.replace(/["[\]]/g, '');
-            });
+        // Format multiple choice options
+        level.exercises?.multiple_choice?.forEach((exercicio: MultipleChoiceExercise) => {
+          exercicio.options = exercicio.options.replace(/["[\]]/g, '');
+        });
 
-            // Combine and shuffle all exercises
-            this.allExercises = this.shuffleArray([
-              ...level.exercises.multiple_choice.map((ex: MultipleChoiceExercise) => ({ ...ex, type: 'multiple_choice' } as MultipleChoiceExerciseWithType)),
-              ...level.exercises.fill_in_the_blanks.map((ex: FillInTheBlanksExercise) => ({ ...ex, type: 'fill_in_the_blanks' } as FillInTheBlanksExerciseWithType)),
-              ...level.exercises.true_false.map((ex: TrueFalseExercise) => ({ ...ex, type: 'true_false' } as TrueFalseExerciseWithType)),
-              ...level.exercises.writing_with_audio.map((ex: WritingWithAudioExercise) => ({ ...ex, type: 'writing_with_audio' } as WritingWithAudioExerciseWithType))
-            ]).filter((ex: ExerciseWithType) => !ex.answeredCorrectly);
+        // Combine and shuffle all exercises
+        this.allExercises = this.shuffleArray([
+          ...level.exercises.multiple_choice.map((ex: MultipleChoiceExercise) => ({ ...ex, type: 'multiple_choice' } as MultipleChoiceExerciseWithType)),
+          ...level.exercises.fill_in_the_blanks.map((ex: FillInTheBlanksExercise) => ({ ...ex, type: 'fill_in_the_blanks' } as FillInTheBlanksExerciseWithType)),
+          ...level.exercises.true_false.map((ex: TrueFalseExercise) => ({ ...ex, type: 'true_false' } as TrueFalseExerciseWithType)),
+          ...level.exercises.writing_with_audio.map((ex: WritingWithAudioExercise) => ({ ...ex, type: 'writing_with_audio' } as WritingWithAudioExerciseWithType))
+        ]).filter((ex: ExerciseWithType) => !ex.answeredCorrectly);
 
-            this.currentExerciseIndex = 0;
+        this.currentExerciseIndex = 0;
 
-            // Add a delay for the placeholder to be visible
-            setTimeout(() => {
-              this.isLoading = false; // Set loading to false after data is processed
-            }, 800); // Match the delay in the article component
-          }
-        },
-        err => {
-          console.error('Error loading exercises:', err);
-          this.isLoading = false; // Set loading to false on error
-        }
-      );
+        // Add a delay for the placeholder to be visible
+        setTimeout(() => {
+          this.isLoading = false; // Set loading to false after data is processed
+        }, 800); // Match the delay in the article component
+      }
     } else {
       this.isLoading = false; // Set loading to false if no article ID
     }
@@ -220,10 +171,10 @@ export class ExercisesComponent implements OnInit, OnChanges {
       return;
     }
 
-    if (this.articleId) {
+    if (this.article.id) {
       const level = this.currentLevel;
 
-      this.exerciseService.validateExercise(exerciseId, answer, type, this.articleId, level).subscribe(
+      this.exerciseService.validateExercise(exerciseId, answer, type, this.article.id, level).subscribe(
         res => {
           console.log(res.message);
           if (res.message === "Correct answer! Progress saved.") {
@@ -233,7 +184,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
             this.showSuccessAnimation = true;
 
             if (this.progressComponent) {
-              this.progressComponent.getData(this.articleId.toString(), level); // Update progress dynamically
+              this.progressComponent.getData(this.article.id.toString(), level); // Update progress dynamically
             }
 
             // Allow time for success animation to play
@@ -341,7 +292,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
   }
 
   playWritingAudio(exerciseId: number) {
-    if (this.articleId) {
+    if (this.article.id) {
       // Find the exercise by ID
       const exercise = this.allExercises.find(ex =>
         ex.type === 'writing_with_audio' && ex.id === exerciseId);

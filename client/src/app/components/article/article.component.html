@@ -137,7 +137,7 @@
         </div>
 
         <!-- Include the Exercises Component -->
-        <app-exercises [articleId]="article.id" [currentLevel]="currentLevel" [isAuthenticated]="isAuthenticated"
+        <app-exercises [article]="article" [currentLevel]="currentLevel" [isAuthenticated]="isAuthenticated"
           (authModalRequested)="openAuthModal()">
         </app-exercises>
       </div>

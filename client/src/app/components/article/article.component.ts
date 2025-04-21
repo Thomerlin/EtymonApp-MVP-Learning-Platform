@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { TtsService } from '../../services/tts.service';
 import { AuthService } from '../../services/auth.service';
 import { ArticleService } from '../../services/article.service';
+import { Article, Level } from '../../interfaces/article.interface';
 
 interface Sentence {
   text: string;
@@ -12,22 +13,6 @@ interface Sentence {
     text: string;
     phonetic: string;
   }[];
-}
-
-interface Level {
-  id: number;
-  level: string;
-  content: string;
-  phonetics: string;
-}
-
-interface Article {
-  id: number;
-  title: string;
-  articleLink: string;
-  createdDate: string;
-  summary: string;
-  levels: Level[];
 }
 
 @Component({

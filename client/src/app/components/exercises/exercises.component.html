@@ -145,7 +145,7 @@
 
     <!-- Article Progress only shown to authenticated users -->
     <div *ngIf="isAuthenticated" class="articleProgressSection">
-      <app-progress-exercises [articleId]="articleId.toString()" [level]="currentLevel" [userId]="1">
+      <app-progress-exercises [articleId]="article && article.id ? article.id.toString() : ''" [level]="currentLevel" [userId]="1">
       </app-progress-exercises>
     </div>
 
