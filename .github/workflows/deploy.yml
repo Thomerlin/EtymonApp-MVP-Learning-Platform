@@ -1,4 +1,4 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger VPS
 
 on:
   push:
@@ -39,9 +39,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
           echo "$GOOGLE_APPLICATION_CREDENTIALS" | base64 -d > server/config/google-credentials.json
-          ls -la server/config/
           chmod 644 server/config/google-credentials.json
-          ls -la server/config/
 
       - name: Create production .env file
         run: |
@@ -85,18 +83,13 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
-          
-      - name: Check files before deployment
-        run: |
-          ls -la server/
-          ls -la server/config/
 
       - name: Deploy to Hostinger via SSH
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key_path: ~/.ssh/id_rsa
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           source: "./server/,./client/dist/client/"
           target: "~/etymonapp"
@@ -104,15 +97,24 @@ jobs:
           timeout: 60s
           command_timeout: 20m
 
-      - name: SSH - Restart server
+      - name: SSH - Setup and restart server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key_path: ~/.ssh/id_rsa
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
             cd ~/etymonapp/server
             npm ci --production
             npm run build
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            if pm2 list | grep -q "etymon-api"; then
+              pm2 restart etymon-api
+            else
+              pm2 start ecosystem.config.js
+            fi
+            
+            # Setup Nginx if not already configured (optional)
+            if [ ! -f /etc/nginx/sites-available/etymonapp.com ]; then
+              echo "You may need to manually set up Nginx configuration for etymonapp.com"
+            fi
