@@ -79,6 +79,13 @@ jobs:
           }
           EOF
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
+          
       - name: Check files before deployment
         run: |
           ls -la server/
@@ -89,7 +96,7 @@ jobs:
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: ~/.ssh/id_rsa
           port: ${{ secrets.HOSTINGER_PORT }}
           source: "./server/,./client/dist/client/"
           target: "~/etymonapp"
@@ -102,7 +109,7 @@ jobs:
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: ~/.ssh/id_rsa
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
             cd ~/etymonapp/server
