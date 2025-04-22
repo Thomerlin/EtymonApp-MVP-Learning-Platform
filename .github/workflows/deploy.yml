@@ -1,0 +1,61 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Build client
+        run: |
+          cd client
+          npm ci
+          npm run build
+
+      - name: Decode Google credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" | base64 -d > server/google-credentials.json
+
+      - name: Copy .env.production
+        run: |
+          echo "${{ secrets.ENV_PRODUCTION }}" > server/.env
+
+      - name: Deploy to Hostinger via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          source: "./server/*,./client/dist/client/*"
+          target: "~/etymonapp"
+
+      - name: SSH - Restart server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script: |
+            cd ~/etymonapp/server
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
