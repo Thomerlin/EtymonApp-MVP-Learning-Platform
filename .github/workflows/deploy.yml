@@ -1,101 +1,84 @@
-name: Deploy to Production
+name: Deploy to Hostinger
 
 on:
   push:
-    branches:
-      - main  # Adjust if your production branch is different
+    branches: [ main ]
 
 jobs:
-  deploy-backend:
-    name: Deploy Backend to VPS
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js 22
+      - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: 'server/package-lock.json'
+          cache: 'npm'                                # :contentReference[oaicite:6]{index=6}
 
-      - name: Install backend dependencies
+      - name: Install dependencies
         run: |
-          cd server
-          npm ci
+          cd server && npm ci
+          cd ../client && npm ci
 
-      - name: Create production environment file
+      - name: Build client (Angular 17)
         run: |
-          cd server
-          cat > .env << EOF
+          cd client
+          npm run build -- --configuration production  # :contentReference[oaicite:7]{index=7}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Decode Google credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          mkdir -p server/config
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" | base64 --decode > server/config/google-credentials.json
+          chmod 600 server/config/google-credentials.json  # :contentReference[oaicite:8]{index=8}
+
+      - name: Create production .env
+        run: |
+          cat > server/.env <<EOF
           NODE_ENV=production
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-          JWT_AUDIENCE="etymonapp.com/api"
-          JWT_ISSUER="etymonapp.com"
+          JWT_AUDIENCE=etymonapp.com/api
+          JWT_ISSUER=etymonapp.com
           PORT=3000
           CLIENT_URL=https://etymonapp.com
           SERVER_URL=https://api.etymonapp.com
-          ALLOWED_ORIGINS=https://etymonapp.com,https://www.etymonapp.com
+          ALLOWED_ORIGINS=https://etymonapp.com,https://www.etymonapp.com,https://api.etymonapp.com
+          GOOGLE_APPLICATION_CREDENTIALS=./config/google-credentials.json
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_CALLBACK_URL=https://api.etymonapp.com/api/auth/google/callback
           EMAIL_ADM=${{ secrets.EMAIL_ADM }}
           EOF
 
-      - name: Decode Google credentials
-        run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 -d > google-credentials.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json" >> server/.env
-
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy backend to VPS
-        run: |
-          rsync -avz --delete --exclude 'node_modules' --exclude '.env.example' server/ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/var/www/api.etymonapp.com/
-          ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "cd /var/www/api.etymonapp.com && npm ci && pm2 restart etymon-api || pm2 start dist/main.js --name etymon-api"
-
-  deploy-frontend:
-    name: Deploy Frontend to VPS
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js for Angular 17
-        uses: actions/setup-node@v3
+      - name: Deploy files via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          node-version: '20'  # Angular 17 is compatible with Node 20
-          cache: 'npm'
-          cache-dependency-path: 'client/package-lock.json'
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "server/,client/dist/client/"
+          target: "~/etymonapp"                         # :contentReference[oaicite:9]{index=9}
 
-      - name: Install frontend dependencies
-        run: |
-          cd client
-          npm ci
-
-      - name: Build frontend for production
-        run: |
-          cd client
-          ng build --configuration production
-
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy frontend to VPS
-        run: |
-          rsync -avz --delete client/dist/client/ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/var/www/etymonapp.com/
-
-      - name: Configure Nginx (if needed)
-        run: |
-          ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "sudo systemctl restart nginx"
+      - name: Restart Node.js app via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/etymonapp/server
+            npm install --production
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js  # :contentReference[oaicite:10]{index=10}
