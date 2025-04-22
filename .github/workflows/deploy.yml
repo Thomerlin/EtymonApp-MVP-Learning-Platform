@@ -22,11 +22,12 @@ jobs:
         run: |
           cd server
           npm ci
+          cd ../client
+          npm ci
 
       - name: Build client
         run: |
           cd client
-          npm ci
           npm run build
 
       - name: Decode Google credentials
@@ -34,28 +35,64 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
           echo "$GOOGLE_APPLICATION_CREDENTIALS" | base64 -d > server/google-credentials.json
+          chmod 400 server/google-credentials.json
 
-      - name: Copy .env.production
+      - name: Create production .env file
         run: |
-          echo "${{ secrets.ENV_PRODUCTION }}" > server/.env
+          cat > server/.env << EOF
+          NODE_ENV=production
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          JWT_AUDIENCE=etymonapp.com/api
+          JWT_ISSUER=etymonapp.com
+          PORT=3000
+          CLIENT_URL=https://etymonapp.com
+          SERVER_URL=https://api.etymonapp.com
+          ALLOWED_ORIGINS=https://etymonapp.com,https://www.etymonapp.com,https://api.etymonapp.com
+          GOOGLE_APPLICATION_CREDENTIALS=./server/google-credentials.json
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_CALLBACK_URL=https://api.etymonapp.com/api/auth/google/callback
+          EMAIL_ADM=${{ secrets.EMAIL_ADM }}
+          EOF
+
+      - name: Create PM2 ecosystem config
+        run: |
+          cat > server/ecosystem.config.js << EOF
+          module.exports = {
+            apps: [{
+              name: "etymon-api",
+              script: "./dist/index.js",
+              env: {
+                NODE_ENV: "production"
+              },
+              instances: 1,
+              exec_mode: "cluster",
+              max_memory_restart: "300M"
+            }]
+          }
+          EOF
 
       - name: Deploy to Hostinger via SSH
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "./server/*,./client/dist/client/*"
+          source: "./server/,./client/dist/client/"
           target: "~/etymonapp"
+          strip_components: 0
 
       - name: SSH - Restart server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
             cd ~/etymonapp/server
+            npm ci --production
+            npm run build
             pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
