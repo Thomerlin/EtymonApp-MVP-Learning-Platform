@@ -26,10 +26,8 @@ function printDatabaseContents() {
           
           if (rows.length > 0) {
             logger.debug({ table: tableName, count: rows.length }, `Table ${tableName} contents`);
-            // Only log detailed rows in trace level (even more detailed than debug)
-            if (logger.level() <= bunyan.TRACE) {
-              logger.trace({ rows }, `${tableName} data`);
-            }
+            // Use trace level for detailed data without direct bunyan reference
+            logger.trace({ rows }, `${tableName} data`);
           }
         });
       }
