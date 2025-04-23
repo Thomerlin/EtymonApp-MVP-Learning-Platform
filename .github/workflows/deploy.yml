@@ -1,84 +1,73 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger VPS
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-          cache: 'npm'                                # :contentReference[oaicite:6]{index=6}
-
-      - name: Install dependencies
-        run: |
-          cd server && npm ci
-          cd ../client && npm ci
-
-      - name: Build client (Angular 17)
-        run: |
-          cd client
-          npm run build -- --configuration production  # :contentReference[oaicite:7]{index=7}
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Decode Google credentials
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      - name: Decode Google Credentials
         run: |
-          mkdir -p server/config
-          echo "$GOOGLE_APPLICATION_CREDENTIALS" | base64 --decode > server/config/google-credentials.json
-          chmod 600 server/config/google-credentials.json  # :contentReference[oaicite:8]{index=8}
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 -d > google-credentials.json
+          ls -l google-credentials.json
+        continue-on-error: true
 
-      - name: Create production .env
-        run: |
-          cat > server/.env <<EOF
-          NODE_ENV=production
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-          JWT_AUDIENCE=etymonapp.com/api
-          JWT_ISSUER=etymonapp.com
-          PORT=3000
-          CLIENT_URL=https://etymonapp.com
-          SERVER_URL=https://api.etymonapp.com
-          ALLOWED_ORIGINS=https://etymonapp.com,https://www.etymonapp.com,https://api.etymonapp.com
-          GOOGLE_APPLICATION_CREDENTIALS=./config/google-credentials.json
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_CALLBACK_URL=https://api.etymonapp.com/api/auth/google/callback
-          EMAIL_ADM=${{ secrets.EMAIL_ADM }}
-          EOF
-
-      - name: Deploy files via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "server/,client/dist/client/"
-          target: "~/etymonapp"                         # :contentReference[oaicite:9]{index=9}
-
-      - name: Restart Node.js app via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/etymonapp/server
-            npm install --production
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js  # :contentReference[oaicite:10]{index=10}
+            set -e
+            whoami
+            pwd
+            # Clone or update repository
+            if [ -d "/home/app" ]; then
+              cd /home/app
+              git pull origin main || { echo "Git pull failed"; exit 1; }
+            else
+              git clone git@github.com:${{ secrets.REPO_OWNER }}/${{ secrets.REPO_NAME }}.git /home/app || { echo "Git clone failed"; exit 1; }
+              cd /home/app
+            fi
+
+            # Check for .env
+            [ -f "/home/app/.env" ] || { echo "Missing .env file. Please upload manually."; exit 1; }
+
+            # Install frontend dependencies and build
+            cd /home/app/client
+            npm install || { echo "Frontend npm install failed"; exit 1; }
+            npm run build --prod || { echo "Frontend build failed"; exit 1; }
+
+            # Install backend dependencies
+            cd /home/app/server
+            npm install || { echo "Backend npm install failed"; exit 1; }
+
+            # Restart backend with pm2
+            pm2 stop server || true
+            pm2 start src/server.js --name server || { echo "pm2 start failed"; exit 1; }
+            pm2 save
+
+            # Restart Nginx
+            sudo systemctl restart nginx || { echo "Nginx restart failed"; exit 1; }
+        env:
+          DEBUG: true
+
+      - name: Upload Google Credentials
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "google-credentials.json"
+          target: "/home/app/server/credentials"
+          strip_components: 1
+        continue-on-error: true
