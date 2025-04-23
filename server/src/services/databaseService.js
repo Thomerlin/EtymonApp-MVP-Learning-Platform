@@ -1,34 +1,42 @@
 const db = require('../db/database');
+const logger = require('../utils/logger');
 
-// Function to print database contents in JSON format
-const printDatabaseContents = () => {
-  console.log("\n--- Database Contents (JSON) ---");
-
-  const tables = [
-    { name: "users", query: "SELECT * FROM users" },
-    { name: "progress", query: "SELECT * FROM progress" },
-    { name: "exercises_multiple_choice", query: "SELECT * FROM exercises_multiple_choice" }
-  ];
-
-  const databaseContents = {};
-  let pendingQueries = tables.length;
-
-  tables.forEach(table => {
-    db.all(table.query, [], (err, rows) => {
-      if (err) {
-        console.error(`Error querying table ${table.name}:`, err.message);
-        databaseContents[table.name] = { error: err.message };
-      } else {
-        databaseContents[table.name] = rows;
-      }
-
-      pendingQueries--;
-      if (pendingQueries === 0) {
-        console.log(JSON.stringify(databaseContents, null, 2));
-        console.log("\n--- End of Database Contents ---\n");
+/**
+ * Print database contents for debugging purposes
+ * Only used in development environment
+ */
+function printDatabaseContents() {
+  logger.debug('Fetching database contents for debug purposes');
+  
+  // Get list of tables
+  db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, tables) => {
+    if (err) {
+      logger.error({ err }, 'Error getting database tables');
+      return;
+    }
+    
+    tables.forEach(tableObj => {
+      const tableName = tableObj.name;
+      if (tableName !== 'sqlite_sequence') {
+        db.all(`SELECT * FROM ${tableName}`, [], (err, rows) => {
+          if (err) {
+            logger.error({ err, table: tableName }, 'Error fetching table data');
+            return;
+          }
+          
+          if (rows.length > 0) {
+            logger.debug({ table: tableName, count: rows.length }, `Table ${tableName} contents`);
+            // Only log detailed rows in trace level (even more detailed than debug)
+            if (logger.level() <= bunyan.TRACE) {
+              logger.trace({ rows }, `${tableName} data`);
+            }
+          }
+        });
       }
     });
   });
-};
+}
 
-module.exports = { printDatabaseContents };
+module.exports = {
+  printDatabaseContents
+};

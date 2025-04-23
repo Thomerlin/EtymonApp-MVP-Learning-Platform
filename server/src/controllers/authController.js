@@ -1,56 +1,28 @@
 const jwt = require('jsonwebtoken');
-const db = require('../db/database'); // Usar db diretamente para diagnosticar
+const db = require('../db/database');
 const { v4: uuidv4 } = require('uuid');
-
-// Generate JWT token with improved security - admin status removed from token
-const generateToken = (user) => {
-  // Verificar se existe JWT_SECRET
-  if (!process.env.JWT_SECRET) {
-    console.error('JWT_SECRET não configurado - isso é um problema crítico de segurança');
-    throw new Error('JWT_SECRET environment variable is not set');
-  }
-
-  console.log('Gerando token para usuário:', {
-    id: user.id,
-    email: user.email,
-    name: user.display_name || user.email.split('@')[0]
-  });
-
-  // Admin tokens still expire in 15 minutes, regular user tokens in 24 hours
-  // We check for admin status here but don't include it in the token
-  const expiresIn = user.is_admin ? '15m' : '24h';
-
-  return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      name: user.display_name || user.email.split('@')[0],
-      jti: uuidv4() // ID único do token para permitir revogação
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: expiresIn,
-      audience: process.env.JWT_AUDIENCE || 'etymon-app',
-      issuer: process.env.JWT_ISSUER || 'etymon-auth-service'
-    }
-  );
-};
+const { generateToken, ADMIN_EMAILS } = require('../config/passport');
+const logger = require('../utils/logger');
 
 // Google callback handler with admin handling
 const googleCallback = (req, res) => {
   try {
-    console.log('Google callback: req.user presente?', !!req.user);
+    logger.info('Google callback: req.user presente?', !!req.user);
 
     if (!req.user) {
-      console.error('req.user não está definido no callback do Google');
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:4200'}/login?error=no_user_data`);
+      logger.error('req.user não está definido no callback do Google');
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=no_user_data`);
     }
 
+    // Use the token generator from passport.js
     const token = generateToken(req.user);
-    console.log('Token JWT gerado com sucesso', req.user.is_admin ? '(Admin)' : '');
+    
+    // Verificar se o usuário é admin dinamicamente
+    const isAdmin = ADMIN_EMAILS.includes(req.user.email.toLowerCase());
+    logger.info(`Token JWT gerado com sucesso ${isAdmin ? '(Admin)' : ''}`);
 
     // Set cookie expiration based on admin status
-    const maxAge = req.user.is_admin ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const maxAge = isAdmin ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
 
     // Enviar token em cookies HTTPOnly
     res.cookie('token', token, {
@@ -61,67 +33,70 @@ const googleCallback = (req, res) => {
     });
 
     // Também envie no redirecionamento para compatibilidade
-    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:4200'}/auth-callback?token=${token}`;
-    console.log('Redirecionando para:', redirectUrl);
+    const redirectUrl = `${process.env.CLIENT_URL}/auth-callback?token=${token}`;
+    logger.info('Redirecionando para:', redirectUrl);
     res.redirect(redirectUrl);
   } catch (error) {
-    console.error('Erro ao gerar token:', error);
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:4200'}/login?error=${encodeURIComponent(error.message)}`);
+    logger.error('Erro ao gerar token:', error);
+    res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(error.message)}`);
   }
 };
 
-// Get current user info - without exposing admin status
+// Get current user info - with role information but without exposing admin status directly
 const getCurrentUser = (req, res) => {
   try {
     // Verificar cabeçalho de autorização
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.warn('getCurrentUser: Token não fornecido no header Authorization');
+      logger.warn('getCurrentUser: Token não fornecido no header Authorization');
       return res.status(401).json({ error: 'Token não fornecido' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('Token recebido para verificação');
+    logger.debug('Token recebido para verificação');
 
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'seu_jwt_secret');
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
-      console.error('Erro na verificação do token:', err.message);
+      logger.error('Erro na verificação do token:', err.message);
       return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 
     if (!decoded || !decoded.id) {
-      console.error('Token decodificado não contém ID de usuário');
+      logger.error('Token decodificado não contém ID de usuário');
       return res.status(401).json({ error: 'Token inválido (sem ID)' });
     }
 
-    console.log('Token verificado para o usuário ID:', decoded.id);
+    logger.debug({ userId: decoded.id }, 'Token verificado para o usuário');
 
-    db.get('SELECT id, email, display_name, profile_picture, is_admin FROM users WHERE id = ?', [decoded.id], (err, user) => {
+    db.get('SELECT id, email, display_name, profile_picture FROM users WHERE id = ?', [decoded.id], (err, user) => {
       if (err) {
-        console.error('Erro ao buscar usuário do banco:', err);
+        logger.error('Erro ao buscar usuário do banco:', err);
         return res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
       }
 
       if (!user) {
-        console.warn('Usuário no token não encontrado no banco:', decoded.id);
+        logger.warn('Usuário no token não encontrado no banco:', decoded.id);
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
-      // Log admin status for server logs but don't send it to client
-      console.log('Usuário encontrado e retornando dados', user.is_admin ? '(Admin)' : '');
+      // Determine role and permissions dynamically
+      const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+      logger.debug('Usuário encontrado e retornando dados', isAdmin ? '(Admin)' : '');
       
-      // Remove is_admin from response 
+      // Return user data with role info but without explicit admin flag
       res.json({
         id: user.id,
         email: user.email,
         display_name: user.display_name,
-        profile_picture: user.profile_picture
+        profile_picture: user.profile_picture,
+        role: decoded.role,              // Send role from token
+        permissions: decoded.permissions // Send permissions from token
       });
     });
   } catch (error) {
-    console.error('Erro não tratado em getCurrentUser:', error);
+    logger.error('Erro não tratado em getCurrentUser:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
@@ -135,6 +110,7 @@ const logout = (req, res) => {
   if (req.logout) {
     req.logout(function (err) {
       if (err) {
+        logger.error('Error during logout:', err);
         return res.status(500).json({ error: 'Error during logout' });
       }
       res.json({ success: true });
@@ -147,6 +123,5 @@ const logout = (req, res) => {
 module.exports = {
   googleCallback,
   getCurrentUser,
-  logout,
-  generateToken
+  logout
 };

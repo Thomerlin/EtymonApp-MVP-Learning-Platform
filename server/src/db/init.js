@@ -1,20 +1,22 @@
 const db = require('./database');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const initializeDatabase = () => {
-  // Create users table with is_admin field
+  logger.info('Initializing database...');
+
+  // Create users table without is_admin field since we're using config-based roles
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     google_id TEXT UNIQUE,
     display_name TEXT,
     profile_picture TEXT,
-    is_admin BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {
-      console.error('Error creating table users:', err.message);
+      logger.error('Error creating table users:', err.message);
     }
   });;
 
@@ -30,7 +32,7 @@ const initializeDatabase = () => {
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(article_id) REFERENCES articles(id)
   )`, (err) => {
-    if (err) console.error('Error creating table progress:', err.message);
+    if (err) logger.error('Error creating table progress:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS articles (
@@ -41,11 +43,13 @@ const initializeDatabase = () => {
     created_date TEXT NOT NULL
   )`, (err) => {
     if (err) {
-      console.error('Error creating table articles:', err.message);
+      logger.error('Error creating table articles:', err.message);
     } else {
       initializeNestedTables();
     }
   });
+
+  logger.info('Database initialization complete');
 };
 
 const initializeNestedTables = () => {
@@ -58,7 +62,7 @@ const initializeNestedTables = () => {
     audio_content BLOB,
     FOREIGN KEY(article_id) REFERENCES articles(id)
   )`, (err) => {
-    if (err) console.error('Error creating table levels:', err.message);
+    if (err) logger.error('Error creating table levels:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS exercises_multiple_choice (
@@ -69,7 +73,7 @@ const initializeNestedTables = () => {
     answer TEXT NOT NULL,
     FOREIGN KEY(level_id) REFERENCES levels(id)
   )`, (err) => {
-    if (err) console.error('Error creating table exercises_multiple_choice:', err.message);
+    if (err) logger.error('Error creating table exercises_multiple_choice:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS exercises_fill_in_the_blanks (
@@ -80,7 +84,7 @@ const initializeNestedTables = () => {
     hint TEXT NOT NULL,
     FOREIGN KEY(level_id) REFERENCES levels(id)
   )`, (err) => {
-    if (err) console.error('Error creating table exercises_fill_in_the_blanks:', err.message);
+    if (err) logger.error('Error creating table exercises_fill_in_the_blanks:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS exercises_true_false (
@@ -90,7 +94,7 @@ const initializeNestedTables = () => {
     answer TEXT NOT NULL,
     FOREIGN KEY(level_id) REFERENCES levels(id)
   )`, (err) => {
-    if (err) console.error('Error creating table exercises_true_false:', err.message);
+    if (err) logger.error('Error creating table exercises_true_false:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS exercises_writing_with_audio (
@@ -99,7 +103,7 @@ const initializeNestedTables = () => {
     sentence TEXT NOT NULL,
     FOREIGN KEY(level_id) REFERENCES levels(id)
   )`, (err) => {
-    if (err) console.error('Error creating table exercises_writing_with_audio:', err.message);
+    if (err) logger.error('Error creating table exercises_writing_with_audio:', err.message);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS exercises_vocabulary_matching (
@@ -110,7 +114,7 @@ const initializeNestedTables = () => {
     example TEXT NOT NULL,
     FOREIGN KEY(level_id) REFERENCES levels(id)
   )`, (err) => {
-    if (err) console.error('Error creating table exercises_vocabulary_matching:', err.message);
+    if (err) logger.error('Error creating table exercises_vocabulary_matching:', err.message);
   });
 
   // Insert initial data
@@ -119,7 +123,7 @@ const initializeNestedTables = () => {
     db.run(`INSERT INTO articles (title, article_link, summary, created_date) VALUES (?, ?, ?, ?)`,
       [article.title, article.article_link, article.summary, article.created_date], function (err) {
         if (err) {
-          console.error('Error inserting article:', err.message);
+          logger.error('Error inserting article:', err.message);
           return;
         }
         const articleId = this.lastID;
@@ -129,7 +133,7 @@ const initializeNestedTables = () => {
           db.run(`INSERT INTO levels (article_id, level, content, phonetics) VALUES (?, ?, ?, ?)`,
             [articleId, levelKey, level.text.content, level.text.phonetics], function (err) {
               if (err) {
-                console.error('Error inserting level:', err.message);
+                logger.error('Error inserting level:', err.message);
                 return;
               }
               const levelId = this.lastID;

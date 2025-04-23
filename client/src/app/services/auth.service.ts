@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 interface User {
   id: number;
@@ -15,7 +16,7 @@ interface User {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = `${environment.apiUrl}/api`;
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$: Observable<User | null>;
   private tokenExpirationTimer: any;
@@ -111,6 +112,7 @@ export class AuthService {
   }
 
   initiateGoogleLogin(): void {
+  console.log(this.apiUrl);
     window.location.href = `${this.apiUrl}/auth/google`;
   }
 

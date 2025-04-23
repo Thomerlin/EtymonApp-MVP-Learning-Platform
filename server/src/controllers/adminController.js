@@ -1,5 +1,6 @@
 const db = require('../db/database');
 const { processContentAudio } = require('../services/ttsService');
+const logger = require('../utils/logger');
 
 /**
  * Inserts a complete article with all its associated content into the database
@@ -8,6 +9,12 @@ const { processContentAudio } = require('../services/ttsService');
 const insertContent = async (req, res) => {
   try {
     const articleData = req.body;
+
+    logger.info({
+      userId: req.user.id,
+      contentType: req.body.type,
+      action: 'insert_content'
+    }, 'Admin content insertion attempt');
 
     // Validate the required fields
     if (!articleData.title || !articleData.article_link || !articleData.summary || !articleData.created_date) {
@@ -30,7 +37,7 @@ const insertContent = async (req, res) => {
         [articleData.title, articleData.article_link, articleData.summary, articleData.created_date],
         async function(err) {
           if (err) {
-            console.error('Erro ao inserir artigo:', err.message);
+            logger.error({ err, userId: req.user.id }, 'Failed to insert article');
             db.run('ROLLBACK');
             return res.status(500).json({ error: 'Erro ao inserir artigo no banco de dados' });
           }
@@ -49,7 +56,7 @@ const insertContent = async (req, res) => {
               if (!level.text || !level.text.content) {
                 errorCount++;
                 processedLevels++;
-                console.error(`Conteúdo textual ausente para o nível ${levelKey}`);
+                logger.error(`Conteúdo textual ausente para o nível ${levelKey}`);
                 if (processedLevels === levelKeys.length) {
                   finishTransaction();
                 }
@@ -57,7 +64,7 @@ const insertContent = async (req, res) => {
               }
 
               // Generate audio content using TTS service
-              console.log(`Generating audio for level ${levelKey}...`);
+              logger.info(`Generating audio for level ${levelKey}...`);
               let audioContent = null;
               try {
                 // Determine language based on level prefix
@@ -71,9 +78,9 @@ const insertContent = async (req, res) => {
                   voice,
                   0.85  // Normal speaking rate for content
                 );
-                console.log(`Audio generated for level ${levelKey}: ${audioContent.length} bytes`);
+                logger.info(`Audio generated for level ${levelKey}: ${audioContent.length} bytes`);
               } catch (ttsError) {
-                console.error(`Error generating audio for level ${levelKey}:`, ttsError);
+                logger.error(`Error generating audio for level ${levelKey}:`, ttsError);
                 // Continue without audio if TTS fails
               }
 
@@ -90,7 +97,7 @@ const insertContent = async (req, res) => {
                 function(err) {
                   if (err) {
                     errorCount++;
-                    console.error(`Erro ao inserir nível ${levelKey}:`, err.message);
+                    logger.error(`Erro ao inserir nível ${levelKey}:`, err.message);
                   } else {
                     const levelId = this.lastID;
                     insertExercises(levelId, level.exercises);
@@ -104,7 +111,7 @@ const insertContent = async (req, res) => {
                 }
               );
             } catch (levelError) {
-              console.error(`Error processing level ${levelKey}:`, levelError);
+              logger.error(`Error processing level ${levelKey}:`, levelError);
               errorCount++;
               processedLevels++;
               if (processedLevels === levelKeys.length) {
@@ -195,7 +202,7 @@ const insertContent = async (req, res) => {
           // Function to complete the transaction
           function finishTransaction() {
             if (errorCount > 0) {
-              console.error(`Transação abortada: ${errorCount} erros encontrados`);
+              logger.error(`Transação abortada: ${errorCount} erros encontrados`);
               db.run('ROLLBACK');
               return res.status(500).json({ 
                 error: 'Alguns níveis ou exercícios não puderam ser inseridos',
@@ -205,6 +212,7 @@ const insertContent = async (req, res) => {
             }
 
             db.run('COMMIT');
+            logger.info({ articleId }, 'Content inserted successfully');
             return res.status(201).json({
               success: true,
               message: 'Conteúdo inserido com sucesso',
@@ -215,7 +223,7 @@ const insertContent = async (req, res) => {
       );
     });
   } catch (error) {
-    console.error('Erro ao processar a inserção de conteúdo:', error);
+    logger.error('Erro ao processar a inserção de conteúdo:', error);
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

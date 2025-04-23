@@ -1,17 +1,27 @@
 const { validateExercise, updateReadingTime } = require('../services/exerciseService');
-// const { normalizeString } = require('../utils/helpers');
+const logger = require('../utils/logger');
 
 const validate = async (req, res) => {
   const { exerciseId, answer, type, articleId, level } = req.body;
   const userId = req.user?.id;
 
   if (!userId) {
+    logger.warn('Authentication required for exercise validation');
     return res.status(401).json({ error: "Authentication required" });
   }
 
   if (!exerciseId || !answer || !type || !articleId || !level) {
+    logger.warn({ userId, type, articleId, level }, 'Missing required exercise validation parameters');
     return res.status(400).json({ error: "exerciseId, answer, type, articleId, and level are required" });
   }
+
+  logger.info({
+    userId, 
+    exerciseId, 
+    type, 
+    articleId, 
+    level 
+  }, 'Validating exercise answer');
 
   // Call the appropriate validation based on the type
   switch (type) {
@@ -31,6 +41,7 @@ const validate = async (req, res) => {
       validateWriting(exerciseId, answer, articleId, level, type, userId, res);
       break;
     default:
+      logger.warn({ type }, 'Invalid exercise type');
       res.status(400).json({ error: "Invalid exercise type" });
   }
 };
@@ -73,18 +84,21 @@ const updateReadingTimeHandler = async (req, res) => {
   const { articleId, level, seconds } = req.body;
 
   if (!userId) {
+    logger.warn('Authentication required for updating reading time');
     return res.status(401).json({ error: "Authentication required" });
   }
 
   if (!articleId || !level || seconds === undefined) {
+    logger.warn({ userId, articleId, level, seconds }, 'Missing required parameters for updating reading time');
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
   try {
+    logger.info({ userId, articleId, level, seconds }, 'Updating reading time');
     await updateReadingTime(userId, articleId, level, seconds);
     res.json({ success: true, message: "Reading time updated" });
   } catch (err) {
-    console.error("Error updating reading time:", err);
+    logger.error({ err, userId, articleId }, 'Error updating reading time');
     res.status(500).json({ error: "Failed to update reading time" });
   }
 };

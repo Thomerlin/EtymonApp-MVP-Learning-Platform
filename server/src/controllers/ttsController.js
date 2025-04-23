@@ -1,4 +1,5 @@
 const { textToSpeechConverter } = require('../services/ttsService');
+const logger = require('../utils/logger');
 
 // Convert text to speech
 const synthesizeSpeech = async (req, res) => {
@@ -6,6 +7,7 @@ const synthesizeSpeech = async (req, res) => {
     const { text, language, voice, speakingRate } = req.body;
     
     if (!text) {
+      logger.warn('TTS request missing text');
       return res.status(400).json({ error: 'Text is required' });
     }
     
@@ -15,6 +17,12 @@ const synthesizeSpeech = async (req, res) => {
     
     // Validate speaking rate is within reasonable bounds
     const validRate = Math.max(0.5, Math.min(2.0, rate));
+    
+    logger.info({
+      textLength: text.length,
+      language,
+      voice
+    }, 'Processing TTS request');
     
     const audioContent = await textToSpeechConverter(text, language, voice, validRate);
     
@@ -26,7 +34,7 @@ const synthesizeSpeech = async (req, res) => {
     
     res.send(audioContent);
   } catch (error) {
-    console.error('Error in TTS controller:', error);
+    logger.error({ err: error }, 'Error processing TTS request');
     res.status(500).json({ 
       error: 'Failed to convert text to speech',
       details: error.message 
@@ -42,6 +50,7 @@ const getAvailableVoices = (req, res) => {
     // Add more languages and voices as needed
   };
   
+  logger.debug('Serving TTS voices list');
   res.json({ voices });
 };
 

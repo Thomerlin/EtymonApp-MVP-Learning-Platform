@@ -7,6 +7,7 @@ const { printDatabaseContents } = require('./services/databaseService');
 const passport = require('passport');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const logger = require('./utils/logger');
 
 dotenv.config();
 
@@ -52,9 +53,36 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // Mount admin routes
 app.use('/', indexRoutes);
 
-// Print database contents after 2 seconds
-setTimeout(printDatabaseContents, 2000);
+// Log DB contents only in development environment
+if (process.env.NODE_ENV === 'development') {
+  setTimeout(printDatabaseContents, 2000);
+}
+
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.info({
+    method: req.method,
+    url: req.url,
+    ip: req.ip
+  }, 'Incoming request');
+  next();
+});
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error({ 
+    err, 
+    method: req.method,
+    url: req.url,
+    body: req.body
+  }, 'Error processing request');
+  
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
 });

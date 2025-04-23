@@ -1,5 +1,6 @@
 const textToSpeech = require('@google-cloud/text-to-speech');
 const path = require('path');
+const logger = require('../utils/logger');
 
 // Criar cliente TTS com autenticação segura
 const client = new textToSpeech.TextToSpeechClient();
@@ -97,7 +98,10 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
     const cacheKey = `${text}-${language}-${voice}-${speakingRate}`;
     if (cache.has(cacheKey)) {
       const cachedAudio = cache.get(cacheKey);
-      if (cachedAudio) return cachedAudio;
+      if (cachedAudio) {
+        logger.debug('TTS audio found in cache');
+        return cachedAudio;
+      }
     }
 
     // Sanitizar texto
@@ -126,6 +130,8 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
       },
     };
 
+    logger.info({ language, voice, textLength: text.length }, 'Requesting TTS conversion');
+
     // Executar a requisição com timeout
     const [response] = await Promise.race([
       client.synthesizeSpeech(request),
@@ -136,10 +142,11 @@ async function textToSpeechConverter(text, language = 'en-US', voice = "en-US-Ca
 
     // Guardar resultado no cache
     cache.set(cacheKey, response.audioContent);
+    logger.debug('TTS conversion successful, stored in cache');
 
     return response.audioContent;
   } catch (error) {
-    console.error('Error in TTS service:', error.message);
+    logger.error({ err: error }, 'Error in TTS service');
     throw error;
   }
 }
@@ -158,6 +165,8 @@ async function processContentAudio(text, language = 'en-US', voice = "en-US-Casu
     const chunks = chunkText(text, 500);
     const audioBuffers = [];
     
+    logger.info({ chunks: chunks.length }, 'Processing content for TTS in chunks');
+    
     // Process each chunk sequentially to avoid rate limits
     for (const chunk of chunks) {
       const audioContent = await textToSpeechConverter(chunk, language, voice, speakingRate);
@@ -167,7 +176,7 @@ async function processContentAudio(text, language = 'en-US', voice = "en-US-Casu
     // Combine all audio buffers into one
     return Buffer.concat(audioBuffers);
   } catch (error) {
-    console.error('Error in batch TTS processing:', error.message);
+    logger.error({ err: error }, 'Error in batch TTS processing');
     throw error;
   }
 }

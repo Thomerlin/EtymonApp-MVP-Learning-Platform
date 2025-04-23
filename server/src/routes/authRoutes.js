@@ -2,8 +2,10 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const { googleCallback, getCurrentUser, logout } = require('../controllers/authController');
-const { authenticateJWT, checkUserExists, requireAdmin } = require('../middleware/auth');
+const { authenticateJWT, checkUserExists, checkPermission } = require('../middleware/auth');
+const { ADMIN_EMAILS } = require('../config/passport');
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 // Google Auth Routes
 router.get('/google', passport.authenticate('google', {
@@ -29,7 +31,7 @@ router.get('/status', (req, res) => {
   const authConfig = {
     googleOAuth: {
       clientConfigured: !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.SERVER_URL || 'http://localhost:3000'}/api/auth/google/callback`
+      callbackURL: `${process.env.SERVER_URL}/api/auth/google/callback`
     },
     jwt: {
       secretConfigured: !!process.env.JWT_SECRET,
@@ -40,11 +42,15 @@ router.get('/status', (req, res) => {
       secretConfigured: !!process.env.SESSION_SECRET,
       secure: process.env.NODE_ENV === 'production'
     },
+    roles: {
+      adminEmails: process.env.EMAIL_ADM ? 'Configured' : 'Not configured'
+    },
     currentSession: {
       isAuthenticated: !!req.user,
       userData: req.user ? {
         id: req.user.id,
-        email: req.user.email
+        email: req.user.email,
+        role: req.user.role
       } : null
     }
   };
@@ -56,11 +62,22 @@ router.get('/status', (req, res) => {
   });
 });
 
-// Admin-only route to verify admin access - simplified response
-router.get('/admin-check', authenticateJWT, requireAdmin, (req, res) => {
+// Admin-only route using the permission middleware
+router.get('/admin-check', authenticateJWT, checkPermission('canManageSystem'), (req, res) => {
   res.json({
     success: true,
-    message: 'Você possui acesso de administrador'
+    message: 'Você possui acesso de administrador',
+    role: req.user.role,
+    permissions: req.user.permissions
+  });
+});
+
+// Route to check specific permissions
+router.get('/permissions', authenticateJWT, (req, res) => {
+  res.json({
+    success: true,
+    role: req.user.role,
+    permissions: req.user.permissions || {}
   });
 });
 

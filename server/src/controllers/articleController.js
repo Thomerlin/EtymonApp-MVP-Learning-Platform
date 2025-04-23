@@ -1,10 +1,13 @@
 const db = require('../db/database');
 const { getAnsweredCorrectlyFlag, getArticlesSummary, getRandomLevel } = require('../services/articleService');
+const logger = require('../utils/logger');
 
 const getArticle = async (req, res) => {
   const articleId = req.params.id;
   // Extract user ID from req.user (if authenticated) or from query parameter
   const userId = req.user?.id || req.query.userId || null;
+
+  logger.info({ articleId, userId: userId || 'anonymous' }, 'Article request received');
 
   try {
     const article = await new Promise((resolve, reject) => {
@@ -74,10 +77,15 @@ const getArticle = async (req, res) => {
       level.exercises.true_false.forEach(ex => delete ex.answer);
     });
 
-    console.log(`Article ${articleId} retrieved with userId: ${userId || 'anonymous'}`);
+    logger.info({ 
+      articleId, 
+      userId: userId || 'anonymous',
+      levelsCount: levels.length
+    }, 'Article retrieved successfully');
+    
     res.json(completeArticle);
   } catch (err) {
-    console.error(`Error retrieving article ${articleId}:`, err);
+    logger.error({ err, articleId }, 'Error retrieving article');
     res.status(err.message === "Article not found" ? 404 : 500).json({ error: err.message });
   }
 };
@@ -86,13 +94,16 @@ const getLevelAudio = async (req, res) => {
   const levelId = req.params.levelId;
 
   try {
+    logger.debug({ levelId }, 'Retrieving audio for level');
+    
     db.get(`SELECT audio_content FROM levels WHERE id = ?`, [levelId], (err, row) => {
       if (err) {
-        console.error('Error retrieving audio content:', err);
+        logger.error({ err, levelId }, 'Error retrieving audio content');
         return res.status(500).json({ error: 'Error retrieving audio content' });
       }
       
       if (!row || !row.audio_content) {
+        logger.warn({ levelId }, 'Audio content not found');
         return res.status(404).json({ error: 'Audio content not found' });
       }
       
@@ -100,7 +111,7 @@ const getLevelAudio = async (req, res) => {
       res.send(row.audio_content);
     });
   } catch (err) {
-    console.error('Error in getLevelAudio:', err);
+    logger.error({ err, levelId }, 'Error in getLevelAudio');
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -109,19 +120,25 @@ const getArticlesSummaryHandler = async (req, res) => {
   // Allow both authenticated and non-authenticated users
   const userId = req.user?.id; // Optional - will be undefined for anonymous users
   
+  logger.info({ userId: userId || 'anonymous' }, 'Retrieving articles summary');
+  
   try {
     const articles = await getArticlesSummary(userId);
+    logger.debug({ articlesCount: articles.length }, 'Articles summary retrieved');
     res.json(articles);
   } catch (err) {
+    logger.error({ err }, 'Error fetching articles summary');
     res.status(500).json({ error: "Error fetching articles summary" });
   }
 };
 
 const getRandomLevelHandler = async (req, res) => {
   try {
+    logger.info('Retrieving random level for daily practice');
     const level = await getRandomLevel();
     res.json(level);
   } catch (err) {
+    logger.error({ err }, 'Error getting random level');
     const status = err.message === "No article found" || err.message === "No levels found" ? 404 : 500;
     res.status(status).json({ error: err.message });
   }
