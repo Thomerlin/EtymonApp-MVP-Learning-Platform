@@ -1,13 +1,17 @@
 {
-  "name": "client",
-  "version": "0.0.0",
+  "name": "etymon-client",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration=production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:client": "node dist/client/server/server.mjs"
+    "serve:ssr:client": "node dist/client/server/server.mjs",
+    "lint": "ng lint",
+    "docker:build": "docker build -t etymon-client .",
+    "docker:run": "docker run -p 4200:80 etymon-client"
   },
   "private": true,
   "dependencies": {
