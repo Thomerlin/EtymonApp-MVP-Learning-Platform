@@ -28,8 +28,9 @@ const googleCallback = (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', 
-      maxAge: maxAge // 15 min for admin, 24h for regular users
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: maxAge, // 15 min for admin, 24h for regular users
+      domain: process.env.NODE_ENV === 'production' ? 'etymonapp.com' : undefined // Use domain for production
     });
 
     // Também envie no redirecionamento para compatibilidade
@@ -91,8 +92,8 @@ const getCurrentUser = (req, res) => {
         email: user.email,
         display_name: user.display_name,
         profile_picture: user.profile_picture,
-        role: decoded.role,              // Send role from token
-        permissions: decoded.permissions // Send permissions from token
+        // role: decoded.role,              // Send role from token
+        // permissions: decoded.permissions // Send permissions from token
       });
     });
   } catch (error) {

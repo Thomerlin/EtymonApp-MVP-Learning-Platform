@@ -107,8 +107,22 @@ const getLevelAudio = async (req, res) => {
         return res.status(404).json({ error: 'Audio content not found' });
       }
       
-      res.set('Content-Type', 'audio/mp3');
-      res.send(row.audio_content);
+      // Set proper headers for binary data streaming
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Accept-Ranges', 'bytes');
+      
+      // Don't use attachment disposition - use inline instead for direct playback
+      res.setHeader('Content-Disposition', `inline; filename="audio-level-${levelId}.mp3"`);
+      
+      if (row.audio_content.length) {
+        res.setHeader('Content-Length', row.audio_content.length);
+      }
+      
+      // Set Cache-Control header to allow caching
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      
+      // End the response immediately after sending the audio content
+      res.end(row.audio_content);
     });
   } catch (err) {
     logger.error({ err, levelId }, 'Error in getLevelAudio');

@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '' // This will be relative to the domain in production
+  apiUrl: 'https://etymonapp.com',
+  googleAuthCallbackUrl: 'https://etymonapp.com/auth-callback',
+  appDomain: 'etymonapp.com'
 };

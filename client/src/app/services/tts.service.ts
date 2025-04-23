@@ -97,17 +97,32 @@ export class TtsService {
     // Get the audio element for articles
     const audioElement = this.audioElements['article'];
     
-    // Set the source to the server-side audio endpoint
-    audioElement.src = `${this.serverUrl}/api/article/audio/${levelId}`;
+    // Create a timestamp to prevent caching issues
+    const timestamp = new Date().getTime();
+    
+    // Set the source to the server-side audio endpoint with a cache-busting parameter
+    audioElement.src = `${this.serverUrl}/api/article/audio/${levelId}?t=${timestamp}`;
+    audioElement.crossOrigin = 'anonymous'; // Try with anonymous CORS mode
+    
+    // Log the attempt
+    console.log(`Attempting to play audio from: ${audioElement.src}`);
     
     // Play the audio
-    audioElement.play().catch(error => {
-      console.error('Error playing level audio:', error);
-      this.updatePlaybackState('article', false, false);
-      
-      // Fallback to TTS if server audio fails
-      this.speak(text, 'article');
-    });
+    const playPromise = audioElement.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Update state on successful playback start
+        this.updatePlaybackState('article', true, false);
+        console.log('Level audio playback started successfully');
+      }).catch(error => {
+        console.error('Error playing level audio:', error);
+        this.updatePlaybackState('article', false, false);
+        
+        // Fallback to TTS if server audio fails
+        console.log('Falling back to TTS synthesis');
+        this.speak(text, 'article');
+      });
+    }
   }
 
   /**
