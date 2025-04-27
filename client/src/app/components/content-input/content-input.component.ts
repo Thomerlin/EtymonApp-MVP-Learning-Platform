@@ -8,7 +8,8 @@ interface Article {
   title: string;
   summary: string;
   created_date: string;
-  // Add other properties as needed
+  article_link?: string;
+  levels?: any;
 }
 
 @Component({
@@ -28,6 +29,13 @@ export class ContentInputComponent implements OnInit {
   loadingArticles = false;
   deletingArticleId: number | null = null;
   searchTerm = '';
+
+  // New properties for modal and editing
+  showEditModal = false;
+  editingArticle: Article | null = null;
+  editJsonContent = '';
+  isLoadingArticle = false;
+  isUpdatingArticle = false;
 
   constructor(
     private adminContentService: AdminContentService,
@@ -154,6 +162,68 @@ export class ContentInputComponent implements OnInit {
 
   loadSampleTemplate() {
     this.jsonContent = JSON.stringify(this.getSampleTemplate(), null, 2);
+  }
+
+  // New methods for edit functionality
+  openEditModal(articleId: number) {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.isLoadingArticle = true;
+    this.editingArticle = null;
+    this.editJsonContent = '';
+
+    this.adminContentService.getArticleById(articleId).subscribe({
+      next: (article) => {
+        this.editingArticle = article;
+        // Format the JSON with indentation for better readability in the editor
+        this.editJsonContent = JSON.stringify(article, null, 2);
+        this.isLoadingArticle = false;
+        this.showEditModal = true;
+      },
+      error: (error) => {
+        console.error('Error loading article details:', error);
+        this.errorMessage = error.error?.error || 
+          'Erro ao carregar detalhes do artigo. Por favor tente novamente.';
+        this.isLoadingArticle = false;
+      }
+    });
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingArticle = null;
+    this.editJsonContent = '';
+  }
+
+  updateArticle() {
+    if (!this.editingArticle) return;
+    
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      // Parse JSON to validate it
+      const updatedContent = JSON.parse(this.editJsonContent);
+      this.isUpdatingArticle = true;
+      
+      this.adminContentService.updateArticle(this.editingArticle.id, updatedContent).subscribe({
+        next: (response) => {
+          this.successMessage = 'Artigo atualizado com sucesso!';
+          this.isUpdatingArticle = false;
+          this.showEditModal = false;
+          // Refresh the articles list
+          this.loadArticles();
+        },
+        error: (error) => {
+          console.error('Error updating article:', error);
+          this.errorMessage = error.error?.error || 
+            'Ocorreu um erro ao atualizar o artigo. Por favor tente novamente.';
+          this.isUpdatingArticle = false;
+        }
+      });
+    } catch (e) {
+      this.errorMessage = 'JSON inválido. Por favor, verifique o formato e tente novamente.';
+    }
   }
 
   private getSampleTemplate() {

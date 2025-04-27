@@ -58,4 +58,21 @@ export class AdminContentService {
   deleteArticle(articleId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/article/${articleId}`, { headers: this.getHeaders() });
   }
+
+  /**
+   * Get full article details by ID
+   * @param articleId The ID of the article to fetch
+   */
+  getArticleById(articleId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/article/${articleId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Update an existing article
+   * @param articleId The ID of the article to update
+   * @param articleData The updated article data
+   */
+  updateArticle(articleId: number, articleData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/article/${articleId}`, articleData, { headers: this.getHeaders() });
+  }
 }

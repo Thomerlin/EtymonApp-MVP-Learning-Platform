@@ -102,10 +102,64 @@
               <span *ngIf="deletingArticleId === article.id" class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
               <i class="far fa-trash-alt"></i> Excluir
             </button>
-            <button class="btn btn-outline-primary">
+            <button class="btn btn-outline-primary" (click)="openEditModal(article.id)">
               <i class="far fa-edit"></i> Editar
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Edit Article Modal -->
+    <div class="modal" [ngClass]="{'show-modal': showEditModal}">
+      <div class="modal-backdrop" (click)="closeEditModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Artigo</h5>
+          <button type="button" class="close-button" (click)="closeEditModal()">
+            <span>&times;</span>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Loading indicator -->
+          <div *ngIf="isLoadingArticle" class="text-center my-4">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando detalhes do artigo...</p>
+          </div>
+          
+          <!-- Edit form -->
+          <div *ngIf="!isLoadingArticle && editingArticle">
+            <div class="mb-3">
+              <h6>Artigo ID: {{ editingArticle.id }}</h6>
+            </div>
+            
+            <div class="form-group">
+              <label for="editJsonInput">Conteúdo JSON:</label>
+              <textarea 
+                id="editJsonInput" 
+                class="form-control json-textarea" 
+                [(ngModel)]="editJsonContent"
+                placeholder="Carregando detalhes do artigo..."></textarea>
+              <small class="form-text text-muted">
+                Edite o JSON do artigo conforme necessário. Todos os níveis e exercícios serão atualizados.
+              </small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            [disabled]="isUpdatingArticle || isLoadingArticle" 
+            (click)="updateArticle()">
+            <span *ngIf="isUpdatingArticle" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+            Salvar Alterações
+          </button>
         </div>
       </div>
     </div>
