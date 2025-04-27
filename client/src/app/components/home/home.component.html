@@ -43,7 +43,7 @@
           [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
           <span class="sentence-text">
             <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-              <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i)">{{
+              <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5)">{{
                 word.text }}</span>
               <span class="popup" *ngIf="word.phonetic">
                 {{ replaceHyphensWithSpaces(word.phonetic) }}

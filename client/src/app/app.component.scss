@@ -12,7 +12,10 @@
   padding: 10px;
   
   @media (max-width: 1200px) {
-    display: none; /* Hide side ads on smaller screens */
+    display: none !important; /* Hide side ads on smaller screens with !important to override */
+    width: 0;
+    min-width: 0;
+    padding: 0;
   }
 }
 
@@ -29,15 +32,17 @@
   transition: background-color 0.3s ease, color 0.3s ease;
   
   @media (max-width: 768px) {
-    padding: 20px;
+    padding: 10px;
     max-width: 100%;
   }
 }
 
 .left-ad, .right-ad {
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Center vertically */
   justify-content: center;
+  position: sticky;
+  top: 20px; /* Keep ads visible while scrolling */
 }
 
 /* Mobile bottom ad container */
@@ -47,9 +52,11 @@
   padding: 15px;
   justify-content: center;
   background-color: var(--background-color);
+  margin-top: 20px;
   
   @media (max-width: 1200px) {
     display: flex; /* Show bottom ad on smaller screens */
+    order: 999; /* Ensure it's at the bottom */
   }
 }
 
@@ -83,7 +90,6 @@
   @media (max-width: 768px) {
     bottom: 20px;
     right: 20px;
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 10px 14px;
   }
 }

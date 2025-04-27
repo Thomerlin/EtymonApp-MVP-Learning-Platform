@@ -1,9 +1,10 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FeedbackService } from './services/feedback.service';
 
-// Add this interface to declare the adsbygoogle property on the window object
-interface WindowWithAdsense extends Window {
-  adsbygoogle: any[];
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
 }
 
 @Component({
@@ -11,9 +12,10 @@ interface WindowWithAdsense extends Window {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements OnInit {
   title = 'Etymon';
   showFeedbackPopup = false;
+  isMobile = false;
 
   constructor(private feedbackService: FeedbackService) {
     // Subscribe to feedback popup state
@@ -22,20 +24,47 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  toggleFeedbackPopup() {
-    this.showFeedbackPopup = !this.showFeedbackPopup;
+  ngOnInit() {
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+    
+    // Initialize ads after view is ready
+    setTimeout(() => {
+      this.initializeAds();
+    }, 100);
   }
 
-  ngAfterViewInit() {
-    // Initialize ads after view is initialized
-    try {
-      // Cast window to the custom interface
-      const windowWithAds = window as unknown as WindowWithAdsense;
-      windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || [];
-      windowWithAds.adsbygoogle.push({});
-      windowWithAds.adsbygoogle.push({});
-    } catch (e) {
-      console.error('AdSense error:', e);
-    }
+  checkScreenSize() {
+    this.isMobile = window.innerWidth <= 1200;
+  }
+  
+  initializeAds() {
+    // Only load desktop ads on desktop
+    const adElements = document.querySelectorAll('.adsbygoogle');
+    
+    adElements.forEach(ad => {
+      const isDesktopAd = ad.parentElement?.classList.contains('left-ad') || 
+                          ad.parentElement?.classList.contains('right-ad');
+      
+      // Skip loading desktop ads on mobile
+      if (this.isMobile && isDesktopAd) {
+        return;
+      }
+      
+      // Skip loading mobile ads on desktop
+      if (!this.isMobile && ad.parentElement?.classList.contains('bottom-ad')) {
+        return;
+      }
+      
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.error('Ad loading failed:', e);
+      }
+    });
+  }
+
+  toggleFeedbackPopup() {
+    this.showFeedbackPopup = !this.showFeedbackPopup;
   }
 }
