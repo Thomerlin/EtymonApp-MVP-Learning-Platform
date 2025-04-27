@@ -1,6 +1,7 @@
 const db = require('../db/database');
 const { processContentAudio } = require('../services/ttsService');
 const logger = require('../utils/logger');
+const { resetRandomLevelCache } = require('../services/articleService');
 
 /**
  * Inserts a complete article with all its associated content into the database
@@ -228,6 +229,138 @@ const insertContent = async (req, res) => {
   }
 };
 
+/**
+ * Deletes an article and all associated content from the database
+ * Only accessible by admin users with appropriate permissions
+ */
+const deleteArticle = async (req, res) => {
+  try {
+    const { articleId } = req.params;
+    
+    if (!articleId) {
+      return res.status(400).json({ error: 'ID do artigo não fornecido' });
+    }
+
+    // Log detailed information including permissions
+    logger.info({
+      userId: req.user.id,
+      articleId,
+      action: 'delete_article',
+      role: req.user.role,
+      permissions: req.user.permissions
+    }, 'Admin article deletion attempt');
+
+    // Start a transaction for data consistency
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+
+      // First check if the article exists
+      db.get('SELECT id FROM articles WHERE id = ?', [articleId], (err, article) => {
+        if (err) {
+          logger.error({ err, userId: req.user.id }, 'Database error checking article');
+          db.run('ROLLBACK');
+          return res.status(500).json({ error: 'Erro ao verificar artigo no banco de dados' });
+        }
+
+        if (!article) {
+          db.run('ROLLBACK');
+          return res.status(404).json({ error: 'Artigo não encontrado' });
+        }
+
+        // Get all levels associated with the article
+        db.all('SELECT id FROM levels WHERE article_id = ?', [articleId], (err, levels) => {
+          if (err) {
+            logger.error({ err, userId: req.user.id }, 'Error fetching article levels');
+            db.run('ROLLBACK');
+            return res.status(500).json({ error: 'Erro ao buscar níveis do artigo' });
+          }
+
+          const levelIds = levels.map(level => level.id);
+          const deleteOperations = [];
+          
+          // If there are levels, delete all exercises for each level
+          if (levelIds.length > 0) {
+            const tables = [
+              'exercises_multiple_choice',
+              'exercises_fill_in_the_blanks',
+              'exercises_true_false',
+              'exercises_vocabulary_matching',
+              'exercises_writing_with_audio'
+            ];
+            
+            tables.forEach(table => {
+              deleteOperations.push(new Promise((resolve, reject) => {
+                const placeholders = levelIds.map(() => '?').join(',');
+                db.run(`DELETE FROM ${table} WHERE level_id IN (${placeholders})`, levelIds, (err) => {
+                  if (err) {
+                    logger.error({ err, table }, `Error deleting from ${table}`);
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                });
+              }));
+            });
+          }
+
+          // Execute all delete operations for exercises
+          Promise.all(deleteOperations)
+            .then(() => {
+              // Delete levels associated with the article
+              db.run('DELETE FROM levels WHERE article_id = ?', [articleId], (err) => {
+                if (err) {
+                  logger.error({ err, articleId }, 'Error deleting article levels');
+                  db.run('ROLLBACK');
+                  return res.status(500).json({ error: 'Erro ao deletar níveis do artigo' });
+                }
+
+                // Finally delete the article
+                db.run('DELETE FROM articles WHERE id = ?', [articleId], function(err) {
+                  if (err) {
+                    logger.error({ err, articleId }, 'Error deleting article');
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ error: 'Erro ao deletar artigo' });
+                  }
+
+                  // If article was successfully deleted
+                  if (this.changes > 0) {
+                    // Reset the random level cache since an article was deleted
+                    resetRandomLevelCache();
+
+                    db.run('COMMIT');
+                    logger.info({ 
+                      userId: req.user.id,
+                      articleId, 
+                      levelsDeleted: levelIds.length 
+                    }, 'Article successfully deleted');
+                    return res.status(200).json({
+                      success: true,
+                      message: 'Artigo e todo seu conteúdo associado foram deletados com sucesso',
+                      articleId: articleId,
+                      levelsDeleted: levelIds.length
+                    });
+                  } else {
+                    db.run('ROLLBACK');
+                    return res.status(404).json({ error: 'Artigo não encontrado ou já foi deletado' });
+                  }
+                });
+              });
+            })
+            .catch(err => {
+              logger.error({ err }, 'Error during exercise deletion');
+              db.run('ROLLBACK');
+              return res.status(500).json({ error: 'Erro ao deletar exercícios' });
+            });
+        });
+      });
+    });
+  } catch (error) {
+    logger.error({ error }, 'Error processing article deletion');
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
+
 module.exports = {
-  insertContent
+  insertContent,
+  deleteArticle
 };

@@ -23,7 +23,8 @@ import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ContentInputComponent } from './components/content-input/content-input.component';
 // Import the footer component
-
+// Import the new component
+import { FeedbackPopupComponent } from './components/feedback-popup/feedback-popup.component';
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { ContentInputComponent } from './components/content-input/content-input.
     ExercisesComponent,
     HeaderComponent,
     FooterComponent,
-    ContentInputComponent
+    ContentInputComponent,
+    FeedbackPopupComponent
   ],
   imports: [
     BrowserModule,

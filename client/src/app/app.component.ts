@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { FeedbackService } from './services/feedback.service';
 
 // Add this interface to declare the adsbygoogle property on the window object
 interface WindowWithAdsense extends Window {
@@ -12,6 +13,18 @@ interface WindowWithAdsense extends Window {
 })
 export class AppComponent implements AfterViewInit {
   title = 'Etymon';
+  showFeedbackPopup = false;
+
+  constructor(private feedbackService: FeedbackService) {
+    // Subscribe to feedback popup state
+    this.feedbackService.showPopup$.subscribe(show => {
+      this.showFeedbackPopup = show;
+    });
+  }
+
+  toggleFeedbackPopup() {
+    this.showFeedbackPopup = !this.showFeedbackPopup;
+  }
 
   ngAfterViewInit() {
     // Initialize ads after view is initialized

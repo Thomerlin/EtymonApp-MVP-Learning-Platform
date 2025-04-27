@@ -150,17 +150,42 @@ const getArticlesSummary = (userId) => {
 let randomLevelCache = null;
 let dateCache = null;
 
+const resetRandomLevelCache = () => {
+  randomLevelCache = null;
+  dateCache = null;
+  logger.debug('Random level cache reset');
+};
+
 const getRandomLevel = () => {
   const today = new Date().toISOString().split('T')[0];
 
   if (dateCache === today && randomLevelCache) {
-    logger.debug('Using cached daily random level');
-    return Promise.resolve(randomLevelCache);
+    // Verify that the cached article still exists before using it
+    return new Promise((resolve, reject) => {
+      db.get('SELECT id FROM articles WHERE id = ?', [randomLevelCache.article_id], (err, article) => {
+        if (err) {
+          logger.error({ err }, 'Error verifying cached article existence');
+          resetRandomLevelCache(); // Reset cache on error
+          getRandomLevel().then(resolve).catch(reject); // Try again with fresh data
+          return;
+        }
+        
+        if (article) {
+          logger.debug('Using cached daily random level - article verified');
+          resolve(randomLevelCache);
+        } else {
+          logger.warn({ articleId: randomLevelCache.article_id }, 'Cached article no longer exists, selecting new one');
+          resetRandomLevelCache(); // Reset cache since article doesn't exist
+          getRandomLevel().then(resolve).catch(reject); // Try again with fresh data
+        }
+      });
+    });
   }
 
   logger.info('Selecting new random level for today');
   
   return new Promise((resolve, reject) => {
+    // Get the latest article that still exists in the database
     const queryLatestArticle = `SELECT id, title, summary FROM articles ORDER BY created_date DESC LIMIT 1`;
     db.get(queryLatestArticle, [], (err, article) => {
       if (err) {
@@ -172,6 +197,8 @@ const getRandomLevel = () => {
         return reject(new Error("No article found"));
       }
 
+      logger.debug({ articleId: article.id, title: article.title }, 'Latest article found for random level');
+
       const queryLevels = `SELECT * FROM levels WHERE article_id = ?`;
       db.all(queryLevels, [article.id], (err, levels) => {
         if (err) {
@@ -179,19 +206,67 @@ const getRandomLevel = () => {
           return reject(err);
         }
         if (levels.length === 0) {
-          logger.warn({ articleId: article.id }, 'No levels found for article');
-          return reject(new Error("No levels found"));
+          logger.warn({ articleId: article.id }, 'No levels found for latest article, looking for another article');
+          
+          // Attempt to find another article with levels
+          const queryAnotherArticle = `
+            SELECT a.id, a.title, a.summary 
+            FROM articles a
+            WHERE EXISTS (SELECT 1 FROM levels l WHERE l.article_id = a.id)
+            ORDER BY a.created_date DESC
+            LIMIT 1
+          `;
+          
+          db.get(queryAnotherArticle, [], (err, alternativeArticle) => {
+            if (err || !alternativeArticle) {
+              logger.error({ err }, 'Could not find any article with levels');
+              return reject(new Error("No articles with levels found"));
+            }
+            
+            // Now get levels for the alternative article
+            db.all(queryLevels, [alternativeArticle.id], (err, alternativeLevels) => {
+              if (err || alternativeLevels.length === 0) {
+                logger.error({ err }, 'Error retrieving levels for alternative article');
+                return reject(new Error("Could not retrieve levels for alternative article"));
+              }
+              
+              const randomLevel = alternativeLevels[Math.floor(Math.random() * alternativeLevels.length)];
+              randomLevelCache = { 
+                ...randomLevel, 
+                title: alternativeArticle.title, 
+                summary: alternativeArticle.summary,
+                isAlternativeArticle: true
+              };
+              dateCache = today;
+              
+              logger.info({ 
+                level: randomLevel.level,
+                articleId: alternativeArticle.id,
+                levelId: randomLevel.id
+              }, 'Random level selected from alternative article');
+              
+              resolve(randomLevelCache);
+            });
+          });
+          return;
         }
 
+        // Normal flow when levels are found for the latest article
         const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-        randomLevelCache = { ...randomLevel, title: article.title, summary: article.summary };
+        randomLevelCache = { 
+          ...randomLevel, 
+          title: article.title, 
+          summary: article.summary,
+          isLatestArticle: true 
+        };
         dateCache = today;
         
         logger.info({ 
           level: randomLevel.level,
           articleId: article.id,
-          levelId: randomLevel.id
-        }, 'Random level selected');
+          levelId: randomLevel.id,
+          levelsCount: levels.length
+        }, 'Random level selected from latest article');
         
         resolve(randomLevelCache);
       });
@@ -202,5 +277,6 @@ const getRandomLevel = () => {
 module.exports = {
   getAnsweredCorrectlyFlag,
   getArticlesSummary,
-  getRandomLevel
+  getRandomLevel,
+  resetRandomLevelCache
 };

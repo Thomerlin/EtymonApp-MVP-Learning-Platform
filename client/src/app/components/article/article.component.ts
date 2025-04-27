@@ -136,7 +136,7 @@ export class ArticleComponent implements OnInit {
       (res: Article) => {
         this.article = res;
         this.title = res.title;
-        this.createdDate = res.createdDate;
+        this.createdDate = res.created_date;
         this.summary = res.summary;
         this.loadLevel();
         this.isLoading = false; // Set loading state to false after content is loaded

@@ -1,20 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateJWT, checkPermission } = require('../middleware/auth');
-const { insertContent } = require('../controllers/adminController');
+const { authenticateJWT, requireAdmin } = require('../middleware/auth');
+const { insertContent, deleteArticle } = require('../controllers/adminController');
 const logger = require('../utils/logger');
 
-// All admin routes require authentication
+// All admin routes require authentication first
 router.use(authenticateJWT);
 
-// Use specific permissions for different operations
-router.post('/content', checkPermission('canWriteContent'), insertContent);
+// Add the requireAdmin middleware to ensure admin permissions are added
+router.use(requireAdmin);
+
+// Content management routes
+router.post('/content', insertContent);
+router.delete('/article/:articleId', deleteArticle);
+router.delete('/content/:articleId', deleteArticle); // Adding alternative path for backward compatibility
 
 // System management routes
-router.get('/status', checkPermission('canManageSystem'), (req, res) => {
+router.get('/status', (req, res) => {
   logger.info({
     userId: req.user.id,
-    role: req.user.role
+    role: req.user.role,
+    permissions: req.user.permissions
   }, 'Admin API status check');
   
   res.json({
@@ -24,19 +30,9 @@ router.get('/status', checkPermission('canManageSystem'), (req, res) => {
     user: {
       id: req.user.id,
       email: req.user.email,
-      role: req.user.role
+      role: req.user.role,
+      permissions: req.user.permissions
     }
-  });
-});
-
-// Add a user management endpoint
-router.get('/users', checkPermission('canManageUsers'), (req, res) => {
-  // This would typically fetch users from database
-  // Simplified response for now
-  res.json({
-    success: true,
-    message: 'You have permission to manage users',
-    timestamp: new Date().toISOString()
   });
 });
 

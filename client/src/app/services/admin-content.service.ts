@@ -3,6 +3,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+// Define Article interface (matching with the component's interface)
+interface Article {
+  id: number;
+  title: string;
+  summary: string;
+  created_date: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,5 +42,20 @@ export class AdminContentService {
           return of(false);
         })
       );
+  }
+
+  /**
+   * Get articles summary for admin management
+   */
+  getArticlesSummary(): Observable<Article[]> {
+    return this.http.get<Article[]>(`${environment.apiUrl}/api/article/articles-summary`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Delete an article by its ID
+   * @param articleId The ID of the article to delete
+   */
+  deleteArticle(articleId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/article/${articleId}`, { headers: this.getHeaders() });
   }
 }

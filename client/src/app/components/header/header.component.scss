@@ -204,7 +204,9 @@
 /* Responsive styles */
 @media (max-width: 768px) {
   .app-header {
-    padding: 0 12px;
+    padding: 0 20px;
+    background-color: var(--header-background, #ffffff);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     
     .logo-container {
       .logo-image {
@@ -237,9 +239,11 @@
 
 @media (max-width: 576px) {
   .app-header {
-    height: 56px; /* Increased from 50px to 56px */
-    padding: 12px; /* Increased from 10px to 12px */
+    height: auto;
+    padding: 12px 20px;
     flex-wrap: wrap;
+    background-color: var(--header-background, #ffffff);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     
     .logo-container {
       order: 1;
@@ -261,6 +265,16 @@
       
       .nav-links {
         justify-content: center;
+        flex-wrap: wrap;
+        
+        li {
+          margin: 5px;
+          
+          a {
+            padding: 8px;
+            font-size: 1rem;
+          }
+        }
       }
     }
     
@@ -281,7 +295,7 @@
       }
       
       .user-menu .profile-button .user-name {
-        max-width: 80px;
+        display: none;
       }
     }
   }

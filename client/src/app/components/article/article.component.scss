@@ -8,16 +8,24 @@
 .article-container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
+  
   background-color: var(--background-color);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
 
   h1 {
     color: var(--text-color);
     margin-bottom: 10px;
     font-size: 2.5rem;
     text-align: center;
+
+    @media (max-width: 576px) {
+      font-size: 2rem;
+    }
   }
 
   h2 {
@@ -113,6 +121,10 @@
     margin: 30px 0;
     justify-content: center;
 
+    @media (max-width: 576px) {
+      gap: 8px;
+    }
+
     button {
       padding: 8px 15px;
       background-color: var(--level-button-bg);
@@ -134,6 +146,11 @@
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+      }
+
+      @media (max-width: 576px) {
+        padding: 6px 12px;
+        font-size: 0.9rem;
       }
     }
   }
@@ -221,6 +238,11 @@
     box-shadow: var(--popup-shadow);
     transition: background-color 0.3s ease;
 
+    @media (max-width: 576px) {
+      max-width: calc(100% - 40px);
+      margin: 0 20px;
+    }
+
     .close-popup-btn {
       position: absolute;
       top: 10px;
@@ -242,6 +264,10 @@
       font-size: 1.4rem;
       margin-bottom: 15px;
       color: var(--popup-text);
+
+      @media (max-width: 576px) {
+        font-size: 1.2rem;
+      }
     }
 
     .audio-control-btn {
@@ -305,7 +331,7 @@
 
   /* Loading placeholders */
   .content-placeholder {
-    padding: 20px;
+    
     width: 100%;
 
     .placeholder-item {
@@ -389,7 +415,7 @@
     .placeholder-exercise-card {
       background-color: var(--card-background);
       border-radius: 8px;
-      padding: 20px;
+      
       box-shadow: var(--card-shadow);
       margin-bottom: 20px;
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -484,6 +510,13 @@
 
     50% {
       opacity: 0.3;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .audio-button {
+      width: 100%;
+      justify-content: center;
     }
   }
 }

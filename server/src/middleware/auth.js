@@ -119,7 +119,23 @@ const requireAdmin = async (req, res, next) => {
       return res.status(403).json({ error: 'Permissão de administrador negada' });
     }
     
-    logger.debug({ userId: req.user.id }, 'requireAdmin: Acesso de admin permitido para usuário');
+    // Add admin permissions to the user object
+    if (!req.user.permissions) req.user.permissions = {};
+    
+    // Grant all admin permissions
+    req.user.permissions.canManageContent = true;
+    req.user.permissions.canWriteContent = true;
+    req.user.permissions.canManageUsers = true;
+    req.user.permissions.canViewAnalytics = true;
+    req.user.permissions.canManageSystem = true;
+    req.user.role = 'admin';
+    
+    logger.debug({ 
+      userId: req.user.id, 
+      permissions: req.user.permissions,
+      role: req.user.role
+    }, 'requireAdmin: Acesso de admin permitido para usuário com permissões');
+    
     next();
   } catch (error) {
     logger.error('Erro em requireAdmin:', error.message);

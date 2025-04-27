@@ -1,8 +1,12 @@
 .footer {
   background-color: var(--light-background-color);
-  padding: 1.5rem 0;
+  padding: 1.5rem 20px;
   margin-top: 2rem;
-  border-top: 1px solid #6a6a6a54
+  border-top: 1px solid #6a6a6a54;
+  
+  @media (max-width: 576px) {
+    padding: 1.2rem 20px;
+  }
 }
 
 .minimal-footer {
@@ -21,6 +25,12 @@
 .footer-links {
   display: flex;
   gap: 1.5rem;
+  
+  @media (max-width: 576px) {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 
 .footer-links a {

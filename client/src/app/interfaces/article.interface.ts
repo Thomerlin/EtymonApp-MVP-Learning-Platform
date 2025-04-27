@@ -57,7 +57,7 @@ export interface Article {
   id: number;
   title: string;
   articleLink: string;
-  createdDate: string;
+  created_date: string;
   summary: string;
   levels: Level[];
 }

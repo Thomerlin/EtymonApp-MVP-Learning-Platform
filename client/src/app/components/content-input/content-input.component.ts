@@ -2,6 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { AdminContentService } from '../../services/admin-content.service';
 import { Router } from '@angular/router';
 
+// Define interface for article data
+interface Article {
+  id: number;
+  title: string;
+  summary: string;
+  created_date: string;
+  // Add other properties as needed
+}
+
 @Component({
   selector: 'app-content-input',
   templateUrl: './content-input.component.html',
@@ -14,6 +23,11 @@ export class ContentInputComponent implements OnInit {
   isLoading = false;
   isAdmin = false;
   checkingAdmin = true;
+  articles: Article[] = [];
+  filteredArticles: Article[] = [];
+  loadingArticles = false;
+  deletingArticleId: number | null = null;
+  searchTerm = '';
 
   constructor(
     private adminContentService: AdminContentService,
@@ -33,6 +47,9 @@ export class ContentInputComponent implements OnInit {
           setTimeout(() => {
             this.router.navigate(['/']);
           }, 3000); // Redirect after 3 seconds
+        } else {
+          // If user is admin, fetch the articles
+          this.loadArticles();
         }
       },
       error: (error) => {
@@ -45,6 +62,56 @@ export class ContentInputComponent implements OnInit {
         }, 3000); // Redirect after 3 seconds
       }
     });
+  }
+
+  loadArticles() {
+    this.loadingArticles = true;
+    this.adminContentService.getArticlesSummary().subscribe({
+      next: (response: Article[]) => {
+        this.articles = response;
+        this.filterArticles(); // Apply any existing search filter
+        this.loadingArticles = false;
+      },
+      error: (error) => {
+        console.error('Error fetching articles:', error);
+        this.errorMessage = 'Erro ao carregar a lista de artigos.';
+        this.loadingArticles = false;
+      }
+    });
+  }
+
+  filterArticles() {
+    if (!this.searchTerm.trim()) {
+      this.filteredArticles = [...this.articles];
+      return;
+    }
+
+    const search = this.searchTerm.toLowerCase().trim();
+    this.filteredArticles = this.articles.filter(article => 
+      article.title.toLowerCase().includes(search) || 
+      article.summary.toLowerCase().includes(search) ||
+      article.id.toString().includes(search)
+    );
+  }
+
+  deleteArticle(articleId: number) {
+    if (confirm('Tem certeza que deseja excluir este artigo? Esta ação não pode ser desfeita.')) {
+      this.deletingArticleId = articleId;
+      this.adminContentService.deleteArticle(articleId).subscribe({
+        next: (response) => {
+          this.successMessage = 'Artigo excluído com sucesso!';
+          // Refresh articles list
+          this.loadArticles();
+          this.deletingArticleId = null;
+        },
+        error: (error) => {
+          console.error('Error deleting article:', error);
+          this.errorMessage = error.error?.error || 
+            'Ocorreu um erro ao excluir o artigo. Por favor tente novamente.';
+          this.deletingArticleId = null;
+        }
+      });
+    }
   }
 
   onSubmit() {
@@ -70,6 +137,8 @@ export class ContentInputComponent implements OnInit {
           this.successMessage = 'Conteúdo adicionado com sucesso!';
           this.jsonContent = '';
           this.isLoading = false;
+          // Refresh the articles list
+          this.loadArticles();
         },
         error: (error) => {
           console.error('Error submitting content:', error);

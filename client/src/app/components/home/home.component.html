@@ -20,7 +20,7 @@
 
   <!-- Random Exercise Container -->
   <div class="featured-section" *ngIf="!isLoading && randomExerciseLevel">
-    <h2>Featured Content: {{ randomExerciseLevel.title }}</h2>
+    <h2>{{ randomExerciseLevel.title }}</h2>
     <p class="summary"><strong>Summary:</strong> {{ randomExerciseLevel.summary }}</p>
 
     <div class="text-container">
@@ -97,7 +97,7 @@
       </div>
     </div>
 
-    <button *ngIf="showArticlesUpTo < articles.length" class="see-more-btn" (click)="seeMoreArticles()">
+    <button *ngIf="showArticlesUpTo < articles.length" class="see-more-btn" (click)="seeMoreArticles()" style="margin-top: 70px;">
       See More Articles
     </button>
   </div>

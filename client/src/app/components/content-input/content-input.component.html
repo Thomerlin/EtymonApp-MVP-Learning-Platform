@@ -21,6 +21,7 @@
   
   <!-- Only show content to admins -->
   <div *ngIf="isAdmin && !checkingAdmin">
+    <!-- Add new content form -->
     <div class="form-group">
       <label for="jsonInput">JSON do Artigo:</label>
       <div class="template-actions">
@@ -46,6 +47,67 @@
         <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
         Enviar Conteúdo
       </button>
+    </div>
+    
+    <!-- Article list section -->
+    <div class="mt-5 articles-section">
+      <div class="section-header">
+        <h3>Artigos Existentes</h3>
+        <div class="search-container">
+          <input 
+            type="text" 
+            class="form-control search-input" 
+            placeholder="Buscar artigos..." 
+            [(ngModel)]="searchTerm"
+            (input)="filterArticles()">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+      </div>
+      
+      <!-- Loading indicator for articles -->
+      <div *ngIf="loadingArticles" class="text-center my-3">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Carregando artigos...</span>
+        </div>
+        <p class="mt-2">Carregando lista de artigos...</p>
+      </div>
+      
+      <!-- No articles message -->
+      <div *ngIf="!loadingArticles && (!filteredArticles || filteredArticles.length === 0)" class="alert alert-info">
+        Nenhum artigo encontrado.
+      </div>
+      
+      <!-- Articles list -->
+      <div *ngIf="!loadingArticles && filteredArticles && filteredArticles.length > 0" class="articles-container">
+        <div class="article-card" *ngFor="let article of filteredArticles">
+          <div class="article-header">
+            <h4 class="article-title">{{ article.title }}</h4>
+            <span class="article-id">ID: {{ article.id }}</span>
+          </div>
+          
+          <div class="article-content">
+            <p class="article-summary">{{ article.summary }}</p>
+            <div class="article-meta">
+              <span class="article-date">
+                <i class="far fa-calendar-alt"></i> {{ article.created_date | date: 'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="article-actions">
+            <button 
+              class="btn btn-outline-danger" 
+              (click)="deleteArticle(article.id)"
+              [disabled]="deletingArticleId === article.id">
+              <span *ngIf="deletingArticleId === article.id" class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+              <i class="far fa-trash-alt"></i> Excluir
+            </button>
+            <button class="btn btn-outline-primary">
+              <i class="far fa-edit"></i> Editar
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

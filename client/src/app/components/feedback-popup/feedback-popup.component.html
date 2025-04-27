@@ -1,0 +1,19 @@
+<div class="feedback-popup-overlay" *ngIf="show">
+  <div class="feedback-popup">
+    <div class="feedback-popup-header">
+      <h3>Sua opinião é importante para nós!</h3>
+      <button class="close-button" (click)="closePopup()">×</button>
+    </div>
+    <div class="feedback-popup-content">
+      <p>Gostaríamos de saber o que você está achando da plataforma. Sua avaliação nos ajudará a melhorar ainda mais!</p>
+      <div class="feedback-actions">
+        <button class="feedback-button primary" (click)="openFeedbackForm()">Deixar feedback</button>
+        <button class="feedback-button secondary" (click)="closePopup()">Mais tarde</button>
+      </div>
+      <div class="dont-show-again">
+        <input type="checkbox" id="dontShowAgain" [(ngModel)]="dontShowAgain">
+        <label for="dontShowAgain">Não mostrar novamente</label>
+      </div>
+    </div>
+  </div>
+</div>
