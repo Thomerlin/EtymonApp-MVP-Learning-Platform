@@ -14,12 +14,15 @@
   <!-- Ensure scripts load with correct type -->
   <script type="module">
     // This helps catch any module loading issues early
-    window.addEventListener('error', function(e) {
+    window.addEventListener('error', function (e) {
       if (e.message && e.message.indexOf('Failed to load module script') >= 0) {
         console.error('Module loading error detected. Check server MIME types configuration.');
       }
     });
   </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5682914748796243"
+    crossorigin="anonymous"></script>
 </head>
 
 <body>

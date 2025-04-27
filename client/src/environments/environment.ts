@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
+  apiUrl: 'https://etymonapp.com',
   googleAuthCallbackUrl: 'http://localhost:4200/auth-callback',
   appDomain: 'localhost:4200'
 };

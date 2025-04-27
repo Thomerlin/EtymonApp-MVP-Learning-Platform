@@ -1,5 +1,25 @@
 <app-header></app-header>
-<div class="main-content">
-  <router-outlet></router-outlet>
+<div class="page-container">
+  <div class="ad-container left-ad">
+    <!-- AdSense ad for left side -->
+    <ins class="adsbygoogle"
+         style="display:block; min-height:600px;"
+         data-ad-client="ca-pub-5682914748796243"
+         data-ad-slot="left-sidebar-ad"
+         data-ad-format="vertical"
+         data-full-width-responsive="true"></ins>
+  </div>
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+  <div class="ad-container right-ad">
+    <!-- AdSense ad for right side -->
+    <ins class="adsbygoogle"
+         style="display:block; min-height:600px;"
+         data-ad-client="ca-pub-5682914748796243"
+         data-ad-slot="right-sidebar-ad"
+         data-ad-format="vertical"
+         data-full-width-responsive="true"></ins>
+  </div>
 </div>
 <app-footer></app-footer>

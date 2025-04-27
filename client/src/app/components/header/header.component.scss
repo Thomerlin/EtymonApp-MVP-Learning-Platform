@@ -6,11 +6,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--header-background);
   color: var(--header-text);
   padding: 0 24px;
-  height: 56px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: 64px; /* Increased height from 56px to 64px */
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -18,11 +16,22 @@
   
   .logo-container {
     display: flex;
-    align-items: center;
+    align-items: end;
+    
+    .logo-image {
+      width: 40px; /* Increased from 32px to 40px */
+      height: 40px; /* Increased from 32px to 40px */
+      margin-right: 12px; /* Increased from 10px to 12px */
+      transition: transform 1s ease;
+      
+      &:hover {
+        transform: rotate(-360deg);
+      }
+    }
     
     .logo {
-      font-size: 1.2rem;
-      font-weight: 500;
+      font-size: 1.5rem; /* Increased from 1.2rem to 1.5rem */
+      font-weight: 600; /* Increased from 500 to 600 */
       color: var(--header-text);
       text-decoration: none;
       cursor: pointer;
@@ -42,17 +51,18 @@
       margin: 0;
       
       li {
-        margin: 0 10px;
+        margin: 0 12px; /* Increased from 10px to 12px */
         
         a {
           display: flex;
           align-items: center;
           color: var(--header-text);
           text-decoration: none;
-          padding: 8px 12px;
+          padding: 10px 14px; /* Increased from 8px 12px to 10px 14px */
           border-radius: 4px;
           transition: background-color 0.3s ease, color 0.3s ease;
           cursor: pointer;
+          font-size: 1.1rem; /* Added font size */
           
           .icon {
             margin-right: 5px;
@@ -69,13 +79,13 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px; /* Increased from 12px to 14px */
     
     .toggle-dark-mode-btn {
       background-color: transparent;
       border: none;
       color: var(--header-text);
-      padding: 6px;
+      padding: 8px; /* Increased from 6px to 8px */
       cursor: pointer;
       opacity: 0.7;
       display: flex;
@@ -83,8 +93,8 @@
       justify-content: center;
       
       .icon {
-        width: 16px;
-        height: 16px;
+        width: 20px; /* Increased from 16px to 20px */
+        height: 20px; /* Increased from 16px to 20px */
       }
       
       &:hover {
@@ -97,16 +107,16 @@
         background-color: var(--button-primary);
         border: none;
         color: white;
-        padding: 8px 18px;
+        padding: 10px 22px; /* Increased from 8px 18px to 10px 22px */
         border-radius: 4px;
-        font-size: 0.95rem;
+        font-size: 1.05rem; /* Increased from 0.95rem to 1.05rem */
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px; /* Increased from 6px to 8px */
         letter-spacing: 0.3px;
         
         &:hover {
@@ -119,37 +129,42 @@
           transform: translateY(0);
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
+
+        .icon {
+          width: 20px; /* Increased from 16px to 20px */
+          height: 20px; /* Increased from 16px to 20px */
+        }
       }
     }
     
     .user-menu {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px; /* Increased from 8px to 10px */
       
       .profile-button {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px; /* Increased from 6px to 8px */
         background-color: transparent;
         border: none;
         color: var(--header-text);
         cursor: pointer;
-        padding: 6px 8px;
-        font-size: 0.9rem;
+        padding: 8px 10px; /* Increased from 6px 8px to 8px 10px */
+        font-size: 1rem; /* Increased from 0.9rem to 1rem */
         opacity: 0.8;
         
         .avatar {
-          font-size: 1.2rem;
+          font-size: 1.4rem; /* Increased from 1.2rem to 1.4rem */
         }
         
         .user-icon {
-          width: 16px;
-          height: 16px;
+          width: 20px; /* Increased from 16px to 20px */
+          height: 20px; /* Increased from 16px to 20px */
         }
         
         .user-name {
-          max-width: 120px;
+          max-width: 140px; /* Increased from 120px to 140px */
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -164,9 +179,9 @@
         background-color: transparent;
         border: 1px solid var(--border-color);
         color: var(--header-text);
-        padding: 6px 8px;
+        padding: 8px 10px; /* Increased from 6px 8px to 8px 10px */
         border-radius: 3px;
-        font-size: 0.9rem;
+        font-size: 1rem; /* Increased from 0.9rem to 1rem */
         cursor: pointer;
         transition: all 0.2s ease;
         display: flex;
@@ -174,8 +189,8 @@
         justify-content: center;
         
         .logout-icon {
-          width: 16px;
-          height: 16px;
+          width: 20px; /* Increased from 16px to 20px */
+          height: 20px; /* Increased from 16px to 20px */
         }
         
         &:hover {
@@ -191,18 +206,26 @@
   .app-header {
     padding: 0 12px;
     
-    .logo-container .logo {
-      font-size: 1.2rem;
+    .logo-container {
+      .logo-image {
+        width: 34px; /* Increased from 28px to 34px */
+        height: 34px; /* Increased from 28px to 34px */
+        margin-right: 10px; /* Increased from 8px to 10px */
+      }
+      
+      .logo {
+        font-size: 1.3rem; /* Increased from 1.2rem to 1.3rem */
+      }
     }
     
     .nav-links li a {
-      padding: 8px;
+      padding: 9px 10px; /* Increased from 8px to 9px 10px */
     }
     
     .header-actions {
       .btn-login {
-        padding: 6px 14px;
-        font-size: 0.9rem;
+        padding: 8px 16px; /* Increased from 6px 14px to 8px 16px */
+        font-size: 1rem; /* Increased from 0.9rem to 1rem */
       }
     }
     
@@ -214,8 +237,8 @@
 
 @media (max-width: 576px) {
   .app-header {
-    height: 50px;
-    padding: 10px;
+    height: 56px; /* Increased from 50px to 56px */
+    padding: 12px; /* Increased from 10px to 12px */
     flex-wrap: wrap;
     
     .logo-container {
@@ -223,6 +246,12 @@
       width: 100%;
       justify-content: center;
       margin-bottom: 10px;
+      
+      .logo-image {
+        width: 30px; /* Increased from 24px to 30px */
+        height: 30px; /* Increased from 24px to 30px */
+        margin-right: 8px; /* Increased from 6px to 8px */
+      }
     }
     
     .main-nav {
