@@ -4,6 +4,18 @@ import { AuthService } from '../../services/auth.service';
 import { ArticleService } from '../../services/article.service';
 import { ThemeService } from '../../services/theme.service';
 
+
+interface Sentence {
+  text: string;
+  phonetic: string;
+  visible: boolean;
+  words: {
+    text: string;
+    phonetic: string;
+  }[];
+  index: number; // Add this new property
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -17,10 +29,10 @@ export class HomeComponent implements OnInit {
   error: string | null = null;
   loggedIn: boolean = false;
   showArticlesUpTo: number = 5;
+  sentences: Sentence[] = [];
 
   // Properties
   randomExerciseLevel: any = null;
-  sentences: any[] = [];
   popupVisible: boolean = false;
   popupContent: { text: string; phonetic: string | null } | null = null;
   darkMode: boolean = false;
@@ -101,13 +113,15 @@ export class HomeComponent implements OnInit {
               };
             });
 
-            // Adicione a sentença processada ao array
+            // Adicione a sentença processada ao array com um índice único
             this.sentences.push({
               text: sentenceText,
               phonetic: phoneticText,
               visible: false,
-              words: wordPairs
+              words: wordPairs,
+              index: this.sentences.length // Add a unique index to each sentence
             });
+
           });
         });
       },

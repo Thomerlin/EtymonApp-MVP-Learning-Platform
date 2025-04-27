@@ -14,6 +14,7 @@ interface Sentence {
     text: string;
     phonetic: string;
   }[];
+  index: number; // Add this new property
 }
 
 @Component({
@@ -200,7 +201,8 @@ export class ArticleComponent implements OnInit {
               text: sentenceText,
               phonetic: phoneticText,
               visible: false,
-              words: wordPairs
+              words: wordPairs,
+              index: this.sentences.length // Add index to each sentence
             });
           });
         });

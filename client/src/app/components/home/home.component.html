@@ -26,10 +26,10 @@
     <div class="text-container">
       <div class="paragraph">
         <div *ngFor="let sentence of sentences.slice(0, sentences.length / 2); let i = index" class="sentence-container"
-          [class.paragraph-start]="i === 0 || sentences[i - 1]?.text?.endsWith('.')">
+          [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
           <span class="sentence-text">
             <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-              <span class="word" (click)="togglePopup(i)">{{ word.text }}</span>
+              <span class="word" (click)="togglePopup(sentence.index)">{{ word.text }}</span>
               <span class="popup" *ngIf="word.phonetic">
                 {{ replaceHyphensWithSpaces(word.phonetic) }}
               </span>
@@ -43,7 +43,7 @@
           [class.paragraph-start]="i === 0 || sentences[i - 1].text.endsWith('.')">
           <span class="sentence-text">
             <span *ngFor="let word of sentence.words; let j = index" class="word-container">
-              <span class="word toggle-phonetics-btn" (click)="togglePopup((sentences.length / 2) + i - 0.5)">{{
+              <span class="word toggle-phonetics-btn" (click)="togglePopup(sentence.index)">{{
                 word.text }}</span>
               <span class="popup" *ngIf="word.phonetic">
                 {{ replaceHyphensWithSpaces(word.phonetic) }}
