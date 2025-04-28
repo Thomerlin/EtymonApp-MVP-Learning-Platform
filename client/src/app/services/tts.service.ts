@@ -370,6 +370,26 @@ export class TtsService {
   }
 
   /**
+   * Stop all audio playback
+   */
+  stopAllAudio(): void {
+    // Stop article audio
+    this.stopAudio('article');
+    
+    // Stop popup audio
+    this.stopAudio('popup');
+    
+    // If you have any other audio contexts, stop them too
+    // this.stopAudio('otherContext');
+    
+    // Reset all status observables
+    this.isArticlePlayingSubject.next(false);
+    this.isArticlePausedSubject.next(false);
+    this.isPopupPlayingSubject.next(false);
+    this.isPopupPausedSubject.next(false);
+  }
+
+  /**
    * Toggle play/pause of current audio for the specified context
    * @param text Text to speak if not currently loaded
    * @param context The audio context

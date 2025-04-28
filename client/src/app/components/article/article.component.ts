@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Update import to include OnDestroy
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { Location } from '@angular/common'; // Add Location import
 import { TtsService } from '../../services/tts.service';
@@ -22,7 +22,7 @@ interface Sentence {
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.scss']
 })
-export class ArticleComponent implements OnInit {
+export class ArticleComponent implements OnInit, OnDestroy {
   article: Article | null = null;
 
   userId: number = 0;
@@ -129,6 +129,10 @@ export class ArticleComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    // Stop all audio when navigating away from the component
+    this.ttsService.stopAllAudio();
+    
+    // Remove event listener to prevent memory leaks
     document.removeEventListener('click', this.closePopupOnOutsideClick.bind(this));
   }
 
