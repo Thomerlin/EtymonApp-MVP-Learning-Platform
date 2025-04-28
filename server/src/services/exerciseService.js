@@ -108,12 +108,13 @@ const validateExercise = (exerciseId, answer, articleId, level, type, userId, re
           saveProgress(userId, articleId, level, exerciseId, type, res);
         } else {
           logger.debug({ userId, exerciseId }, 'Answer is incorrect');
-          // For incorrect answers, just return an error response without saving
+          // For incorrect answers, return the correct answer
           return res.status(400).json({
             error: "Incorrect answer. Try again.",
             correct: false,
             exerciseId,
-            answeredCorrectly: false
+            answeredCorrectly: false,
+            correctAnswer: type === "writing_with_audio" ? row.sentence : row.answer
           });
         }
       } else {

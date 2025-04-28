@@ -112,7 +112,6 @@ export class AuthService {
   }
 
   initiateGoogleLogin(): void {
-  console.log(this.apiUrl);
     window.location.href = `${this.apiUrl}/auth/google`;
   }
 

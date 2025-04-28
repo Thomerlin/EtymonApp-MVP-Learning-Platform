@@ -88,6 +88,10 @@ export class ExercisesComponent implements OnInit, OnChanges {
   // Add hint visibility tracking
   hintsShown: { [key: number]: boolean } = {};
 
+  // Add properties to handle error message with correct answer
+  showErrorMessage: boolean = false;
+  correctAnswer: string = '';
+
   constructor(
     private exerciseService: ExerciseService,
     private ttsService: TtsService,
@@ -228,7 +232,7 @@ export class ExercisesComponent implements OnInit, OnChanges {
               // Emit event to notify that exercise was validated correctly
               // but don't trigger full page refresh
               this.exerciseValidated.emit();
-            }, 1000);
+            }, 3000);
           } else {
             this.clearInputForExerciseType(type, exerciseId); // Clear input after failure
             this.handleIncorrectAnswer(exerciseId); // Handle incorrect answer
@@ -236,6 +240,13 @@ export class ExercisesComponent implements OnInit, OnChanges {
         },
         err => {
           console.log(err.error || "Error validating answer");
+          
+          // If there's a correctAnswer in the error response, show it to the user
+          if (err.error && err.error.correctAnswer) {
+            this.correctAnswer = err.error.correctAnswer;
+            this.showErrorMessage = true;
+          }
+          
           this.clearInputForExerciseType(type, exerciseId); // Clear input on error
           this.handleIncorrectAnswer(exerciseId); // Ensure it moves to the next exercise even on API error
         }
@@ -290,6 +301,8 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
   handleIncorrectAnswer(exerciseId: number) {
     this.showErrorAnimation = true; // Trigger error animation
+    
+    // Don't automatically move to next exercise since we now have a continue button
     setTimeout(() => {
       this.showErrorAnimation = false; // Reset animation after 500ms
       const incorrectExercise = this.allExercises[this.currentExerciseIndex];
@@ -297,9 +310,14 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
       // Add the incorrect exercise back to the allExercises list
       this.allExercises.push(incorrectExercise);
-
-      this.moveToNextExercise(); // Move to the next exercise
     }, 500);
+  }
+
+  // Add method to continue to next exercise after showing error message
+  continueAfterError() {
+    this.showErrorMessage = false;
+    this.correctAnswer = '';
+    this.moveToNextExercise();
   }
 
   moveToNextExercise() {

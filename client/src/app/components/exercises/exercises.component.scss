@@ -43,7 +43,6 @@
 }
 
 .error-animation::before {
-  content: '✕';
   position: absolute;
   top: 10px;
   right: 10px;
@@ -75,17 +74,17 @@
   }
 }
 
-// Success animation
+// Success animation - improved visuals
 .success-animation {
   animation: pulseSuccess 0.6s;
   border: 2px solid var(--success-color) !important;
   position: relative;
   z-index: 10;
-  transform-origin: center; /* Ensure scaling from center */
+  transform-origin: center;
+  box-shadow: 0 0 15px rgba(75, 181, 67, 0.3);
 }
 
 .success-animation::before {
-  content: '✓';
   position: absolute;
   top: 10px;
   right: 10px;
@@ -93,22 +92,117 @@
   font-size: 24px;
   font-weight: bold;
   z-index: 11;
+  animation: popIn 0.3s ease-out;
 }
 
 @keyframes pulseSuccess {
   0% {
     transform: scale(1);
-    z-index: 10;
+    box-shadow: 0 0 0 rgba(75, 181, 67, 0.1);
   }
-
   50% {
     transform: scale(1.05);
-    z-index: 10;
+    box-shadow: 0 0 20px rgba(75, 181, 67, 0.4);
   }
-
   100% {
     transform: scale(1);
-    z-index: 10;
+    box-shadow: 0 0 15px rgba(75, 181, 67, 0.3);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Inline success message (within exercise card)
+.inline-success-message {
+  background-color: var(--success-bg, rgba(75, 181, 67, 0.1));
+  border-radius: 8px;
+  padding: 18px;
+  margin: 15px 0;
+  text-align: center;
+  animation: slideInUp 0.4s ease-out;
+  border: 1px solid var(--success-color);
+  
+  .success-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--success-color);
+    animation: bounceIn 0.6s;
+  }
+  
+  .success-title {
+    color: var(--success-color);
+    margin: 5px 0;
+    font-weight: bold;
+    font-size: 1.3rem;
+  }
+  
+  .success-message {
+    color: var(--text-color);
+    margin: 10px 0;
+    font-size: 1.1rem;
+  }
+  
+  .continue-btn {
+    padding: 10px 20px;
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s;
+    
+    &:hover {
+      background-color: darken(#4bb543, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -125,6 +219,122 @@
   100% {
     transform: translateX(-100%);
     opacity: 0;
+  }
+}
+
+// Error message with correct answer
+.error-message-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.error-message-card {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  border: 2px solid var(--error-color);
+  
+  h3 {
+    color: var(--error-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    color: var(--text-color);
+    margin-bottom: 5px;
+  }
+  
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+  
+  .correct-answer {
+    background-color: var(--success-bg, rgba(75, 181, 67, 0.1));
+    border: 1px solid var(--success-color);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 15px 0;
+    font-weight: bold;
+    color: var(--text-color);
+  }
+  
+  .continue-btn {
+    padding: 10px 20px;
+    background-color: var(--button-primary);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    
+    &:hover {
+      background-color: var(--button-hover);
+    }
+  }
+}
+
+// Inline error message (within exercise card)
+.inline-error-message {
+  background-color: var(--error-bg, rgba(220, 53, 69, 0.1));
+  border-radius: 6px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+  
+  .error-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--error-color);
+  }
+  
+  p {
+    color: var(--text-color);
+    margin: 5px 0;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .correct-answer {
+    background-color: var(--success-bg, rgba(75, 181, 67, 0.1));
+    border: 1px solid var(--success-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin: 12px 0;
+    font-weight: bold;
+    color: var(--text-color);
+  }
+  
+  .continue-btn {
+    padding: 8px 16px;
+    background-color: var(--button-primary);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    
+    &:hover {
+      background-color: var(--button-hover);
+    }
   }
 }
 
@@ -288,11 +498,21 @@
   flex-direction: column;
   
   .sentence-container {
-    margin-bottom: 10px;
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 2;
+    
+    span {
+      margin: 0 5px;
+    }
   }
   
   .exercise-buttons {
-    margin-top: 15px;
+    margin-top: 25px;
     align-self: flex-end;
   }
 }

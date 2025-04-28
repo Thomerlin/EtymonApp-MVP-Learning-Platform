@@ -81,7 +81,24 @@
           [class.slide-out]="isSlidingOut">
           <div class="exercise-content">
             <h3>{{ allExercises[currentExerciseIndex].question }}</h3>
-            <div class="options-container">
+            
+            <!-- Error message inside the exercise card -->
+            <div *ngIf="showErrorMessage" class="inline-error-message">
+              <div class="error-icon">❌</div>
+              <p>Incorrect Answer</p>
+              <div class="correct-answer">Correct answer: {{ correctAnswer }}</div>
+              <button class="continue-btn" (click)="continueAfterError()">Continue</button>
+            </div>
+            
+            <!-- Success message inside the exercise card -->
+            <div *ngIf="showSuccessAnimation && !isSlidingOut" class="inline-success-message">
+              <div class="success-icon">✓</div>
+              <p class="success-title">Excellent!</p>
+              <p class="success-message">That's the correct answer.</p>
+            </div>
+            
+            <!-- Only show options when not displaying error or success -->
+            <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="options-container">
               <div *ngFor="let option of allExercises[currentExerciseIndex].options.split(',')" class="option-item">
                 <input type="radio" [name]="'multiple_choice_' + allExercises[currentExerciseIndex].id"
                   [value]="option.split('.')[0].trim()" (change)="answer = option.split('.')[0].trim()">
@@ -89,7 +106,7 @@
               </div>
             </div>
           </div>
-          <div class="exercise-buttons">
+          <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="exercise-buttons">
             <button class="validate-btn"
               (click)="validate(allExercises[currentExerciseIndex].id, answer, 'multiple_choice')">Validate</button>
           </div>
@@ -110,7 +127,25 @@
           </div>
           
           <div class="exercise-content">
-            <div class="fill-blanks-container">
+            <!-- Add title for the fill in the blanks exercise -->
+            <h3>Fill in the blank</h3>
+            
+            <!-- Error message inside the exercise card -->
+            <div *ngIf="showErrorMessage" class="inline-error-message">
+              <div class="error-icon">❌</div>
+              <p>Incorrect Answer</p>
+              <div class="correct-answer">Correct answer: {{ correctAnswer }}</div>
+              <button class="continue-btn" (click)="continueAfterError()">Continue</button>
+            </div>
+            
+            <!-- Success message inside the exercise card -->
+            <div *ngIf="showSuccessAnimation && !isSlidingOut" class="inline-success-message">
+              <div class="success-icon">✓</div>
+              <p class="success-title">Perfect!</p>
+              <p class="success-message">You filled in the correct word.</p>
+            </div>
+            
+            <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="fill-blanks-container">
               <div class="sentence-container">
                 <span *ngFor="let part of allExercises[currentExerciseIndex].sentence.split('___'); let i = index">
                   {{ part }}
@@ -138,7 +173,23 @@
           [class.slide-out]="isSlidingOut">
           <div class="exercise-content">
             <h3>{{ allExercises[currentExerciseIndex].statement }}</h3>
-            <div class="true-false-buttons">
+            
+            <!-- Error message inside the exercise card -->
+            <div *ngIf="showErrorMessage" class="inline-error-message">
+              <div class="error-icon">❌</div>
+              <p>Incorrect Answer</p>
+              <div class="correct-answer">Correct answer: {{ correctAnswer }}</div>
+              <button class="continue-btn" (click)="continueAfterError()">Continue</button>
+            </div>
+            
+            <!-- Success message inside the exercise card -->
+            <div *ngIf="showSuccessAnimation && !isSlidingOut" class="inline-success-message">
+              <div class="success-icon">✓</div>
+              <p class="success-title">Correct!</p>
+              <p class="success-message">You got it right!</p>
+            </div>
+            
+            <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="true-false-buttons">
               <button class="tf-btn"
                 (click)="validate(allExercises[currentExerciseIndex].id, 'T', 'true_false')">True</button>
               <button class="tf-btn"
@@ -153,7 +204,23 @@
           [class.slide-out]="isSlidingOut">
           <div class="exercise-content">
             <h3>Listen and Write</h3>
-            <div class="writing-audio-container">
+            
+            <!-- Error message inside the exercise card -->
+            <div *ngIf="showErrorMessage" class="inline-error-message">
+              <div class="error-icon">❌</div>
+              <p>Incorrect Answer</p>
+              <div class="correct-answer">Correct answer: {{ correctAnswer }}</div>
+              <button class="continue-btn" (click)="continueAfterError()">Continue</button>
+            </div>
+            
+            <!-- Success message inside the exercise card -->
+            <div *ngIf="showSuccessAnimation && !isSlidingOut" class="inline-success-message">
+              <div class="success-icon">✓</div>
+              <p class="success-title">Outstanding!</p>
+              <p class="success-message">Your answer is correct.</p>
+            </div>
+            
+            <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="writing-audio-container">
               <div class="audio-control">
                 <button class="audio-button" [class.active]="isExercisePlaying || isExercisePaused"
                   (click)="playWritingAudio(allExercises[currentExerciseIndex].id)">
@@ -166,7 +233,7 @@
                 placeholder="Type your answer here..."></textarea>
             </div>
           </div>
-          <div class="exercise-buttons">
+          <div *ngIf="!showErrorMessage && !(showSuccessAnimation && !isSlidingOut)" class="exercise-buttons">
             <button class="validate-btn"
               (click)="validate(allExercises[currentExerciseIndex].id, answers[allExercises[currentExerciseIndex].id], 'writing_with_audio')">Validate</button>
           </div>

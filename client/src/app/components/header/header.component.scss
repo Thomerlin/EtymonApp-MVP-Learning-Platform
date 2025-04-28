@@ -22,10 +22,10 @@
       width: 40px; /* Increased from 32px to 40px */
       height: 40px; /* Increased from 32px to 40px */
       margin-right: 12px; /* Increased from 10px to 12px */
-      transition: transform 1s ease;
+      transition: transform 1.5s ease;
       
       &:hover {
-        transform: rotate(-360deg);
+        transform: rotate(-380deg);
       }
     }
     

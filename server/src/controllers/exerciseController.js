@@ -5,12 +5,15 @@ const validate = async (req, res) => {
   const { exerciseId, answer, type, articleId, level } = req.body;
   const userId = req.user?.id;
 
+  // Handle empty answers as incorrect
+  const userAnswer = answer || "";
+
   if (!userId) {
     logger.warn('Authentication required for exercise validation');
     return res.status(401).json({ error: "Authentication required" });
   }
 
-  if (!exerciseId || !answer || !type || !articleId || !level) {
+  if (!exerciseId || !type || !articleId || !level) {
     logger.warn({ userId, type, articleId, level }, 'Missing required exercise validation parameters');
     return res.status(400).json({ error: "exerciseId, answer, type, articleId, and level are required" });
   }
@@ -26,19 +29,19 @@ const validate = async (req, res) => {
   // Call the appropriate validation based on the type
   switch (type) {
     case "multiple_choice":
-      validateMultipleChoice(exerciseId, answer, articleId, level, type, userId, res);
+      validateMultipleChoice(exerciseId, userAnswer, articleId, level, type, userId, res);
       break;
     case "fill_in_the_blanks":
-      validateGapFill(exerciseId, answer, articleId, level, type, userId, res);
+      validateGapFill(exerciseId, userAnswer, articleId, level, type, userId, res);
       break;
     case "true_false":
-      validateTrueFalse(exerciseId, answer, articleId, level, type, userId, res);
+      validateTrueFalse(exerciseId, userAnswer, articleId, level, type, userId, res);
       break;
     case "vocabulary_matching":
-      validateVocabularyMatching(exerciseId, answer, articleId, level, type, userId, res);
+      validateVocabularyMatching(exerciseId, userAnswer, articleId, level, type, userId, res);
       break;
     case "writing_with_audio":
-      validateWriting(exerciseId, answer, articleId, level, type, userId, res);
+      validateWriting(exerciseId, userAnswer, articleId, level, type, userId, res);
       break;
     default:
       logger.warn({ type }, 'Invalid exercise type');

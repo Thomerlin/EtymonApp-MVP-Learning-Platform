@@ -211,7 +211,6 @@ export class ArticleComponent implements OnInit, OnDestroy {
           });
         });
       } else {
-        console.log('Level not found:', this.level);
       }
     }
   }
@@ -327,7 +326,6 @@ export class ArticleComponent implements OnInit, OnDestroy {
   reloadArticle() {
     // No longer reloading the entire article
     // Just update the parts needed or do nothing
-    console.log('Exercise validated successfully');
     
     // If specific UI updates are needed without reloading the whole article:
     // this.updateSpecificUI();
@@ -335,7 +333,6 @@ export class ArticleComponent implements OnInit, OnDestroy {
 
   // Add handleExerciseValidated method
   handleExerciseValidated(): void {
-    console.log('Exercise validated successfully');
     // We can use this to update UI elements or progress if needed
     // without reloading the whole article
   }

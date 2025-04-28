@@ -104,22 +104,17 @@ export class TtsService {
     audioElement.src = `${this.serverUrl}/api/article/audio/${levelId}?t=${timestamp}`;
     audioElement.crossOrigin = 'anonymous'; // Try with anonymous CORS mode
     
-    // Log the attempt
-    console.log(`Attempting to play audio from: ${audioElement.src}`);
-    
     // Play the audio
     const playPromise = audioElement.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
         // Update state on successful playback start
         this.updatePlaybackState('article', true, false);
-        console.log('Level audio playback started successfully');
       }).catch(error => {
         console.error('Error playing level audio:', error);
         this.updatePlaybackState('article', false, false);
         
         // Fallback to TTS if server audio fails
-        console.log('Falling back to TTS synthesis');
         this.speak(text, 'article');
       });
     }
