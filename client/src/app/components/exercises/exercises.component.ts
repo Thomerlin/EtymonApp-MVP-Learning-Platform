@@ -27,6 +27,7 @@ interface MultipleChoiceExerciseWithType extends MultipleChoiceExercise {
 interface FillInTheBlanksExerciseWithType extends FillInTheBlanksExercise {
   type: 'fill_in_the_blanks';
   answeredCorrectly: boolean;
+  showHint?: boolean; // Add property to track if hint is shown
 }
 interface TrueFalseExerciseWithType extends TrueFalseExercise {
   type: 'true_false';
@@ -83,6 +84,9 @@ export class ExercisesComponent implements OnInit, OnChanges {
 
   // Add property to track if all exercises are completed
   allExercisesCompleted: boolean = false;
+
+  // Add hint visibility tracking
+  hintsShown: { [key: number]: boolean } = {};
 
   constructor(
     private exerciseService: ExerciseService,
@@ -410,6 +414,16 @@ export class ExercisesComponent implements OnInit, OnChanges {
   // Add method to navigate to home
   navigateToHome() {
     this.router.navigate(['/']);
+  }
+
+  // Toggle the visibility of a hint for a specific fill-in-the-blanks exercise
+  toggleHint(exerciseId: number): void {
+    this.hintsShown[exerciseId] = !this.hintsShown[exerciseId];
+  }
+
+  // Check if hint is visible for a specific exercise
+  isHintVisible(exerciseId: number): boolean {
+    return this.hintsShown[exerciseId] === true;
   }
 }
 

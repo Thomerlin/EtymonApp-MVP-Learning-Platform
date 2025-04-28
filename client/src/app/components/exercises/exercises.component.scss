@@ -285,21 +285,15 @@
 // Fill in the blanks horizontal layout
 .fill-blanks-container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  margin: 20px 0;
-
+  flex-direction: column;
+  
   .sentence-container {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
+    margin-bottom: 10px;
   }
-
+  
   .exercise-buttons {
-    margin-top: 0;
-    flex-shrink: 0;
+    margin-top: 15px;
+    align-self: flex-end;
   }
 }
 
@@ -742,6 +736,110 @@
     50% {
       opacity: 0.3;
     }
+  }
+}
+
+// Hint button and text - updated for better visibility in both themes
+.hint-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hint-btn {
+  background-color: transparent;
+  border: 1px solid var(--hint-border, #e6b800);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  
+  &:hover {
+    background-color: var(--hint-hover-bg, rgba(0, 0, 0, 0.08));
+  }
+  
+  &.hint-active {
+    background-color: var(--hint-active-bg, rgba(255, 215, 0, 0.3));
+    box-shadow: 0 0 5px var(--hint-glow, rgba(255, 215, 0, 0.5));
+  }
+}
+
+.hint-bulb-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: var(--hint-color, #e6b800);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--hint-glow, rgba(255, 215, 0, 0.5));
+  }
+  
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 8px;
+    background-color: var(--hint-color, #e6b800);
+    border-radius: 0 0 3px 3px;
+  }
+}
+
+.hint-text {
+  margin: 10px 0;
+  padding: 12px 1px;
+  background-color: var(--hint-bg, rgba(255, 215, 0, 0.1));
+  border-left: 4px solid var(--hint-color, #e6b800);
+  border-radius: 4px;
+  color: var(--text-color);
+  font-size: 14px;
+  animation: fadeIn 0.3s ease-in;
+  width: 100%;
+  
+  p {
+    margin: 0;
+  }
+}
+
+// Fill in the blanks layout adjustments for hint position
+.exercise-card-fill_in_the_blanks {
+  position: relative; /* Ensure proper positioning context for hint button */
+  
+  .exercise-content {
+    padding-top: 10px; /* Add some space at the top for the hint button */
+  }
+  
+  .exercise-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    position: relative; /* Create positioning context for alignment */
+  }
+  
+  // Ensure validate button has consistent positioning
+  .validate-btn {
+    position: relative;
+    z-index: 5;
   }
 }
 

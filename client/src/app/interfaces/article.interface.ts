@@ -9,7 +9,8 @@ export interface MultipleChoiceExercise {
 export interface FillInTheBlanksExercise {
   id: number;
   sentence: string;
-  hint: string;
+  answer: string;
+  hint?: string; // Add hint property
   answeredCorrectly: boolean;
 
 }

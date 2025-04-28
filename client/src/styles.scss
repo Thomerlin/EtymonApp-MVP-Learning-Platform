@@ -34,6 +34,14 @@
 	--level-button-bg: #007bff;
 	--level-button-text: #ffffff;
 	--modal-overlay-bg: rgba(0, 0, 0, 0.5);
+
+	/* Hint button specific variables for light mode */
+	--hint-color: #e6b800;
+	--hint-glow: rgba(230, 184, 0, 0.5);
+	--hint-bg: rgba(255, 215, 0, 0.1);
+	--hint-active-bg: rgba(255, 215, 0, 0.3);
+	--hint-hover-bg: rgba(0, 0, 0, 0.08);
+	--hint-border: #e6b800;
 }
 
 /* Dark Mode */
@@ -66,6 +74,14 @@ body.dark-mode {
 	--level-button-bg: #C28820;
 	--level-button-text: #ffffff;
 	--modal-overlay-bg: rgba(0, 0, 0, 0.7);
+
+	/* Hint button specific variables for dark mode */
+	--hint-color: #ffd700;
+	--hint-glow: rgba(255, 215, 0, 0.7);
+	--hint-bg: rgba(255, 215, 0, 0.15);
+	--hint-active-bg: rgba(255, 215, 0, 0.35);
+	--hint-hover-bg: rgba(255, 255, 255, 0.1);
+	--hint-border: #ffd700;
 }
 
 /* Basic element styling */
